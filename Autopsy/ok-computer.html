@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OK Computer - Album Autopsy</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #030608;
+    --bg2: #060a0f;
+    --bg3: #090e14;
+    --accent: #2e86ab;
+    --accent2: #54b3d6;
+    --gold: #7ecbdc;
+    --text: #ddeaf0;
+    --muted: #4a6070;
+    --border: rgba(46,134,171,0.1);
+    --font-display: 'Bebas Neue', sans-serif;
+    --font-serif: 'Playfair Display', serif;
+    --font-body: 'DM Sans', sans-serif;
+  }
+  html { scroll-behavior: smooth; }
+  body { background: var(--bg); color: var(--text); font-family: var(--font-body); font-weight: 300; line-height: 1.7; overflow-x: hidden; }
+  /* clinical blue-grey noise */
+  body::before { content:''; position:fixed; inset:0; background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E"); pointer-events:none; z-index:9999; opacity:0.5; }
+  /* circuit grid - subtle, like the album artwork's highway imagery */
+  body::after { content:''; position:fixed; inset:0; background-image:
+    repeating-linear-gradient(0deg, transparent, transparent 60px, rgba(46,134,171,0.025) 60px, rgba(46,134,171,0.025) 61px),
+    repeating-linear-gradient(90deg, transparent, transparent 80px, rgba(46,134,171,0.015) 80px, rgba(46,134,171,0.015) 81px);
+    pointer-events:none; z-index:9998; }
+  .progress-bar { position:fixed; top:0; left:0; height:2px; background:linear-gradient(90deg, var(--accent), var(--gold)); z-index:200; width:0%; transition: width 0.1s linear; }
+  nav { position:fixed; top:0; left:0; right:0; padding:1.1rem 2.5rem; display:flex; justify-content:space-between; align-items:center; z-index:100; background:linear-gradient(to bottom, rgba(3,6,8,0.97), transparent); }
+  .nav-back { font-family:var(--font-display); letter-spacing:0.25em; font-size:0.7rem; color:var(--muted); text-decoration:none; transition:color 0.2s; }
+  .nav-back:hover { color:var(--accent); }
+  .nav-score { font-family:var(--font-display); font-size:1.1rem; color:var(--accent); opacity:0; transition:opacity 0.4s; }
+  .nav-score.visible { opacity:1; }
+
+  /* HERO - cold, fluorescent, surveillance aesthetic */
+  .hero { min-height:100vh; display:flex; flex-direction:column; justify-content:center; align-items:center; position:relative; overflow:hidden; padding:4rem 2rem; text-align:center; }
+  .hero-bg { position:absolute; inset:0; background:
+    radial-gradient(ellipse 50% 40% at 50% 50%, rgba(46,134,171,0.1) 0%, transparent 60%),
+    radial-gradient(ellipse 80% 30% at 50% 100%, rgba(46,134,171,0.04) 0%, transparent 55%),
+    var(--bg); z-index:0; }
+  /* motorway overpass lines - reference to the Whittington Hospital where they mixed it */
+  .hero-overpass { position:absolute; inset:0; z-index:0; overflow:hidden; }
+  .hero-overpass::before {
+    content:'';
+    position:absolute; bottom:0; left:-20%; right:-20%; height:45%;
+    background:
+      linear-gradient(to top, transparent 0%, rgba(46,134,171,0.015) 40%, transparent 100%);
+    clip-path: polygon(0% 100%, 8% 0%, 12% 0%, 100% 100%);
+  }
+  .hero-overpass::after {
+    content:'';
+    position:absolute; bottom:0; left:-20%; right:-20%; height:45%;
+    background:
+      linear-gradient(to top, transparent 0%, rgba(46,134,171,0.01) 40%, transparent 100%);
+    clip-path: polygon(88% 0%, 92% 0%, 100% 100%, 96% 100%);
+  }
+  .hero-content { position:relative; z-index:1; }
+  .autopsy-label { font-family:var(--font-display); letter-spacing:0.4em; font-size:0.72rem; color:var(--accent); text-transform:uppercase; margin-bottom:1.8rem; opacity:0; animation:fadeUp 0.8s ease 0.2s forwards; }
+  .hero-artist { font-family:var(--font-display); font-size:clamp(4rem,16vw,14rem); line-height:0.88; letter-spacing:-0.02em; color:var(--text); opacity:0; animation:fadeUp 0.8s ease 0.4s forwards; }
+  .hero-album { font-family:var(--font-serif); font-style:italic; font-size:clamp(1.2rem,4vw,3.2rem); color:var(--gold); margin-top:0.6rem; opacity:0; animation:fadeUp 0.8s ease 0.6s forwards; line-height:1.25; }
+  .hero-meta { font-family:var(--font-display); letter-spacing:0.3em; font-size:0.85rem; color:var(--muted); margin-top:1.5rem; opacity:0; animation:fadeUp 0.8s ease 0.8s forwards; }
+  .hero-rule { width:1px; height:70px; background:linear-gradient(to bottom, var(--accent), transparent); margin:3rem auto 0; opacity:0; animation:fadeUp 0.8s ease 1s forwards; }
+  .scroll-hint { font-size:0.68rem; letter-spacing:0.35em; color:var(--muted); text-transform:uppercase; margin-top:0.8rem; opacity:0; animation:fadeUp 0.8s ease 1.2s forwards; }
+  .verdict-bar { background:linear-gradient(90deg, #1a4e63, var(--accent)); padding:1.1rem 2rem; text-align:center; font-size:0.92rem; color:rgba(255,255,255,0.88); font-weight:400; line-height:1.5; }
+
+  /* SCORE */
+  .score-section { background:var(--bg2); border-top:1px solid var(--border); border-bottom:1px solid var(--border); }
+  .score-inner { max-width:920px; margin:0 auto; padding:6rem 2rem; display:grid; grid-template-columns:1fr 1.5fr; gap:5rem; align-items:center; }
+  @media(max-width:640px){.score-inner{grid-template-columns:1fr;gap:2.5rem;}}
+  .score-display { text-align:center; }
+  .score-number { font-family:var(--font-display); font-size:clamp(5.5rem,16vw,11rem); line-height:1; color:var(--text); }
+  .score-number span { color:var(--accent); }
+  .score-label { font-family:var(--font-display); letter-spacing:0.35em; font-size:0.75rem; color:var(--muted); margin-top:0.4rem; }
+  .score-verdict { font-family:var(--font-serif); font-style:italic; font-size:1.3rem; line-height:1.55; margin-bottom:1.5rem; color:var(--text); }
+  .score-defense { font-size:0.88rem; color:var(--muted); line-height:1.85; }
+
+  /* SECTIONS */
+  .section { max-width:920px; margin:0 auto; padding:6rem 2rem; }
+  .section-label { font-family:var(--font-display); letter-spacing:0.4em; font-size:0.68rem; color:var(--accent); text-transform:uppercase; margin-bottom:1.4rem; }
+  .section-title { font-family:var(--font-serif); font-size:clamp(1.8rem,4.5vw,3.2rem); font-weight:900; line-height:1.1; margin-bottom:2.5rem; }
+  .section-title em { font-style:italic; color:var(--gold); }
+
+  /* THEMES */
+  .pill { padding:0.35rem 0.9rem; border:1px solid var(--border); border-radius:2px; font-size:0.7rem; letter-spacing:0.15em; text-transform:uppercase; font-family:var(--font-display); color:var(--text); background:transparent; transition:all 0.2s; cursor:default; }
+  .pill:hover, .pill.active { border-color:var(--accent); color:var(--accent); background:rgba(46,134,171,0.08); }
+  .theme-pills { display:flex; flex-wrap:wrap; gap:0.45rem; margin:0 0 3rem; }
+  .themes-section { background:var(--bg2); border-top:1px solid var(--border); }
+  .themes-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:1.5px; background:var(--border); border:1px solid var(--border); }
+  .theme-card { background:var(--bg2); padding:2.2rem 1.8rem; transition:background 0.2s; cursor:default; position:relative; overflow:hidden; }
+  .theme-card::before { content:''; position:absolute; top:0; left:0; width:3px; height:0; background:var(--accent); transition:height 0.3s; }
+  .theme-card:hover::before { height:100%; }
+  .theme-card:hover { background:var(--bg3); }
+  .theme-card-icon { font-size:1.8rem; margin-bottom:0.9rem; display:block; }
+  .theme-card-title { font-family:var(--font-serif); font-size:1rem; font-weight:700; margin-bottom:0.6rem; }
+  .theme-card-text { font-size:0.82rem; color:var(--muted); line-height:1.75; }
+
+  /* EASTER EGG BOX */
+  .egg-section { background:var(--bg3); border-top:1px solid var(--border); border-bottom:1px solid var(--border); }
+  .egg-inner { max-width:920px; margin:0 auto; padding:5rem 2rem; }
+  .egg-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:1px; background:var(--border); border:1px solid var(--border); margin-top:2.5rem; }
+  .egg-card { background:var(--bg3); padding:2rem 1.6rem; position:relative; }
+  .egg-card::after { content:'🥚'; position:absolute; top:1.2rem; right:1.4rem; font-size:1rem; opacity:0.4; }
+  .egg-num { font-family:var(--font-display); font-size:2.5rem; line-height:1; color:rgba(46,134,171,0.2); margin-bottom:0.6rem; }
+  .egg-title { font-family:var(--font-serif); font-size:0.95rem; font-weight:700; margin-bottom:0.5rem; }
+  .egg-text { font-size:0.8rem; color:var(--muted); line-height:1.75; }
+
+  /* QUOTE */
+  .quote-section { padding:7rem 2rem; text-align:center; position:relative; overflow:hidden; }
+  .quote-bg { position:absolute; inset:0; background:radial-gradient(ellipse 55% 55% at 50% 50%, rgba(46,134,171,0.06) 0%, transparent 70%); }
+  .quote-mark { font-family:var(--font-serif); font-size:7rem; line-height:0; vertical-align:-1.8rem; color:rgba(46,134,171,0.18); margin-right:0.05em; }
+  .quote-text { font-family:var(--font-serif); font-style:italic; font-size:clamp(1.4rem,3.5vw,2.5rem); line-height:1.35; max-width:680px; margin:0 auto; position:relative; z-index:1; }
+  .quote-attr { margin-top:2rem; font-size:0.72rem; letter-spacing:0.3em; text-transform:uppercase; color:var(--muted); font-family:var(--font-display); position:relative; z-index:1; }
+
+  /* TRACKS */
+  .tracks-section { background:var(--bg); border-top:1px solid var(--border); }
+  .tracks-inner { max-width:920px; margin:0 auto; padding:6rem 2rem; }
+  .track-item { border-bottom:1px solid var(--border); overflow:hidden; cursor:pointer; transition:background 0.15s; }
+  .track-item:first-of-type { border-top:1px solid var(--border); }
+  .track-item:hover { background:rgba(46,134,171,0.025); }
+  .track-header { display:grid; grid-template-columns:3rem 1fr auto; align-items:center; gap:1.2rem; padding:1.1rem 0; }
+  .track-num { font-family:var(--font-display); font-size:0.75rem; color:var(--muted); letter-spacing:0.1em; }
+  .track-name { font-family:var(--font-serif); font-size:1rem; font-weight:700; }
+  .track-right { display:flex; align-items:center; gap:1.2rem; }
+  .track-score-bar { width:70px; height:3px; background:rgba(255,255,255,0.06); border-radius:2px; overflow:hidden; }
+  .track-score-fill { height:100%; background:linear-gradient(90deg, var(--accent), var(--gold)); transform-origin:left; transform:scaleX(0); transition:transform 0.8s ease; border-radius:2px; }
+  .track-score-num { font-family:var(--font-display); font-size:0.95rem; color:var(--muted); min-width:2.2rem; text-align:right; }
+  .track-expand-icon { font-size:0.55rem; color:var(--muted); transition:transform 0.3s; }
+  .track-item.open .track-expand-icon { transform:rotate(180deg); }
+  .track-body { max-height:0; overflow:hidden; transition:max-height 0.38s ease; }
+  .track-body-inner { padding:0 0 1.4rem 0; margin-left:4.2rem; color:var(--muted); font-size:0.87rem; line-height:1.8; border-left:2px solid var(--accent); padding-left:1.4rem; }
+
+  /* CHART */
+  .chart-section { background:var(--bg3); border-top:1px solid var(--border); border-bottom:1px solid var(--border); }
+  .chart-inner { max-width:920px; margin:0 auto; padding:6rem 2rem; }
+  .chart-bars { display:flex; flex-direction:column; gap:0.85rem; margin-top:3rem; }
+  .bar-row { display:grid; grid-template-columns:170px 1fr 2.8rem; align-items:center; gap:1rem; }
+  @media(max-width:500px){.bar-row{grid-template-columns:90px 1fr 2.5rem;}}
+  .bar-label { font-size:0.78rem; color:var(--muted); text-align:right; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .bar-track { height:5px; background:rgba(255,255,255,0.05); border-radius:3px; overflow:hidden; }
+  .bar-fill { height:100%; background:linear-gradient(90deg, var(--accent), var(--gold)); transform-origin:left; transform:scaleX(0); transition:transform 0.85s ease; border-radius:3px; }
+  .bar-val { font-family:var(--font-display); font-size:0.88rem; color:var(--text); }
+
+  .footnote-section { padding:5rem 2rem; text-align:center; border-top:1px solid var(--border); background:var(--bg2); }
+  .footnote-text { font-family:var(--font-serif); font-style:italic; font-size:1rem; color:var(--muted); line-height:1.85; max-width:640px; margin:0 auto; }
+  footer { padding:3.5rem 2rem; text-align:center; border-top:1px solid var(--border); }
+  .footer-sig { font-family:var(--font-serif); font-style:italic; font-size:0.88rem; color:var(--muted); }
+  .footer-brand { font-family:var(--font-display); letter-spacing:0.4em; font-size:0.68rem; color:rgba(255,255,255,0.1); margin-top:1.8rem; }
+  .divider { width:36px; height:1px; background:var(--accent); margin:1.8rem auto; }
+  .back-link { display:inline-block; margin-top:2rem; font-family:var(--font-display); letter-spacing:0.25em; font-size:0.72rem; color:var(--accent); text-decoration:none; border:1px solid var(--accent); padding:0.6rem 1.4rem; transition:all 0.2s; }
+  .back-link:hover { background:var(--accent); color:#000; }
+
+  @keyframes fadeUp { from{opacity:0;transform:translateY(28px)} to{opacity:1;transform:translateY(0)} }
+  .reveal { opacity:0; transform:translateY(38px); transition:opacity 0.7s ease, transform 0.7s ease; }
+  .reveal.visible { opacity:1; transform:translateY(0); }
+</style>
+</head>
+<body>
+<div class="progress-bar" id="progress"></div>
+<nav>
+  <a href="index.html" class="nav-back">← All Autopsies</a>
+  <div class="nav-score" id="navScore">10 / 10</div>
+</nav>
+
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-overpass"></div>
+  <div class="hero-content">
+    <div class="autopsy-label">Album Autopsy · 008</div>
+    <div class="hero-artist">Radiohead</div>
+    <div class="hero-album">OK Computer</div>
+    <div class="hero-meta">Parlophone · Capitol · 1997</div>
+    <div class="hero-rule"></div>
+    <div class="scroll-hint">Scroll to dissect</div>
+  </div>
+</section>
+
+<div class="verdict-bar">The most prescient album ever made. Recorded in 1996 about technology, alienation, and the dehumanising logic of late capitalism - and it keeps getting more accurate. Not a prediction. A diagnosis delivered early.</div>
+
+<section class="score-section">
+  <div class="score-inner">
+    <div class="score-display reveal">
+      <div class="score-number" id="scoreCounter">0<span>.0</span></div>
+      <div class="score-label">Overall Score</div>
+    </div>
+    <div class="reveal">
+      <div class="score-verdict">"The most prescient album ever made. Written about a world that didn't fully exist yet. Every decade it sounds more like a documentary."</div>
+      <div class="score-defense">10 because the argument that Electioneering breaks the album is a misreading of what the album is doing. It is the one track where the anger is blunt and unadorned - and that bluntness is load-bearing. Without it, the album risks becoming beautiful and abstract, a feeling about a feeling. Electioneering is the record refusing to aestheticise its own rage. It makes No Surprises, which follows it, land harder by contrast. Exit Music, Let Down, Lucky, The Tourist - each could close any other record. Here they coexist as a single sustained argument. OK Computer is a 10 not because every moment is flawless in isolation but because the album functions as a complete, irreducible system. It described the present from 1997. That it keeps getting more accurate is not coincidence. It saw the logic and followed it to its end.</div>
+    </div>
+  </div>
+</section>
+
+<div class="themes-section">
+  <div class="section">
+    <div class="section-label reveal">Central Thesis</div>
+    <div class="section-title reveal">What <em>This Album Is Really About</em></div>
+    <div class="theme-pills reveal">
+      <span class="pill active">Technological Alienation</span>
+      <span class="pill">The Managed Self</span>
+      <span class="pill">Speed as Violence</span>
+      <span class="pill">The Comfortable Cage</span>
+    </div>
+    <div class="themes-grid reveal">
+      <div class="theme-card">
+        <span class="theme-card-icon">🖥️</span>
+        <div class="theme-card-title">Technological Alienation</div>
+        <div class="theme-card-text">Thom wrote most of OK Computer while reading Noam Chomsky and being horrified by the emerging internet. The machines in this album are not evil - they are indifferent, which is worse. Fitter Happier is literally a computer voice reading self-help platitudes. The horror is that it sounds like advice.</div>
+      </div>
+      <div class="theme-card">
+        <span class="theme-card-icon">📋</span>
+        <div class="theme-card-title">The Managed Self</div>
+        <div class="theme-card-text">Karma Police, No Surprises, Fitter Happier - the album's recurring image is of a person submitting to management. Not coercion, compliance. The sedation is voluntary and that's the point. 'A heart that's full up like a landfill' is a line about people who stopped feeling because feeling became inconvenient.</div>
+      </div>
+      <div class="theme-card">
+        <span class="theme-card-icon">🚗</span>
+        <div class="theme-card-title">Speed as Violence</div>
+        <div class="theme-card-text">Airbag opens with a car crash survived. The Tourist ends by begging something to slow down. Between those two poles the album is saturated with velocity - motorways, planes, global capitalism moving too fast for any individual body to track. Thom said the album was partly about the feeling of standing still while everything moved past you at speed.</div>
+      </div>
+      <div class="theme-card">
+        <span class="theme-card-icon">🏠</span>
+        <div class="theme-card-title">The Comfortable Cage</div>
+        <div class="theme-card-text">No Surprises is the most frightening song on the album because it wants to be soothing. A pretty tune about wanting nothing, going nowhere, the perfect calm of a man who's given up entirely. 'A handshake of carbon monoxide.' The comfort and the death threat delivered in the same breath, same tempo.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<section class="quote-section">
+  <div class="quote-bg"></div>
+  <div class="quote-text reveal"><span class="quote-mark">"</span>No alarms and no surprises, please.</div>
+  <div class="quote-attr reveal">Thom Yorke · No Surprises · 1997</div>
+</section>
+
+<!-- EASTER EGGS -->
+<section class="egg-section">
+  <div class="egg-inner">
+    <div class="section-label reveal">Rare Frequencies</div>
+    <div class="section-title reveal">Things You <em>Didn't Know</em></div>
+    <div class="egg-grid reveal">
+      <div class="egg-card">
+        <div class="egg-num">01</div>
+        <div class="egg-title">The Mansion on the Hill</div>
+        <div class="egg-text">Much of OK Computer was recorded at St. Catherine's Court, a 15th-century manor house in Bath lent to the band by actress Jane Seymour. Jonny Greenwood set up recording equipment in the ballroom, the hallways, and the wine cellar. Different songs were tracked in different rooms to get different acoustics. The ghost-like reverb on Let Down came from the stone hallway. The band have said the house felt "haunted in a good way."</div>
+      </div>
+      <div class="egg-card">
+        <div class="egg-num">02</div>
+        <div class="egg-title">Fitter Happier's Voice</div>
+        <div class="egg-text">The robotic voice reading the Fitter Happier monologue is MacInTalk - Apple's built-in text-to-speech engine, specifically the "Fred" voice. Thom typed the text into a Mac and hit play. The list was composed as a genuine attempt to write the most hollow self-improvement advice he could imagine. He later said he was disturbed by how easily it came to him.</div>
+      </div>
+      <div class="egg-card">
+        <div class="egg-num">03</div>
+        <div class="egg-title">Paranoid Android's Three Heads</div>
+        <div class="egg-text">Paranoid Android is technically three separate songs stitched together - Thom had three distinct pieces that wouldn't work individually, so the band welded them. The structure was inspired by Bohemian Rhapsody. The name comes from the character Marvin the Paranoid Android in The Hitchhiker's Guide to the Galaxy. At over six minutes, it was released as a single in 1997. Radio stations were told it was uneditable. Most played it in full anyway.</div>
+      </div>
+      <div class="egg-card">
+        <div class="egg-num">04</div>
+        <div class="egg-title">Lucky Was Written in an Afternoon</div>
+        <div class="egg-text">Lucky was originally written and recorded in a single afternoon for the War Child charity album Help in 1995 - produced, mixed and released within 24 hours of being tracked. It was so obviously superior to anything else on that compilation that the band held it for OK Computer two years later. Thom has described it as the most effortless song they ever wrote, which he found unsettling. 'I feel my luck could change' - written in an afternoon about the exact feeling of that afternoon.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="tracks-section">
+  <div class="tracks-inner">
+    <div class="section-label reveal">Track by Track</div>
+    <div class="section-title reveal">The <em>Dissection</em></div>
+    <div id="trackList" class="reveal">
+
+      <div class="track-item">
+        <div class="track-header"><span class="track-num">01</span><span class="track-name">Airbag</span><div class="track-right"><div class="track-score-bar"><div class="track-score-fill" data-score="9.4"></div></div><span class="track-score-num">9.4</span><span class="track-expand-icon">▼</span></div></div>
+        <div class="track-body"><div class="track-body-inner">Opens mid-song, mid-crash. The drum loop is chopped and looped - one of the first times Radiohead used sampling this way. 'In an interstellar burst I am back to save the universe' - Thom said the lyric came from thinking about the car crash he survived as a teenager. The album starts with a death survived, and spends the next hour asking if that was the lucky part.</div></div>
+      </div>
+
+      <div class="track-item">
+        <div class="track-header"><span class="track-num">02</span><span class="track-name">Paranoid Android</span><div class="track-right"><div class="track-score-bar"><div class="track-score-fill" data-score="9.8"></div></div><span class="track-score-num">9.8</span><span class="track-expand-icon">▼</span></div></div>
+        <div class="track-body"><div class="track-body-inner">Three songs in one, six minutes, released as a single in 1997. The quiet section was inspired by a woman Thom saw at a bar in Los Angeles whose face went completely blank when cocaine was spilled on her - a smile that didn't reach the eyes. The middle section builds to a scream that sounds like the album breaking apart and then reassembling itself calmer, which is what it does.</div></div>
+      </div>
+
+      <div class="track-item">
+        <div class="track-header"><span class="track-num">03</span><span class="track-name">Subterranean Homesick Alien</span><div class="track-right"><div class="track-score-bar"><div class="track-score-fill" data-score="9.1"></div></div><span class="track-score-num">9.1</span><span class="track-expand-icon">▼</span></div></div>
+        <div class="track-body"><div class="track-body-inner">The quietest moment in the first half and the most cosmic. Jonny's guitar tone - achieved through an Ebow run through a chorus pedal - sounds genuinely extraterrestrial. The fantasy of being taken by aliens and shown the Earth from above: 'I'd tell all my friends but they'd never believe me.' The loneliness of clarity is the subject. Nobody wants to know what you saw.</div></div>
+      </div>
+
+      <div class="track-item">
+        <div class="track-header"><span class="track-num">04</span><span class="track-name">Exit Music (For a Film)</span><div class="track-right"><div class="track-score-bar"><div class="track-score-fill" data-score="9.7"></div></div><span class="track-score-num">9.7</span><span class="track-expand-icon">▼</span></div></div>
+        <div class="track-body"><div class="track-body-inner">Written for Baz Luhrmann's Romeo + Juliet but the film used a different version. The guitar part is Jonny playing a chord and then Thom overdubbing the same chord slightly out of phase, creating that suffocating reverb. The ending - voices, bass, and a chord that won't resolve - is one of the most physically oppressive moments in rock. 'We hope that you choke.' Delivered like a prayer.</div></div>
+      </div>
+
+      <div class="track-item">
+        <div class="track-header"><span class="track-num">05</span><span class="track-name">Let Down</span><div class="track-right"><div class="track-score-bar"><div class="track-score-fill" data-score="9.9"></div></div><span class="track-score-num">9.9</span><span class="track-expand-icon">▼</span></div></div>
+        <div class="track-body"><div class="track-body-inner">Possibly the most beautiful song they have made. Written about the feeling of standing in an airport watching thousands of people pass through without making any contact. 'Transport, motorways and tramlines.' The guitar interlocking parts were recorded in the stone hallway at St. Catherine's Court - that's the reverb. The final chord, held, feels like something dissolving. In a good way. In the specific way that beautiful things dissolving feels good.</div></div>
+      </div>
+
+      <div class="track-item">
+        <div class="track-header"><span class="track-num">06</span><span class="track-name">Karma Police</span><div class="track-right"><div class="track-score-bar"><div class="track-score-fill" data-score="9.5"></div></div><span class="track-score-num">9.5</span><span class="track-expand-icon">▼</span></div></div>
+        <div class="track-body"><div class="track-body-inner">Written about the unspoken pact of social conformity - 'karma police' was a phrase the band used to describe the imaginary force they believed would punish petty social transgressions. The piano chord sequence is borrowed from The Beatles' Sexy Sadie. The outro - with the whirring sample and Thom's vocal dissolving into it - was improvised in the studio and kept because nothing they planned was better.</div></div>
+      </div>
+
+      <div class="track-item">
+        <div class="track-header"><span class="track-num">07</span><span class="track-name">Fitter Happier</span><div class="track-right"><div class="track-score-bar"><div class="track-score-fill" data-score="9.3"></div></div><span class="track-score-num">9.3</span><span class="track-expand-icon">▼</span></div></div>
+        <div class="track-body"><div class="track-body-inner">Not technically a song. Two minutes of a Mac computer reading self-improvement platitudes over a piano loop and a dog barking in the distance. The most devastating track on the album because every item on the list is reasonable and the cumulative effect is horror. 'A pig in a cage on antibiotics.' The joke lands as a threat. Most people skip it. That's part of what it's about.</div></div>
+      </div>
+
+      <div class="track-item">
+        <div class="track-header"><span class="track-num">10</span><span class="track-name">No Surprises</span><div class="track-right"><div class="track-score-bar"><div class="track-score-fill" data-score="9.8"></div></div><span class="track-score-num">9.8</span><span class="track-expand-icon">▼</span></div></div>
+        <div class="track-body"><div class="track-body-inner">A lullaby about giving up. The glockenspiel melody was programmed by Jonny and then played manually so it would breathe slightly. Thom holds his breath for the entire underwater sequence in the music video - he failed five takes before getting it right. 'Such a pretty house, such a pretty garden.' The most comfortable suicide note ever written.</div></div>
+      </div>
+
+      <div class="track-item">
+        <div class="track-header"><span class="track-num">11</span><span class="track-name">Lucky</span><div class="track-right"><div class="track-score-bar"><div class="track-score-fill" data-score="9.6"></div></div><span class="track-score-num">9.6</span><span class="track-expand-icon">▼</span></div></div>
+        <div class="track-body"><div class="track-body-inner">Written in an afternoon in 1995 for a War Child charity album and held two years because it was too good to give away. Jonny's guitar solo is one take - he has said he doesn't know where it came from. 'Pull me out of the aircrash.' The album's crash survivor returns. It ends with 'I feel my luck could change' - the most carefully placed optimism in the catalog, surrounded on all sides by evidence against it.</div></div>
+      </div>
+
+      <div class="track-item">
+        <div class="track-header"><span class="track-num">12</span><span class="track-name">The Tourist</span><div class="track-right"><div class="track-score-bar"><div class="track-score-fill" data-score="9.4"></div></div><span class="track-score-num">9.4</span><span class="track-expand-icon">▼</span></div></div>
+        <div class="track-body"><div class="track-body-inner">Written by Jonny, not Thom - one of the few Radiohead songs with a different primary author, though Thom sings it as his own. A plea to a tourist walking too fast through a foreign city to slow down and see it. 'Hey man, slow down.' The bell at the end is a single handbell hit - the last sound on the album before silence. The album that opened with a crash ends with a bell asking everything to stop.</div></div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<section class="chart-section">
+  <div class="chart-inner">
+    <div class="section-label reveal">Score Breakdown</div>
+    <div class="section-title reveal">Every Track, <em>Ranked</em></div>
+    <div class="chart-bars reveal" id="chartBars">
+      <div class="bar-row"><div class="bar-label">Let Down</div><div class="bar-track"><div class="bar-fill" data-score="9.9"></div></div><div class="bar-val">9.9</div></div>
+      <div class="bar-row"><div class="bar-label">Paranoid Android</div><div class="bar-track"><div class="bar-fill" data-score="9.8"></div></div><div class="bar-val">9.8</div></div>
+      <div class="bar-row"><div class="bar-label">No Surprises</div><div class="bar-track"><div class="bar-fill" data-score="9.8"></div></div><div class="bar-val">9.8</div></div>
+      <div class="bar-row"><div class="bar-label">Exit Music</div><div class="bar-track"><div class="bar-fill" data-score="9.7"></div></div><div class="bar-val">9.7</div></div>
+      <div class="bar-row"><div class="bar-label">Lucky</div><div class="bar-track"><div class="bar-fill" data-score="9.6"></div></div><div class="bar-val">9.6</div></div>
+      <div class="bar-row"><div class="bar-label">Karma Police</div><div class="bar-track"><div class="bar-fill" data-score="9.5"></div></div><div class="bar-val">9.5</div></div>
+      <div class="bar-row"><div class="bar-label">Airbag</div><div class="bar-track"><div class="bar-fill" data-score="9.4"></div></div><div class="bar-val">9.4</div></div>
+      <div class="bar-row"><div class="bar-label">The Tourist</div><div class="bar-track"><div class="bar-fill" data-score="9.4"></div></div><div class="bar-val">9.4</div></div>
+      <div class="bar-row"><div class="bar-label">Fitter Happier</div><div class="bar-track"><div class="bar-fill" data-score="9.3"></div></div><div class="bar-val">9.3</div></div>
+      <div class="bar-row"><div class="bar-label">Subterranean Alien</div><div class="bar-track"><div class="bar-fill" data-score="9.1"></div></div><div class="bar-val">9.1</div></div>
+    </div>
+  </div>
+</section>
+
+<div class="footnote-section">
+  <div class="section-label reveal" style="text-align:center;">Footnote</div>
+  <div class="footnote-text reveal">When OK Computer came out in 1997, Radiohead were widely expected to follow up The Bends with something commercially safer. Instead they made a six-minute avant-garde single their lead track and refused to play the game. NME gave it 10/10. Rolling Stone didn't understand it. By 2000 it was on every greatest albums list ever compiled. By 2020 it sounded like a news report. The album that was supposed to be a commercial risk is now the document of the era it predicted.</div>
+</div>
+
+<footer>
+  <div class="footer-sig reveal">Album Autopsy - A structured dissection of records that matter.</div>
+  <div class="divider"></div>
+  <a href="index.html" class="back-link reveal">← Back to All Autopsies</a>
+  <div class="footer-brand">@MyParentsDidntLeaveForThis</div>
+</footer>
+
+<script>
+  window.addEventListener('scroll', () => {
+    const p = (window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100;
+    document.getElementById('progress').style.width = p + '%';
+  });
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (!e.isIntersecting) return;
+      e.target.classList.add('visible');
+      if (e.target.id === 'scoreCounter') { animateScore(0, 10, 1600); document.getElementById('navScore').classList.add('visible'); }
+    });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+  if(document.getElementById('scoreCounter')) observer.observe(document.getElementById('scoreCounter'));
+  const tlObs = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (!e.isIntersecting) return; e.target.querySelectorAll('.track-score-fill').forEach((f,i) => { setTimeout(() => { f.style.transform = `scaleX(${parseFloat(f.dataset.score)/10})`; }, i * 55); }); tlObs.unobserve(e.target); });
+  }, { threshold: 0.08 });
+  const tl = document.getElementById('trackList'); if(tl) tlObs.observe(tl);
+  const chObs = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (!e.isIntersecting) return; e.target.querySelectorAll('.bar-fill').forEach((f,i) => { setTimeout(() => { const s = parseFloat(f.dataset.score); f.style.transform = `scaleX(${Math.max(0,(s-6)/4)})`; }, i * 70); }); chObs.unobserve(e.target); });
+  }, { threshold: 0.08 });
+  const cb = document.getElementById('chartBars'); if(cb) chObs.observe(cb);
+  function animateScore(from, to, duration) {
+    const el = document.getElementById('scoreCounter'); if(!el) return;
+    const start = performance.now();
+    (function tick(now) { const p = Math.min((now - start) / duration, 1); const ease = 1 - Math.pow(1 - p, 3); const val = from + (to - from) * ease; const int = Math.floor(val); const dec = Math.round((val - int) * 10); el.innerHTML = int + '<span>.' + dec + '</span>'; if(p < 1) requestAnimationFrame(tick); })(start);
+  }
+  document.querySelectorAll('.track-item').forEach(item => {
+    item.querySelector('.track-header').addEventListener('click', () => { const body = item.querySelector('.track-body'); const open = item.classList.toggle('open'); body.style.maxHeight = open ? body.scrollHeight + 'px' : '0'; });
+  });
+  document.querySelectorAll('.pill').forEach(pill => {
+    pill.addEventListener('click', () => { document.querySelectorAll('.pill').forEach(p => p.classList.remove('active')); pill.classList.add('active'); });
+  });
+</script>
+</body>
+</html>

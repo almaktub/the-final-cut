@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Led Zeppelin IV - Album Autopsy</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #080600;
+    --bg2: #0e0b00;
+    --bg3: #140f00;
+    --accent: #c4882a;
+    --accent2: #e0a030;
+    --gold: #e8c87a;
+    --text: #f0ece0;
+    --muted: #7a6e50;
+    --border: rgba(196,136,42,0.1);
+    --font-display: 'Bebas Neue', sans-serif;
+    --font-serif: 'Playfair Display', serif;
+    --font-body: 'DM Sans', sans-serif;
+  }
+  html { scroll-behavior: smooth; }
+  body { background: var(--bg); color: var(--text); font-family: var(--font-body); font-weight: 300; line-height: 1.7; overflow-x: hidden; }
+  body::before { content:''; position:fixed; inset:0; background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.055'/%3E%3C/svg%3E"); pointer-events:none; z-index:9999; opacity:0.5; }
+  .progress-bar { position:fixed; top:0; left:0; height:2px; background:linear-gradient(90deg, var(--accent), var(--gold)); z-index:200; width:0%; transition: width 0.1s linear; }
+  nav { position:fixed; top:0; left:0; right:0; padding:1.1rem 2.5rem; display:flex; justify-content:space-between; align-items:center; z-index:100; background:linear-gradient(to bottom, rgba(8,6,0,0.95), transparent); }
+  .nav-back { font-family:var(--font-display); letter-spacing:0.25em; font-size:0.7rem; color:var(--muted); text-decoration:none; transition:color 0.2s; }
+  .nav-back:hover { color:var(--accent); }
+  .nav-score { font-family:var(--font-display); font-size:1.1rem; color:var(--accent); opacity:0; transition:opacity 0.4s; }
+  .nav-score.visible { opacity:1; }
+
+  .hero { min-height:100vh; display:flex; flex-direction:column; justify-content:center; align-items:center; position:relative; overflow:hidden; padding:4rem 2rem; text-align:center; }
+  .hero-bg { position:absolute; inset:0; background:
+    radial-gradient(ellipse 60% 50% at 50% 40%, rgba(196,136,42,0.12) 0%, transparent 65%),
+    radial-gradient(ellipse 35% 35% at 20% 70%, rgba(224,160,48,0.05) 0%, transparent 55%),
+    var(--bg); z-index:0; }
+  .hero-content { position:relative; z-index:1; }
+  .autopsy-label { font-family:var(--font-display); letter-spacing:0.4em; font-size:0.72rem; color:var(--accent); text-transform:uppercase; margin-bottom:1.8rem; opacity:0; animation:fadeUp 0.8s ease 0.2s forwards; }
+  .hero-artist { font-family:var(--font-display); font-size:clamp(3rem,13vw,11rem); line-height:0.88; letter-spacing:-0.02em; color:var(--text); opacity:0; animation:fadeUp 0.8s ease 0.4s forwards; }
+  .hero-album { font-family:var(--font-serif); font-style:italic; font-size:clamp(1.2rem,4vw,3.2rem); color:var(--gold); margin-top:0.6rem; opacity:0; animation:fadeUp 0.8s ease 0.6s forwards; line-height:1.25; }
+  .hero-meta { font-family:var(--font-display); letter-spacing:0.3em; font-size:0.85rem; color:var(--muted); margin-top:1.5rem; opacity:0; animation:fadeUp 0.8s ease 0.8s forwards; }
+  .hero-rule { width:1px; height:70px; background:linear-gradient(to bottom, var(--accent), transparent); margin:3rem auto 0; opacity:0; animation:fadeUp 0.8s ease 1s forwards; }
+  .scroll-hint { font-size:0.68rem; letter-spacing:0.35em; color:var(--muted); text-transform:uppercase; margin-top:0.8rem; opacity:0; animation:fadeUp 0.8s ease 1.2s forwards; }
+  .verdict-bar { background:linear-gradient(90deg, #8b5e0a, #5a3d06); padding:1.1rem 2rem; text-align:center; font-size:0.92rem; color:rgba(255,255,255,0.9); font-weight:400; line-height:1.5; }
+
+  .score-section { background:var(--bg2); border-top:1px solid var(--border); border-bottom:1px solid var(--border); }
+  .score-inner { max-width:920px; margin:0 auto; padding:6rem 2rem; display:grid; grid-template-columns:1fr 1.5fr; gap:5rem; align-items:center; }
+  @media(max-width:640px){.score-inner{grid-template-columns:1fr;gap:2.5rem;}}
+  .score-display { text-align:center; }
+  .score-number { font-family:var(--font-display); font-size:clamp(5.5rem,16vw,11rem); line-height:1; color:var(--text); }
+  .score-number span { color:var(--accent); }
+  .score-label { font-family:var(--font-display); letter-spacing:0.35em; font-size:0.75rem; color:var(--muted); margin-top:0.4rem; }
+  .score-verdict { font-family:var(--font-serif); font-style:italic; font-size:1.3rem; line-height:1.55; margin-bottom:1.5rem; color:var(--text); }
+  .score-defense { font-size:0.88rem; color:var(--muted); line-height:1.85; }
+
+  .section { max-width:920px; margin:0 auto; padding:6rem 2rem; }
+  .section-label { font-family:var(--font-display); letter-spacing:0.4em; font-size:0.68rem; color:var(--accent); text-transform:uppercase; margin-bottom:1.4rem; }
+  .section-title { font-family:var(--font-serif); font-size:clamp(1.8rem,4.5vw,3.2rem); font-weight:900; line-height:1.1; margin-bottom:2.5rem; }
+  .section-title em { font-style:italic; color:var(--gold); }
+
+  .pill { padding:0.35rem 0.9rem; border:1px solid var(--border); border-radius:2px; font-size:0.7rem; letter-spacing:0.15em; text-transform:uppercase; font-family:var(--font-display); color:var(--text); background:transparent; transition:all 0.2s; cursor:default; }
+  .pill:hover, .pill.active { border-color:var(--accent); color:var(--accent); background:rgba(196,136,42,0.08); }
+  .theme-pills { display:flex; flex-wrap:wrap; gap:0.45rem; margin:0 0 3rem; }
+  .themes-section { background:var(--bg2); border-top:1px solid var(--border); }
+  .themes-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:1.5px; background:var(--border); border:1px solid var(--border); }
+  .theme-card { background:var(--bg2); padding:2.2rem 1.8rem; transition:background 0.2s; cursor:default; position:relative; overflow:hidden; }
+  .theme-card::before { content:''; position:absolute; top:0; left:0; width:3px; height:0; background:var(--accent); transition:height 0.3s; }
+  .theme-card:hover::before { height:100%; }
+  .theme-card:hover { background:var(--bg3); }
+  .theme-card-icon { font-size:1.8rem; margin-bottom:0.9rem; display:block; }
+  .theme-card-title { font-family:var(--font-serif); font-size:1rem; font-weight:700; margin-bottom:0.6rem; }
+  .theme-card-text { font-size:0.82rem; color:var(--muted); line-height:1.75; }
+
+  .egg-section { background:var(--bg3); border-top:1px solid var(--border); border-bottom:1px solid var(--border); }
+  .egg-inner { max-width:920px; margin:0 auto; padding:5rem 2rem; }
+  .egg-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:1px; background:var(--border); border:1px solid var(--border); margin-top:2.5rem; }
+  .egg-card { background:var(--bg3); padding:2rem 1.6rem; position:relative; }
+  .egg-card::after { content:'🥚'; position:absolute; top:1.2rem; right:1.4rem; font-size:1rem; opacity:0.4; }
+  .egg-num { font-family:var(--font-display); font-size:2.5rem; line-height:1; color:rgba(196,136,42,0.2); margin-bottom:0.6rem; }
+  .egg-title { font-family:var(--font-serif); font-size:0.95rem; font-weight:700; margin-bottom:0.5rem; }
+  .egg-text { font-size:0.8rem; color:var(--muted); line-height:1.75; }
+
+  .quote-section { padding:7rem 2rem; text-align:center; position:relative; overflow:hidden; }
+  .quote-bg { position:absolute; inset:0; background:radial-gradient(ellipse 55% 55% at 50% 50%, rgba(196,136,42,0.06) 0%, transparent 70%); }
+  .quote-mark { font-family:var(--font-serif); font-size:7rem; line-height:0; vertical-align:-1.8rem; color:rgba(196,136,42,0.18); margin-right:0.05em; }
+  .quote-text { font-family:var(--font-serif); font-style:italic; font-size:clamp(1.4rem,3.5vw,2.5rem); line-height:1.35; max-width:680px; margin:0 auto; position:relative; z-index:1; }
+  .quote-attr { margin-top:2rem; font-size:0.72rem; letter-spacing:0.3em; text-transform:uppercase; color:var(--muted); font-family:var(--font-display); position:relative; z-index:1; }
+
+  .tracks-section { background:var(--bg); border-top:1px solid var(--border); }
+  .tracks-inner { max-width:920px; margin:0 auto; padding:6rem 2rem; }
+  .track-item { border-bottom:1px solid var(--border); overflow:hidden; cursor:pointer; transition:background 0.15s; }
+  .track-item:first-of-type { border-top:1px solid var(--border); }
+  .track-item:hover { background:rgba(196,136,42,0.025); }
+  .track-header { display:grid; grid-template-columns:3rem 1fr auto; align-items:center; gap:1.2rem; padding:1.1rem 0; }
+  .track-num { font-family:var(--font-display); font-size:0.75rem; color:var(--muted); letter-spacing:0.1em; }
+  .track-name { font-family:var(--font-serif); font-size:1rem; font-weight:700; }
+  .track-right { display:flex; align-items:center; gap:1.2rem; }
+  .track-score-bar { width:70px; height:3px; background:rgba(255,255,255,0.06); border-radius:2px; overflow:hidden; }
+  .track-score-fill { height:100%; background:linear-gradient(90deg, var(--accent), var(--gold)); transform-origin:left; transform:scaleX(0); transition:transform 0.8s ease; border-radius:2px; }
+  .track-score-num { font-family:var(--font-display); font-size:0.95rem; color:var(--muted); min-width:2.2rem; text-align:right; }
+  .track-expand-icon { font-size:0.55rem; color:var(--muted); transition:transform 0.3s; }
+  .track-item.open .track-expand-icon { transform:rotate(180deg); }
+  .track-body { max-height:0; overflow:hidden; transition:max-height 0.38s ease; }
+  .track-body-inner { padding:0 0 1.4rem 0; margin-left:4.2rem; color:var(--muted); font-size:0.87rem; line-height:1.8; border-left:2px solid var(--accent); padding-left:1.4rem; }
+
+  .chart-section { background:var(--bg3); border-top:1px solid var(--border); border-bottom:1px solid var(--border); }
+  .chart-inner { max-width:920px; margin:0 auto; padding:6rem 2rem; }
+  .chart-bars { display:flex; flex-direction:column; gap:0.85rem; margin-top:3rem; }
+  .bar-row { display:grid; grid-template-columns:190px 1fr 2.8rem; align-items:center; gap:1rem; }
+  @media(max-width:500px){.bar-row{grid-template-columns:100px 1fr 2.5rem;}}
+  .bar-label { font-size:0.78rem; color:var(--muted); text-align:right; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .bar-track { height:5px; background:rgba(255,255,255,0.05); border-radius:3px; overflow:hidden; }
+  .bar-fill { height:100%; background:linear-gradient(90deg, var(--accent), var(--gold)); transform-origin:left; transform:scaleX(0); transition:transform 0.85s ease; border-radius:3px; }
+  .bar-val { font-family:var(--font-display); font-size:0.88rem; color:var(--text); }
+
+  .footnote-section { padding:5rem 2rem; text-align:center; border-top:1px solid var(--border); background:var(--bg2); }
+  .footnote-text { font-family:var(--font-serif); font-style:italic; font-size:1rem; color:var(--muted); line-height:1.85; max-width:640px; margin:0 auto; }
+  footer { padding:3.5rem 2rem; text-align:center; border-top:1px solid var(--border); }
+  .footer-sig { font-family:var(--font-serif); font-style:italic; font-size:0.88rem; color:var(--muted); }
+  .footer-brand { font-family:var(--font-display); letter-spacing:0.4em; font-size:0.68rem; color:rgba(255,255,255,0.1); margin-top:1.8rem; }
+  .divider { width:36px; height:1px; background:var(--accent); margin:1.8rem auto; }
+  .back-link { display:inline-block; margin-top:2rem; font-family:var(--font-display); letter-spacing:0.25em; font-size:0.72rem; color:var(--accent); text-decoration:none; border:1px solid var(--accent); padding:0.6rem 1.4rem; transition:all 0.2s; }
+  .back-link:hover { background:var(--accent); color:#fff; }
+
+  @keyframes fadeUp { from{opacity:0;transform:translateY(28px)} to{opacity:1;transform:translateY(0)} }
+  .reveal { opacity:0; transform:translateY(38px); transition:opacity 0.7s ease, transform 0.7s ease; }
+  .reveal.visible { opacity:1; transform:translateY(0); }
+</style>
+</head>
+<body>
+<div class="progress-bar" id="progress"></div>
+<nav>
+  <a href="index.html" class="nav-back">← All Autopsies</a>
+  <div class="nav-score" id="navScore">9.8 / 10</div>
+</nav>
+
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-content">
+    <div class="autopsy-label">Album Autopsy · 024</div>
+    <div class="hero-artist">Led Zeppelin</div>
+    <div class="hero-album">Led Zeppelin IV</div>
+    <div class="hero-meta">Atlantic Records · 1971</div>
+    <div class="hero-rule"></div>
+    <div class="scroll-hint">Scroll to dissect</div>
+  </div>
+</section>
+
+<div class="verdict-bar">No title. No band name. No label credit on the cover. Just four symbols and eight songs. One of those songs is the most played track in rock radio history. They didn't need to tell you who made it.</div>
+
+<section class="score-section">
+  <div class="score-inner">
+    <div class="score-display reveal">
+      <div class="score-number" id="scoreCounter">0<span>.0</span></div>
+      <div class="score-label">Overall Score</div>
+    </div>
+    <div class="reveal">
+      <div class="score-verdict">"The heaviest and the most delicate record they ever made, sometimes on the same track. Plant and Page at absolute peak. Bonham inventing the physics of rock drumming in real time."</div>
+      <div class="score-defense">9.8 because this is the album where everything Led Zeppelin promised on their first three records finally arrived fully formed. The dynamic range is the story - from the acoustic tenderness of Going to California to the apocalyptic weight of When the Levee Breaks, recorded in a stairwell because no studio room could contain what Bonham was doing. The only reason it isn't a 10 is that Misty Mountain Hop and Four Sticks, while good, are clearly the album's filler - a very high floor, but a floor. Everything else is untouchable.</div>
+    </div>
+  </div>
+</section>
+
+<div class="themes-section">
+  <div class="section">
+    <div class="section-label reveal">Central Thesis</div>
+    <div class="section-title reveal">What <em>This Album Is Really About</em></div>
+    <div class="theme-pills reveal">
+      <span class="pill active">Ancient Britain</span>
+      <span class="pill">The Acoustic/Electric Duality</span>
+      <span class="pill">Occult Power</span>
+      <span class="pill">The Stairway Problem</span>
+    </div>
+    <div class="themes-grid reveal">
+      <div class="theme-card">
+        <span class="theme-card-icon">🏔️</span>
+        <div class="theme-card-title">Ancient Britain</div>
+        <div class="theme-card-text">Jimmy Page spent 1970 obsessed with Aleister Crowley and the English countryside. He bought Crowley's former home, Boleskine House. The album art - an old man carrying sticks up a hill - came from a Hermit tarot card. The whole record has the atmosphere of something that predates electricity. Misty Mountain Hop, The Battle of Evermore, Stairway - they all feel like they were found, not written.</div>
+      </div>
+      <div class="theme-card">
+        <span class="theme-card-icon">⚡</span>
+        <div class="theme-card-title">The Acoustic/Electric Duality</div>
+        <div class="theme-card-text">No rock album before or since has navigated the space between quiet and obliterating as expertly as this one. Going to California is barely a whisper. When the Levee Breaks is one of the loudest things ever recorded. They sit three tracks apart on the same record and somehow both feel inevitable. Page understood that the light only exists because of the dark beside it.</div>
+      </div>
+      <div class="theme-card">
+        <span class="theme-card-icon">🔮</span>
+        <div class="theme-card-title">Occult Power</div>
+        <div class="theme-card-text">Each band member chose a symbol for the inner sleeve - Page chose the Zoso symbol from a 17th-century grimoire. Plant chose a feather in a circle. Jones took an interlocking circles design. Bonham chose three interlocking circles - the symbol of the man, representing the past, the present, and the future. They refused to explain any of it. The mystery was the point.</div>
+      </div>
+      <div class="theme-card">
+        <span class="theme-card-icon">🎸</span>
+        <div class="theme-card-title">The Stairway Problem</div>
+        <div class="theme-card-text">Stairway to Heaven is the most overplayed song in rock history and also genuinely one of the ten best songs in rock history. The tension between those two facts is real. It's been in guitar shop ban lists for thirty years. It was never released as a single. It is eight minutes long and has three distinct movements. The guitar solo is the most important eight bars of rock guitar ever played. The overplay is not the song's fault.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<section class="quote-section">
+  <div class="quote-bg"></div>
+  <div class="quote-text reveal"><span class="quote-mark">"</span>And as we wind on down the road, our shadows taller than our soul.</div>
+  <div class="quote-attr reveal">Robert Plant · Stairway to Heaven · 1971</div>
+</section>
+
+<section class="egg-section">
+  <div class="egg-inner">
+    <div class="section-label reveal">Rare Frequencies</div>
+    <div class="section-title reveal">Things You <em>Didn't Know</em></div>
+    <div class="egg-grid reveal">
+      <div class="egg-card">
+        <div class="egg-num">01</div>
+        <div class="egg-title">The Stairwell Recording</div>
+        <div class="egg-text">When the Levee Breaks was recorded with John Bonham's kit set up in the stairwell of Headley Grange - a 19th century workhouse in Hampshire the band used as a recording location. Engineer Andy Johns placed two microphones at the top of the stairs and let the natural reverb do the work. The drum sound is entirely acoustic, entirely architectural. It has never been replicated. Producers have been trying for fifty years.</div>
+      </div>
+      <div class="egg-card">
+        <div class="egg-num">02</div>
+        <div class="egg-title">Stairway Was Never a Single</div>
+        <div class="egg-text">Stairway to Heaven was never officially released as a single during Zeppelin's active years - Page and Plant felt it would cheapen it. It became the most requested and most played track in rock radio history anyway. When it was finally released as a single in 1990, it charted. The band had broken up ten years earlier. The song simply refused to stop being relevant on its own terms.</div>
+      </div>
+      <div class="egg-card">
+        <div class="egg-num">03</div>
+        <div class="egg-title">Plant Wrote the Lyrics in 30 Minutes</div>
+        <div class="egg-text">Robert Plant has said the lyrics to Stairway to Heaven came to him almost automatically while sitting beside a fire at Headley Grange, listening to Page play the chord progression. He wrote them in approximately half an hour. He described the feeling as something being "channeled" through him. Whether you believe that or not, the result is eight minutes of rock poetry that has never been adequately explained or improved upon.</div>
+      </div>
+      <div class="egg-card">
+        <div class="egg-num">04</div>
+        <div class="egg-title">The Untitled Album</div>
+        <div class="egg-text">Atlantic Records begged the band to put their name on the cover. Zeppelin refused. The label refused to release it without a name. Zeppelin threatened to walk. Atlantic blinked. The album went out with nothing on the cover - no title, no band name, no catalog information. It sold 37 million copies. It is commonly called Led Zeppelin IV by everyone, but that is not what the band called it. They called it nothing.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="tracks-section">
+  <div class="tracks-inner">
+    <div class="section-label reveal">Track by Track</div>
+    <div class="section-title reveal">The <em>Dissection</em></div>
+    <div id="trackList" class="reveal">
+
+      <div class="track-item">
+        <div class="track-header"><span class="track-num">01</span><span class="track-name">Black Dog</span><div class="track-right"><div class="track-score-bar"><div class="track-score-fill" data-score="9.2"></div></div><span class="track-score-num">9.2</span><span class="track-expand-icon">▼</span></div></div>
+        <div class="track-body"><div class="track-body-inner">Named after a black labrador that wandered around Headley Grange during recording sessions. The guitar riff sits in a deliberately odd rhythmic relationship with the vocals - Plant comes in off the beat in a way that sounds wrong and then sounds like the only way it could ever work. John Paul Jones wrote the riff. Bonham plays it like he's trying to break something important.</div></div>
+      </div>
+
+      <div class="track-item">
+        <div class="track-header"><span class="track-num">02</span><span class="track-name">Rock and Roll</span><div class="track-right"><div class="track-score-bar"><div class="track-score-fill" data-score="9.3"></div></div><span class="track-score-num">9.3</span><span class="track-expand-icon">▼</span></div></div>
+        <div class="track-body"><div class="track-body-inner">Written in fifteen minutes during a rehearsal jam when Bonham spontaneously launched into the intro to Little Richard's Keep A Knockin'. Page joined immediately, then Jones, then Plant - the whole thing crystallized in one session. It is a love letter to the music that raised them, played by four people who had technically superseded it. The opening drum fill is the single most imitated four bars in rock history.</div></div>
+      </div>
+
+      <div class="track-item">
+        <div class="track-header"><span class="track-num">03</span><span class="track-name">The Battle of Evermore</span><div class="track-right"><div class="track-score-bar"><div class="track-score-fill" data-score="9.0"></div></div><span class="track-score-num">9.0</span><span class="track-expand-icon">▼</span></div></div>
+        <div class="track-body"><div class="track-body-inner">Page picked up Jones's mandolin late one night and wrote this song. Sandy Denny of Fairport Convention was brought in to sing the counterpart to Plant - the only time Zeppelin ever featured a guest vocalist on a studio recording. The duet is structured like a Greek dialogue: Plant as the narrator, Denny as the voice of warning. Plant described it as needing "another voice to be the town crier, the village folk singing." Tolkien influence is not subtle.</div></div>
+      </div>
+
+      <div class="track-item">
+        <div class="track-header"><span class="track-num">04</span><span class="track-name">Stairway to Heaven</span><div class="track-right"><div class="track-score-bar"><div class="track-score-fill" data-score="10.0"></div></div><span class="track-score-num">10.0</span><span class="track-expand-icon">▼</span></div></div>
+        <div class="track-body"><div class="track-body-inner">Eight minutes. Three distinct movements - the fingerpicked acoustic opening, the folk-rock mid-section, the full electric crescendo. Page plays the guitar solo on a 1959 Telecaster borrowed from Joe Walsh. It is widely considered the greatest guitar solo in rock history, which is a title that can sound like a cliché until you listen to it again and remember it isn't. Plant wrote the lyrics in thirty minutes by a fire. The song has no chorus. It doesn't need one.</div></div>
+      </div>
+
+      <div class="track-item">
+        <div class="track-header"><span class="track-num">05</span><span class="track-name">Misty Mountain Hop</span><div class="track-right"><div class="track-score-bar"><div class="track-score-fill" data-score="8.5"></div></div><span class="track-score-num">8.5</span><span class="track-expand-icon">▼</span></div></div>
+        <div class="track-body"><div class="track-body-inner">The most overtly fun track on the record - Page and Jones playing a locked groove while Plant riffs about hippies getting arrested in Hyde Park. Inspired by actual events Plant witnessed in 1968. The keyboard riff from Jones is the spine of the whole thing; it never resolves, just circles. Good song on a great album. It earns its place by not pretending to be more than it is.</div></div>
+      </div>
+
+      <div class="track-item">
+        <div class="track-header"><span class="track-num">06</span><span class="track-name">Four Sticks</span><div class="track-right"><div class="track-score-bar"><div class="track-score-fill" data-score="8.3"></div></div><span class="track-score-num">8.3</span><span class="track-expand-icon">▼</span></div></div>
+        <div class="track-body"><div class="track-body-inner">Named because Bonham played it holding two drumsticks in each hand - four sticks - to achieve the particular rhythmic density the song demanded. It was recorded after multiple failed attempts; Bonham just started playing with the second pair out of frustration and it worked immediately. The odd meter and spiraling guitar work make it the album's most experimental moment. An interesting song sandwiched between two great ones.</div></div>
+      </div>
+
+      <div class="track-item">
+        <div class="track-header"><span class="track-num">07</span><span class="track-name">Going to California</span><div class="track-right"><div class="track-score-bar"><div class="track-score-fill" data-score="9.4"></div></div><span class="track-score-num">9.4</span><span class="track-expand-icon">▼</span></div></div>
+        <div class="track-body"><div class="track-body-inner">Plant wrote this about Joni Mitchell, who he had never met but was thoroughly in love with. Two acoustic guitars and a mandolin. No drums, no bass, no electricity. It is the quietest thing on the record and it sits next to the loudest thing on the record and the album is better for both. Plant's voice here - unprocessed, intimate - is a different instrument than the one screaming on Whole Lotta Love. Both versions are great. This one is underrated.</div></div>
+      </div>
+
+      <div class="track-item">
+        <div class="track-header"><span class="track-num">08</span><span class="track-name">When the Levee Breaks</span><div class="track-right"><div class="track-score-bar"><div class="track-score-fill" data-score="9.9"></div></div><span class="track-score-num">9.9</span><span class="track-expand-icon">▼</span></div></div>
+        <div class="track-body"><div class="track-body-inner">A cover of a 1929 Memphis Minnie song about the Great Mississippi Flood of 1927. Bonham's drums, recorded in the Headley Grange stairwell, are the only true sonic original of the rock era - there is nothing else that sounds like that. The song runs six minutes. Plant's harmonica is processed into something barely human. The whole thing has the weight of inevitability, like it was recorded inside a catastrophe rather than about one. The greatest album closer in rock.</div></div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<section class="chart-section">
+  <div class="chart-inner">
+    <div class="section-label reveal">Score Breakdown</div>
+    <div class="section-title reveal">Every Track, <em>Ranked</em></div>
+    <div class="chart-bars reveal" id="chartBars">
+      <div class="bar-row"><div class="bar-label">Stairway to Heaven</div><div class="bar-track"><div class="bar-fill" data-score="10.0"></div></div><div class="bar-val">10.0</div></div>
+      <div class="bar-row"><div class="bar-label">When the Levee Breaks</div><div class="bar-track"><div class="bar-fill" data-score="9.9"></div></div><div class="bar-val">9.9</div></div>
+      <div class="bar-row"><div class="bar-label">Going to California</div><div class="bar-track"><div class="bar-fill" data-score="9.4"></div></div><div class="bar-val">9.4</div></div>
+      <div class="bar-row"><div class="bar-label">Rock and Roll</div><div class="bar-track"><div class="bar-fill" data-score="9.3"></div></div><div class="bar-val">9.3</div></div>
+      <div class="bar-row"><div class="bar-label">Black Dog</div><div class="bar-track"><div class="bar-fill" data-score="9.2"></div></div><div class="bar-val">9.2</div></div>
+      <div class="bar-row"><div class="bar-label">The Battle of Evermore</div><div class="bar-track"><div class="bar-fill" data-score="9.0"></div></div><div class="bar-val">9.0</div></div>
+      <div class="bar-row"><div class="bar-label">Misty Mountain Hop</div><div class="bar-track"><div class="bar-fill" data-score="8.5"></div></div><div class="bar-val">8.5</div></div>
+      <div class="bar-row"><div class="bar-label">Four Sticks</div><div class="bar-track"><div class="bar-fill" data-score="8.3"></div></div><div class="bar-val">8.3</div></div>
+    </div>
+  </div>
+</section>
+
+<div class="footnote-section">
+  <div class="section-label reveal" style="text-align:center;">Footnote</div>
+  <div class="footnote-text reveal">In 2014, Jimmy Page and Robert Plant won a jury trial alleging that the opening guitar passage of Stairway to Heaven was plagiarized from Spirit's 1968 instrumental Taurus. The case went back to court in 2016 and Page won again. The acoustic guitar pattern that opens the song is one of the most contested eight bars in music legal history. It also sounds nothing like Taurus once you actually listen to both. The suits kept coming. The song kept playing.</div>
+</div>
+
+<footer>
+  <div class="footer-sig reveal">Album Autopsy - A structured dissection of records that matter.</div>
+  <div class="divider"></div>
+  <a href="index.html" class="back-link reveal">← Back to All Autopsies</a>
+  <div class="footer-brand">@MyParentsDidntLeaveForThis</div>
+</footer>
+
+<script>
+  window.addEventListener('scroll', () => {
+    const p = (window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100;
+    document.getElementById('progress').style.width = p + '%';
+  });
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (!e.isIntersecting) return;
+      e.target.classList.add('visible');
+      if (e.target.id === 'scoreCounter') { animateScore(0, 9.8, 1600); document.getElementById('navScore').classList.add('visible'); }
+    });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+  if(document.getElementById('scoreCounter')) observer.observe(document.getElementById('scoreCounter'));
+  const tlObs = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (!e.isIntersecting) return; e.target.querySelectorAll('.track-score-fill').forEach((f,i) => { setTimeout(() => { f.style.transform = `scaleX(${parseFloat(f.dataset.score)/10})`; }, i * 55); }); tlObs.unobserve(e.target); });
+  }, { threshold: 0.08 });
+  const tl = document.getElementById('trackList'); if(tl) tlObs.observe(tl);
+  const chObs = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (!e.isIntersecting) return; e.target.querySelectorAll('.bar-fill').forEach((f,i) => { setTimeout(() => { const s = parseFloat(f.dataset.score); f.style.transform = `scaleX(${Math.max(0,(s-6)/4)})`; }, i * 70); }); chObs.unobserve(e.target); });
+  }, { threshold: 0.08 });
+  const cb = document.getElementById('chartBars'); if(cb) chObs.observe(cb);
+  function animateScore(from, to, duration) {
+    const el = document.getElementById('scoreCounter'); if(!el) return;
+    const start = performance.now();
+    (function tick(now) { const p = Math.min((now - start) / duration, 1); const ease = 1 - Math.pow(1 - p, 3); const val = from + (to - from) * ease; const int = Math.floor(val); const dec = Math.round((val - int) * 10); el.innerHTML = int + '<span>.' + dec + '</span>'; if(p < 1) requestAnimationFrame(tick); })(start);
+  }
+  document.querySelectorAll('.track-item').forEach(item => {
+    item.querySelector('.track-header').addEventListener('click', () => { const body = item.querySelector('.track-body'); const open = item.classList.toggle('open'); body.style.maxHeight = open ? body.scrollHeight + 'px' : '0'; });
+  });
+  document.querySelectorAll('.pill').forEach(pill => {
+    pill.addEventListener('click', () => { document.querySelectorAll('.pill').forEach(p => p.classList.remove('active')); pill.classList.add('active'); });
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Astroworld - Album Autopsy</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #080809;
+    --bg2: #0e0e10;
+    --bg3: #131315;
+    --accent: #e07b3a;
+    --gold: #c9a84c;
+    --text: #eae6de;
+    --muted: #6e6a64;
+    --border: rgba(255,255,255,0.055);
+    --font-display: 'Bebas Neue', sans-serif;
+    --font-serif: 'Playfair Display', serif;
+    --font-body: 'DM Sans', sans-serif;
+  }
+  html { scroll-behavior: smooth; }
+  body { background: var(--bg); color: var(--text); font-family: var(--font-body); font-weight: 300; line-height: 1.7; overflow-x: hidden; }
+  body::before { content:''; position:fixed; inset:0; background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E"); pointer-events:none; z-index:9999; opacity:0.45; }
+  .progress-bar { position:fixed; top:0; left:0; height:2px; background:var(--accent); z-index:200; width:0%; transition: width 0.1s linear; }
+  nav { position:fixed; top:0; left:0; right:0; padding:1.1rem 2.5rem; display:flex; justify-content:space-between; align-items:center; z-index:100; background:linear-gradient(to bottom, rgba(8,8,9,0.92), transparent); }
+  .nav-back { font-family:var(--font-display); letter-spacing:0.25em; font-size:0.7rem; color:var(--muted); text-decoration:none; transition:color 0.2s; }
+  .nav-back:hover { color:var(--accent); }
+  .nav-score { font-family:var(--font-display); font-size:1.1rem; color:var(--accent); opacity:0; transition:opacity 0.4s; }
+  .nav-score.visible { opacity:1; }
+  .hero { min-height:100vh; display:flex; flex-direction:column; justify-content:center; align-items:center; position:relative; overflow:hidden; padding:4rem 2rem; text-align:center; }
+  .hero-bg { position:absolute; inset:0; background: radial-gradient(ellipse 80% 55% at 50% 45%, #e07b3a18 0%, transparent 68%), radial-gradient(ellipse 35% 35% at 15% 75%, #e07b3a09 0%, transparent 60%), var(--bg); z-index:0; }
+  .hero-lines { position:absolute; inset:0; background-image:repeating-linear-gradient(0deg, transparent, transparent 78px, rgba(255,255,255,0.011) 78px, rgba(255,255,255,0.011) 79px); z-index:0; }
+  .hero-content { position:relative; z-index:1; }
+  .autopsy-label { font-family:var(--font-display); letter-spacing:0.4em; font-size:0.72rem; color:var(--accent); text-transform:uppercase; margin-bottom:1.8rem; opacity:0; animation:fadeUp 0.8s ease 0.2s forwards; }
+  .hero-artist { font-family:var(--font-display); font-size:clamp(4rem,16vw,14rem); line-height:0.88; letter-spacing:-0.02em; color:var(--text); opacity:0; animation:fadeUp 0.8s ease 0.4s forwards; }
+  .hero-album { font-family:var(--font-serif); font-style:italic; font-size:clamp(1.2rem,4vw,3rem); color:var(--gold); margin-top:0.6rem; opacity:0; animation:fadeUp 0.8s ease 0.6s forwards; line-height:1.25; max-width:800px; }
+  .hero-meta { font-family:var(--font-display); letter-spacing:0.3em; font-size:0.85rem; color:var(--muted); margin-top:1.5rem; opacity:0; animation:fadeUp 0.8s ease 0.8s forwards; }
+  .hero-rule { width:1px; height:70px; background:linear-gradient(to bottom, var(--accent), transparent); margin:3rem auto 0; opacity:0; animation:fadeUp 0.8s ease 1s forwards; }
+  .scroll-hint { font-size:0.68rem; letter-spacing:0.35em; color:var(--muted); text-transform:uppercase; margin-top:0.8rem; opacity:0; animation:fadeUp 0.8s ease 1.2s forwards; }
+  .verdict-bar { background:var(--accent); padding:1.1rem 2rem; text-align:center; font-family:var(--font-body); font-size:0.92rem; color:rgba(255,255,255,0.9); font-weight:500; line-height:1.5; }
+  .score-section { background:var(--bg2); border-top:1px solid var(--border); border-bottom:1px solid var(--border); }
+  .score-inner { max-width:920px; margin:0 auto; padding:6rem 2rem; display:grid; grid-template-columns:1fr 1.5fr; gap:5rem; align-items:center; }
+  @media(max-width:640px){.score-inner{grid-template-columns:1fr;gap:2.5rem;}}
+  .score-display { text-align:center; }
+  .score-number { font-family:var(--font-display); font-size:clamp(5.5rem,16vw,11rem); line-height:1; color:var(--text); }
+  .score-number span { color:var(--accent); }
+  .score-label { font-family:var(--font-display); letter-spacing:0.35em; font-size:0.75rem; color:var(--muted); margin-top:0.4rem; }
+  .score-verdict { font-family:var(--font-serif); font-style:italic; font-size:1.3rem; line-height:1.55; margin-bottom:1.5rem; color:var(--text); }
+  .score-defense { font-size:0.88rem; color:var(--muted); line-height:1.85; }
+  .section { max-width:920px; margin:0 auto; padding:6rem 2rem; }
+  .section-label { font-family:var(--font-display); letter-spacing:0.4em; font-size:0.68rem; color:var(--accent); text-transform:uppercase; margin-bottom:1.4rem; }
+  .section-title { font-family:var(--font-serif); font-size:clamp(1.8rem,4.5vw,3.2rem); font-weight:900; line-height:1.1; margin-bottom:2.5rem; }
+  .section-title em { font-style:italic; color:var(--gold); }
+  .pill { padding:0.35rem 0.9rem; border:1px solid var(--border); border-radius:2px; font-size:0.7rem; letter-spacing:0.15em; text-transform:uppercase; font-family:var(--font-display); color:var(--text); background:transparent; transition:all 0.2s; cursor:default; }
+  .pill:hover, .pill.active { border-color:var(--accent); color:var(--accent); background:#e07b3a14; }
+  .theme-pills { display:flex; flex-wrap:wrap; gap:0.45rem; margin:0 0 3rem; }
+  .themes-section { background:var(--bg2); border-top:1px solid var(--border); }
+  .themes-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:1.5px; background:var(--border); border:1px solid var(--border); margin-top:0; }
+  .theme-card { background:var(--bg2); padding:2.2rem 1.8rem; transition:background 0.2s; cursor:default; position:relative; overflow:hidden; }
+  .theme-card::before { content:''; position:absolute; top:0; left:0; width:3px; height:0; background:var(--accent); transition:height 0.3s; }
+  .theme-card:hover::before { height:100%; }
+  .theme-card:hover { background:var(--bg3); }
+  .theme-card-icon { font-size:1.8rem; margin-bottom:0.9rem; display:block; }
+  .theme-card-title { font-family:var(--font-serif); font-size:1rem; font-weight:700; margin-bottom:0.6rem; }
+  .theme-card-text { font-size:0.82rem; color:var(--muted); line-height:1.75; }
+  .quote-section { padding:7rem 2rem; text-align:center; position:relative; overflow:hidden; }
+  .quote-bg { position:absolute; inset:0; background:radial-gradient(ellipse 55% 55% at 50% 50%, #e07b3a0a 0%, transparent 70%); }
+  .quote-mark { font-family:var(--font-serif); font-size:7rem; line-height:0; vertical-align:-1.8rem; color:#e07b3a25; margin-right:0.05em; }
+  .quote-text { font-family:var(--font-serif); font-style:italic; font-size:clamp(1.4rem,3.5vw,2.5rem); line-height:1.35; max-width:680px; margin:0 auto; position:relative; z-index:1; }
+  .quote-attr { margin-top:2rem; font-size:0.72rem; letter-spacing:0.3em; text-transform:uppercase; color:var(--muted); font-family:var(--font-display); position:relative; z-index:1; }
+  .tracks-section { background:var(--bg); border-top:1px solid var(--border); }
+  .tracks-inner { max-width:920px; margin:0 auto; padding:6rem 2rem; }
+  .track-item { border-bottom:1px solid var(--border); overflow:hidden; cursor:pointer; transition:background 0.15s; }
+  .track-item:first-of-type { border-top:1px solid var(--border); }
+  .track-item:hover { background:rgba(255,255,255,0.018); }
+  .track-header { display:grid; grid-template-columns:3rem 1fr auto; align-items:center; gap:1.2rem; padding:1.1rem 0; }
+  .track-num { font-family:var(--font-display); font-size:0.75rem; color:var(--muted); letter-spacing:0.1em; }
+  .track-name { font-family:var(--font-serif); font-size:1rem; font-weight:700; }
+  .track-right { display:flex; align-items:center; gap:1.2rem; }
+  .track-score-bar { width:70px; height:3px; background:rgba(255,255,255,0.08); border-radius:2px; overflow:hidden; }
+  .track-score-fill { height:100%; background:var(--accent); transform-origin:left; transform:scaleX(0); transition:transform 0.8s ease; border-radius:2px; }
+  .track-score-num { font-family:var(--font-display); font-size:0.95rem; color:var(--muted); min-width:2.2rem; text-align:right; }
+  .track-expand-icon { font-size:0.55rem; color:var(--muted); transition:transform 0.3s; }
+  .track-item.open .track-expand-icon { transform:rotate(180deg); }
+  .track-body { max-height:0; overflow:hidden; transition:max-height 0.38s ease; }
+  .track-body-inner { padding:0 0 1.4rem 0; margin-left:4.2rem; color:var(--muted); font-size:0.87rem; line-height:1.8; border-left:2px solid var(--accent); padding-left:1.4rem; }
+  .chart-section { background:var(--bg3); border-top:1px solid var(--border); border-bottom:1px solid var(--border); }
+  .chart-inner { max-width:920px; margin:0 auto; padding:6rem 2rem; }
+  .chart-bars { display:flex; flex-direction:column; gap:0.85rem; margin-top:3rem; }
+  .bar-row { display:grid; grid-template-columns:170px 1fr 2.8rem; align-items:center; gap:1rem; }
+  @media(max-width:500px){.bar-row{grid-template-columns:90px 1fr 2.5rem;}}
+  .bar-label { font-size:0.78rem; color:var(--muted); text-align:right; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .bar-track { height:5px; background:rgba(255,255,255,0.055); border-radius:3px; overflow:hidden; }
+  .bar-fill { height:100%; background:linear-gradient(90deg, var(--accent), var(--gold)); transform-origin:left; transform:scaleX(0); transition:transform 0.85s ease; border-radius:3px; }
+  .bar-val { font-family:var(--font-display); font-size:0.88rem; color:var(--text); }
+  .footnote-section { padding:5rem 2rem; text-align:center; border-top:1px solid var(--border); background:var(--bg2); }
+  .footnote-text { font-family:var(--font-serif); font-style:italic; font-size:1rem; color:var(--muted); line-height:1.85; max-width:640px; margin:0 auto; }
+  footer { padding:3.5rem 2rem; text-align:center; border-top:1px solid var(--border); }
+  .footer-sig { font-family:var(--font-serif); font-style:italic; font-size:0.88rem; color:var(--muted); }
+  .footer-brand { font-family:var(--font-display); letter-spacing:0.4em; font-size:0.68rem; color:rgba(255,255,255,0.12); margin-top:1.8rem; }
+  .divider { width:36px; height:1px; background:var(--accent); margin:1.8rem auto; }
+  .back-link { display:inline-block; margin-top:2rem; font-family:var(--font-display); letter-spacing:0.25em; font-size:0.72rem; color:var(--accent); text-decoration:none; border:1px solid var(--accent); padding:0.6rem 1.4rem; transition:all 0.2s; }
+  .back-link:hover { background:var(--accent); color:#fff; }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(28px)} to{opacity:1;transform:translateY(0)} }
+  .reveal { opacity:0; transform:translateY(38px); transition:opacity 0.7s ease, transform 0.7s ease; }
+  .reveal.visible { opacity:1; transform:translateY(0); }
+</style>
+</head>
+<body>
+<div class="progress-bar" id="progress"></div>
+<nav>
+  <a href="index.html" class="nav-back">← All Autopsies</a>
+  <div class="nav-score" id="navScore">9.1 / 10</div>
+</nav>
+
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-lines"></div>
+  <div class="hero-content">
+    <div class="autopsy-label">Album Autopsy · 032</div>
+    <div class="hero-artist">Travis Scott</div>
+    <div class="hero-album">Astroworld</div>
+    <div class="hero-meta">Cactus Jack / Epic Records · 2018</div>
+    <div class="hero-rule"></div>
+    <div class="scroll-hint">Scroll to dissect</div>
+  </div>
+</section>
+
+<div class="verdict-bar">The park closed in 2005. Travis was 14. He spent the next thirteen years building it back.</div>
+
+<section class="score-section">
+  <div class="score-inner">
+    <div class="score-display reveal">
+      <div class="score-number" id="scoreCounter">0<span>.0</span></div>
+      <div class="score-label">Overall Score</div>
+    </div>
+    <div class="reveal">
+      <div class="score-verdict">"Travis made an album about a demolished amusement park and somehow made it the most immersive record of his career. The concept does all the heavy lifting the lyrics don't need to."</div>
+      <div class="score-defense">9.1 because the production architecture on this record is its own argument. Mike Dean, Cactus Jack, Tame Impala, James Blake, Pharrell - Travis assembled collaborators who all operate at maximum, and the album holds them without feeling like a compilation. CAROUSEL is Frank Ocean at his most playful over a sample that has no business being this good. STOP TRYING TO BE GOD arrives like a seance: Stevie Wonder's harmonica, Kid Cudi's hums, James Blake's voice building to a closer that feels genuinely earned. The 0.9: after NC-17 the album runs out of momentum. ASTROTHUNDER is gorgeous but brief. YOSEMITE is filler. WHO? WHAT! exists mainly as a gap in the sequencing. The back four tracks needed either cutting or restructuring. COFFEE BEAN lands the album back on its feet but the damage is done. A 9.1 album that could have been a 9.6 with a better edit.</div>
+    </div>
+  </div>
+</section>
+
+<div class="themes-section">
+  <div class="section">
+    <div class="section-label reveal">Central Thesis</div>
+    <div class="section-title reveal">What <em>This Album Is Really About</em></div>
+    <div class="theme-pills reveal"><span class="pill active">Memory as Architecture</span><span class="pill">Houston as Subject</span><span class="pill">The Feature as Instrument</span><span class="pill">Production over Lyricism</span></div>
+    <div class="themes-grid reveal">
+    <div class="theme-card">
+      <span class="theme-card-icon">🎡</span>
+      <div class="theme-card-title">Memory as Architecture</div>
+      <div class="theme-card-text">Six Flags AstroWorld was demolished in 2005 when Travis was 14. The album is not about the park - it is the park. Every production choice is a reconstruction of what it felt like to be a kid inside something larger than yourself. The concept works because Travis doesn't explain it. He just builds it.</div>
+    </div>
+    <div class="theme-card">
+      <span class="theme-card-icon">🌆</span>
+      <div class="theme-card-title">Houston as Subject</div>
+      <div class="theme-card-text">R.I.P. SCREW is the most direct - a tribute to DJ Screw, the Houston producer who invented the slowed-and-chopped sound that defines the city's musical identity. But Houston is in the album's DNA whether Travis names it or not. The warmth, the sprawl, the sense of physical scale. It's a city record that never announces itself as one.</div>
+    </div>
+    <div class="theme-card">
+      <span class="theme-card-icon">🎤</span>
+      <div class="theme-card-title">The Feature as Instrument</div>
+      <div class="theme-card-text">STOP TRYING TO BE GOD has Stevie Wonder, Kid Cudi, and James Blake. CAROUSEL has Frank Ocean. WAKE UP has The Weeknd. Travis treats his features the way a director treats cast - each one chosen for what they bring to the specific moment, not for cross-promotion. Frank Ocean on a Donkey Kong Country sample is a creative decision. Most of these are.</div>
+    </div>
+    <div class="theme-card">
+      <span class="theme-card-icon">🎛️</span>
+      <div class="theme-card-title">Production over Lyricism</div>
+      <div class="theme-card-text">Travis is not the strongest lyricist in his class. On Astroworld, he doesn't need to be. The production is the argument, and the argument is airtight. He understood what kind of record he was capable of making and made exactly that record. Self-awareness is underrated in rap.</div>
+    </div>
+    </div>
+  </div>
+</div>
+
+<section class="quote-section">
+  <div class="quote-bg"></div>
+  <div class="quote-text reveal"><span class="quote-mark">"</span>Stop trying to be God.</div>
+  <div class="quote-attr reveal">Travis Scott · Stop Trying to Be God · Astroworld · 2018</div>
+</section>
+
+<section class="tracks-section">
+  <div class="tracks-inner">
+    <div class="section-label reveal">Track by Track</div>
+    <div class="section-title reveal">The <em>Dissection</em></div>
+    <div id="trackList" class="reveal">
+    <div class="track-item">
+      <div class="track-header">
+        <span class="track-num">01</span>
+        <span class="track-name">STARGAZING</span>
+        <div class="track-right">
+          <div class="track-score-bar"><div class="track-score-fill" data-score="9.0"></div></div>
+          <span class="track-score-num">9.0</span>
+          <span class="track-expand-icon">▼</span>
+        </div>
+      </div>
+      <div class="track-body"><div class="track-body-inner">The cold open. Disorienting, layered, a beat flip halfway through that resets the tone entirely. Travis announcing the park is open without saying so. The distorted vocals are the wristband going on.</div></div>
+    </div>
+    <div class="track-item">
+      <div class="track-header">
+        <span class="track-num">02</span>
+        <span class="track-name">CAROUSEL (feat. Frank Ocean)</span>
+        <div class="track-right">
+          <div class="track-score-bar"><div class="track-score-fill" data-score="9.8"></div></div>
+          <span class="track-score-num">9.8</span>
+          <span class="track-expand-icon">▼</span>
+        </div>
+      </div>
+      <div class="track-body"><div class="track-body-inner">The best track. Frank Ocean doing the loosest, most joyful thing he's done in years over a sample nobody else would have touched. The production lets him breathe and he takes full advantage. Proof that Travis's best skill is knowing who to put in the room.</div></div>
+    </div>
+    <div class="track-item">
+      <div class="track-header">
+        <span class="track-num">03</span>
+        <span class="track-name">SICKO MODE (feat. Drake)</span>
+        <div class="track-right">
+          <div class="track-score-bar"><div class="track-score-fill" data-score="9.4"></div></div>
+          <span class="track-score-num">9.4</span>
+          <span class="track-expand-icon">▼</span>
+        </div>
+      </div>
+      <div class="track-body"><div class="track-body-inner">Three beats, three moods, one song that held the number one spot for three weeks. The transitions shouldn't work and work completely. Drake's verse is one of his better performances in this era. The production does most of the heavy lifting but the heavy lifting gets done.</div></div>
+    </div>
+    <div class="track-item">
+      <div class="track-header">
+        <span class="track-num">04</span>
+        <span class="track-name">R.I.P. SCREW (feat. Swae Lee)</span>
+        <div class="track-right">
+          <div class="track-score-bar"><div class="track-score-fill" data-score="8.8"></div></div>
+          <span class="track-score-num">8.8</span>
+          <span class="track-expand-icon">▼</span>
+        </div>
+      </div>
+      <div class="track-body"><div class="track-body-inner">A direct tribute to DJ Screw - slowed, hazy, Houston-drenched. Swae Lee's hook is the right kind of effortless. Not the album's most ambitious track but one of its most honest.</div></div>
+    </div>
+    <div class="track-item">
+      <div class="track-header">
+        <span class="track-num">05</span>
+        <span class="track-name">STOP TRYING TO BE GOD (feat. James Blake, Kid Cudi, Stevie Wonder)</span>
+        <div class="track-right">
+          <div class="track-score-bar"><div class="track-score-fill" data-score="9.6"></div></div>
+          <span class="track-score-num">9.6</span>
+          <span class="track-expand-icon">▼</span>
+        </div>
+      </div>
+      <div class="track-body"><div class="track-body-inner">Seven minutes. Stevie Wonder's harmonica arrives two-thirds in and changes the room. Kid Cudi hums underneath everything. James Blake closes it. The sequencing within the track is better than the sequencing on most albums. The most architecturally ambitious thing here.</div></div>
+    </div>
+    <div class="track-item">
+      <div class="track-header">
+        <span class="track-num">06</span>
+        <span class="track-name">NO BYSTANDERS (feat. Juice WRLD, Sheck Wes)</span>
+        <div class="track-right">
+          <div class="track-score-bar"><div class="track-score-fill" data-score="8.9"></div></div>
+          <span class="track-score-num">8.9</span>
+          <span class="track-expand-icon">▼</span>
+        </div>
+      </div>
+      <div class="track-body"><div class="track-body-inner">The mosh pit track. Sheck Wes yelling over a beat that sounds like a carnival ride going too fast. Juice WRLD's verse is effortless. This is the album at its most physical.</div></div>
+    </div>
+    <div class="track-item">
+      <div class="track-header">
+        <span class="track-num">07</span>
+        <span class="track-name">SKELETONS (feat. Pharrell, Tame Impala, Gunna)</span>
+        <div class="track-right">
+          <div class="track-score-bar"><div class="track-score-fill" data-score="8.7"></div></div>
+          <span class="track-score-num">8.7</span>
+          <span class="track-expand-icon">▼</span>
+        </div>
+      </div>
+      <div class="track-body"><div class="track-body-inner">Psychedelic, Tame Impala's production making the album briefly float. Pharrell does what Pharrell does. A left-field detour that works better than it should on paper but doesn't fully justify its placement between NO BYSTANDERS and WAKE UP.</div></div>
+    </div>
+    <div class="track-item">
+      <div class="track-header">
+        <span class="track-num">08</span>
+        <span class="track-name">WAKE UP (feat. The Weeknd)</span>
+        <div class="track-right">
+          <div class="track-score-bar"><div class="track-score-fill" data-score="9.1"></div></div>
+          <span class="track-score-num">9.1</span>
+          <span class="track-expand-icon">▼</span>
+        </div>
+      </div>
+      <div class="track-body"><div class="track-body-inner">The Weeknd sounds like himself in the best way. The sample underneath the track gives it a warmth the back half needs. One of the album's most replayable moments.</div></div>
+    </div>
+    <div class="track-item">
+      <div class="track-header">
+        <span class="track-num">09</span>
+        <span class="track-name">5% TINT</span>
+        <div class="track-right">
+          <div class="track-score-bar"><div class="track-score-fill" data-score="8.6"></div></div>
+          <span class="track-score-num">8.6</span>
+          <span class="track-expand-icon">▼</span>
+        </div>
+      </div>
+      <div class="track-body"><div class="track-body-inner">Travis alone, a beat that rolls rather than hits. A palette cleanser that knows it's a palette cleanser. Does what it needs to do and doesn't try to do more.</div></div>
+    </div>
+    <div class="track-item">
+      <div class="track-header">
+        <span class="track-num">10</span>
+        <span class="track-name">NC-17 (feat. 21 Savage)</span>
+        <div class="track-right">
+          <div class="track-score-bar"><div class="track-score-fill" data-score="9.2"></div></div>
+          <span class="track-score-num">9.2</span>
+          <span class="track-expand-icon">▼</span>
+        </div>
+      </div>
+      <div class="track-body"><div class="track-body-inner">21 Savage arrives and the album briefly becomes a different record - harder, colder, more stripped. His verse is one of the better guest turns here. The production underneath is some of the most interesting on the album.</div></div>
+    </div>
+    <div class="track-item">
+      <div class="track-header">
+        <span class="track-num">11</span>
+        <span class="track-name">ASTROTHUNDER</span>
+        <div class="track-right">
+          <div class="track-score-bar"><div class="track-score-fill" data-score="8.8"></div></div>
+          <span class="track-score-num">8.8</span>
+          <span class="track-expand-icon">▼</span>
+        </div>
+      </div>
+      <div class="track-body"><div class="track-body-inner">Beautiful and too short. The album catching its breath after NC-17. The synths here are doing something genuinely cinematic. At two minutes it feels like a sketch of something that should have been developed further.</div></div>
+    </div>
+    <div class="track-item">
+      <div class="track-header">
+        <span class="track-num">12</span>
+        <span class="track-name">YOSEMITE (feat. NAV, Gunna)</span>
+        <div class="track-right">
+          <div class="track-score-bar"><div class="track-score-fill" data-score="8.3"></div></div>
+          <span class="track-score-num">8.3</span>
+          <span class="track-expand-icon">▼</span>
+        </div>
+      </div>
+      <div class="track-body"><div class="track-body-inner">Where the album's momentum starts leaking. NAV and Gunna both do their thing but their thing isn't what this moment needs. The beat is fine. The track is the album's low point not because it's bad but because of what surrounds it.</div></div>
+    </div>
+    <div class="track-item">
+      <div class="track-header">
+        <span class="track-num">13</span>
+        <span class="track-name">CAN'T SAY</span>
+        <div class="track-right">
+          <div class="track-score-bar"><div class="track-score-fill" data-score="8.5"></div></div>
+          <span class="track-score-num">8.5</span>
+          <span class="track-expand-icon">▼</span>
+        </div>
+      </div>
+      <div class="track-body"><div class="track-body-inner">Travis finding a pocket and staying in it. Nothing extraordinary but nothing wasted. A track that would sit comfortably in the middle of the album and is slightly out of place near the end.</div></div>
+    </div>
+    <div class="track-item">
+      <div class="track-header">
+        <span class="track-num">14</span>
+        <span class="track-name">WHO? WHAT!</span>
+        <div class="track-right">
+          <div class="track-score-bar"><div class="track-score-fill" data-score="7.9"></div></div>
+          <span class="track-score-num">7.9</span>
+          <span class="track-expand-icon">▼</span>
+        </div>
+      </div>
+      <div class="track-body"><div class="track-body-inner">The album's weakest point. Pharrell and Quavo both appear but the track never finds a reason for them to be there. It exists between ASTROTHUNDER and COFFEE BEAN and earns nothing from the company it keeps.</div></div>
+    </div>
+    <div class="track-item">
+      <div class="track-header">
+        <span class="track-num">15</span>
+        <span class="track-name">COFFEE BEAN</span>
+        <div class="track-right">
+          <div class="track-score-bar"><div class="track-score-fill" data-score="9.3"></div></div>
+          <span class="track-score-num">9.3</span>
+          <span class="track-expand-icon">▼</span>
+        </div>
+      </div>
+      <div class="track-body"><div class="track-body-inner">The right way to end. Travis alone, a piano, something genuinely vulnerable beneath the bravado. The album landing softly after everything it put through the speakers. If the closer were a 7 this would be an 8.8 album. It isn't.</div></div>
+    </div>
+    </div>
+  </div>
+</section>
+
+<section class="chart-section">
+  <div class="chart-inner">
+    <div class="section-label reveal">Score Breakdown</div>
+    <div class="section-title reveal">Every Track, <em>Ranked</em></div>
+    <div class="chart-bars reveal" id="chartBars">
+    <div class="bar-row">
+      <div class="bar-label">CAROUSEL</div>
+      <div class="bar-track"><div class="bar-fill" data-score="9.8"></div></div>
+      <div class="bar-val">9.8</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">STOP TRYING TO BE GOD</div>
+      <div class="bar-track"><div class="bar-fill" data-score="9.6"></div></div>
+      <div class="bar-val">9.6</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">SICKO MODE</div>
+      <div class="bar-track"><div class="bar-fill" data-score="9.4"></div></div>
+      <div class="bar-val">9.4</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">COFFEE BEAN</div>
+      <div class="bar-track"><div class="bar-fill" data-score="9.3"></div></div>
+      <div class="bar-val">9.3</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">NC-17</div>
+      <div class="bar-track"><div class="bar-fill" data-score="9.2"></div></div>
+      <div class="bar-val">9.2</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">WAKE UP</div>
+      <div class="bar-track"><div class="bar-fill" data-score="9.1"></div></div>
+      <div class="bar-val">9.1</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">STARGAZING</div>
+      <div class="bar-track"><div class="bar-fill" data-score="9.0"></div></div>
+      <div class="bar-val">9.0</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">NO BYSTANDERS</div>
+      <div class="bar-track"><div class="bar-fill" data-score="8.9"></div></div>
+      <div class="bar-val">8.9</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">R.I.P. SCREW</div>
+      <div class="bar-track"><div class="bar-fill" data-score="8.8"></div></div>
+      <div class="bar-val">8.8</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">ASTROTHUNDER</div>
+      <div class="bar-track"><div class="bar-fill" data-score="8.8"></div></div>
+      <div class="bar-val">8.8</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">SKELETONS</div>
+      <div class="bar-track"><div class="bar-fill" data-score="8.7"></div></div>
+      <div class="bar-val">8.7</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">5% TINT</div>
+      <div class="bar-track"><div class="bar-fill" data-score="8.6"></div></div>
+      <div class="bar-val">8.6</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">CAN'T SAY</div>
+      <div class="bar-track"><div class="bar-fill" data-score="8.5"></div></div>
+      <div class="bar-val">8.5</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">YOSEMITE</div>
+      <div class="bar-track"><div class="bar-fill" data-score="8.3"></div></div>
+      <div class="bar-val">8.3</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">WHO? WHAT!</div>
+      <div class="bar-track"><div class="bar-fill" data-score="7.9"></div></div>
+      <div class="bar-val">7.9</div>
+    </div>
+    </div>
+  </div>
+</section>
+
+<div class="footnote-section">
+  <div class="section-label reveal" style="text-align:center;">Footnote</div>
+  <div class="footnote-text reveal">Astroworld was named after Six Flags AstroWorld, a Houston theme park that closed in 2005 when Travis Scott was 14 years old. The park sat empty for two years before being demolished. Travis has said it was a formative place for him growing up, and the album was his attempt to recreate the feeling of being inside it. The annual Astroworld Festival began in 2018 the same year the album dropped. The cover art by Cactus Jack features Travis's face as an entrance gate.</div>
+</div>
+
+<footer>
+  <div class="footer-sig reveal">Album Autopsy - A structured dissection of records that matter.</div>
+  <div class="divider"></div>
+  <a href="index.html" class="back-link reveal">← Back to All Autopsies</a>
+  <div class="footer-brand">@MyParentsDidntLeaveForThis</div>
+</footer>
+
+<script>
+  window.addEventListener('scroll', () => {
+    const p = (window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100;
+    document.getElementById('progress').style.width = p + '%';
+  });
+
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (!e.isIntersecting) return;
+      e.target.classList.add('visible');
+      if (e.target.id === 'scoreCounter') {
+        animateScore(0, 9.1, 1600);
+        document.getElementById('navScore').classList.add('visible');
+      }
+    });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+  if(document.getElementById('scoreCounter')) observer.observe(document.getElementById('scoreCounter'));
+
+  const tlObs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (!e.isIntersecting) return;
+      e.target.querySelectorAll('.track-score-fill').forEach((f,i) => {
+        setTimeout(() => { f.style.transform = `scaleX(${parseFloat(f.dataset.score)/10})`; }, i * 55);
+      });
+      tlObs.unobserve(e.target);
+    });
+  }, { threshold: 0.08 });
+  const tl = document.getElementById('trackList');
+  if(tl) tlObs.observe(tl);
+
+  const chObs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (!e.isIntersecting) return;
+      e.target.querySelectorAll('.bar-fill').forEach((f,i) => {
+        setTimeout(() => { const s = parseFloat(f.dataset.score); f.style.transform = `scaleX(${Math.max(0,(s-6)/4)})`; }, i * 70);
+      });
+      chObs.unobserve(e.target);
+    });
+  }, { threshold: 0.08 });
+  const cb = document.getElementById('chartBars');
+  if(cb) chObs.observe(cb);
+
+  function animateScore(from, to, duration) {
+    const el = document.getElementById('scoreCounter');
+    if(!el) return;
+    const start = performance.now();
+    (function tick(now) {
+      const p = Math.min((now - start) / duration, 1);
+      const ease = 1 - Math.pow(1 - p, 3);
+      const val = from + (to - from) * ease;
+      const int = Math.floor(val);
+      const dec = Math.round((val - int) * 10);
+      el.innerHTML = int + '<span>.' + dec + '</span>';
+      if(p < 1) requestAnimationFrame(tick);
+    })(start);
+  }
+
+  document.querySelectorAll('.track-item').forEach(item => {
+    item.querySelector('.track-header').addEventListener('click', () => {
+      const body = item.querySelector('.track-body');
+      const open = item.classList.toggle('open');
+      body.style.maxHeight = open ? body.scrollHeight + 'px' : '0';
+    });
+  });
+
+  document.querySelectorAll('.pill').forEach(pill => {
+    pill.addEventListener('click', () => {
+      document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+      pill.classList.add('active');
+    });
+  });
+</script>
+</body>
+</html>

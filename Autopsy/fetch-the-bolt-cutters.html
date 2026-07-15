@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Album Autopsy · Fetch the Bolt Cutters – Fiona Apple</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --accent: #7a9a5a;
+      --accent-light: #9aba7a;
+      --accent-dim: rgba(122,154,90,0.15);
+      --bg: #080c06;
+      --surface: #10160c;
+      --surface2: #182010;
+      --text: #eaf0e4;
+      --muted: #7a9a60;
+      --border: rgba(122,154,90,0.2);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; font-weight: 300; line-height: 1.7; }
+    .progress-bar { position: fixed; top: 0; left: 0; height: 3px; background: var(--accent); width: 0%; z-index: 1000; transition: width 0.1s linear; }
+    nav { position: fixed; top: 0; left: 0; right: 0; z-index: 999; display: flex; justify-content: space-between; align-items: center; padding: 1rem 2rem; background: rgba(8,12,6,0.85); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); }
+    .nav-back { color: var(--muted); text-decoration: none; font-size: 0.85rem; letter-spacing: 0.05em; transition: color 0.2s; }
+    .nav-back:hover { color: var(--accent-light); }
+    .nav-score { font-family: 'Bebas Neue', sans-serif; font-size: 1.4rem; color: var(--accent); letter-spacing: 0.08em; }
+    .hero { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; padding: 8rem 2rem 4rem; max-width: 900px; margin: 0 auto; }
+    .autopsy-label { font-size: 0.75rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); margin-bottom: 1.5rem; }
+    .hero-artist { font-family: 'Bebas Neue', sans-serif; font-size: clamp(3rem,10vw,7rem); line-height: 0.9; color: var(--accent-light); letter-spacing: 0.03em; }
+    .hero-album { font-family: 'Playfair Display', serif; font-size: clamp(2rem,6vw,4.5rem); font-style: italic; color: var(--text); margin-top: 0.3rem; }
+    .hero-meta { margin-top: 1.5rem; color: var(--muted); font-size: 0.85rem; letter-spacing: 0.12em; text-transform: uppercase; }
+    .verdict-bar { background: var(--accent); color: #fff; padding: 1.2rem 2rem; font-family: 'Bebas Neue', sans-serif; font-size: clamp(1.1rem,3vw,1.6rem); letter-spacing: 0.12em; text-align: center; }
+    .score-section { max-width: 900px; margin: 5rem auto; padding: 0 2rem; display: grid; grid-template-columns: auto 1fr; gap: 3rem; align-items: start; }
+    .score-number { font-family: 'Bebas Neue', sans-serif; font-size: clamp(5rem,15vw,10rem); line-height: 1; color: var(--accent); }
+    .score-number span { font-size: 0.5em; color: var(--muted); }
+    .score-verdict { font-family: 'Playfair Display', serif; font-size: 1.3rem; color: var(--text); margin-bottom: 1rem; }
+    .score-defense { color: var(--muted); font-size: 0.95rem; line-height: 1.8; }
+    .themes-section { max-width: 900px; margin: 4rem auto; padding: 0 2rem; }
+    .section-label { font-size: 0.7rem; letter-spacing: 0.25em; text-transform: uppercase; color: var(--muted); margin-bottom: 2rem; border-bottom: 1px solid var(--border); padding-bottom: 0.75rem; }
+    .themes-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px,1fr)); gap: 1.5rem; }
+    .theme-card { background: var(--surface); border: 1px solid var(--border); border-top: 3px solid var(--accent); padding: 1.5rem; opacity: 0; transform: translateY(20px); transition: opacity 0.5s, transform 0.5s; }
+    .theme-card.visible { opacity: 1; transform: none; }
+    .theme-icon { font-size: 1.5rem; margin-bottom: 0.75rem; }
+    .theme-title { font-family: 'Playfair Display', serif; font-size: 1rem; color: var(--text); margin-bottom: 0.5rem; }
+    .theme-body { font-size: 0.85rem; color: var(--muted); line-height: 1.7; }
+    .quote-section { background: var(--surface); border-left: 4px solid var(--accent); margin: 4rem 0; padding: 3rem 2rem; text-align: center; }
+    .quote-text { font-family: 'Playfair Display', serif; font-size: clamp(1.2rem,3vw,1.8rem); font-style: italic; color: var(--text); max-width: 700px; margin: 0 auto 1rem; }
+    .quote-attr { font-size: 0.8rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); }
+    .egg-section { max-width: 900px; margin: 4rem auto; padding: 0 2rem; }
+    .egg-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px,1fr)); gap: 1.5rem; }
+    .egg-card { background: var(--surface); border: 1px solid var(--border); padding: 1.5rem; position: relative; overflow: hidden; opacity: 0; transform: translateY(20px); transition: opacity 0.5s, transform 0.5s; }
+    .egg-card.visible { opacity: 1; transform: none; }
+    .egg-card::before { content: '🥚'; position: absolute; top: 0.75rem; right: 1rem; font-size: 1.2rem; opacity: 0.4; }
+    .egg-label { font-size: 0.7rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent-light); margin-bottom: 0.5rem; }
+    .egg-title { font-family: 'Playfair Display', serif; font-size: 1rem; color: var(--text); margin-bottom: 0.5rem; }
+    .egg-body { font-size: 0.85rem; color: var(--muted); line-height: 1.7; }
+    .tracks-section { max-width: 900px; margin: 4rem auto; padding: 0 2rem; }
+    .track-item { border-bottom: 1px solid var(--border); }
+    .track-header { display: flex; justify-content: space-between; align-items: center; padding: 1.2rem 0; cursor: pointer; gap: 1rem; }
+    .track-header:hover .track-name { color: var(--accent-light); }
+    .track-name { font-family: 'Playfair Display', serif; font-size: 1rem; color: var(--text); transition: color 0.2s; }
+    .track-score-badge { font-family: 'Bebas Neue', sans-serif; font-size: 1.1rem; color: var(--accent); letter-spacing: 0.05em; flex-shrink: 0; }
+    .track-body { max-height: 0; overflow: hidden; transition: max-height 0.4s ease; }
+    .track-body-inner { padding: 0 0 1.2rem; font-size: 0.9rem; color: var(--muted); line-height: 1.8; }
+    .track-item.open .track-body { max-height: 300px; }
+    .chart-section { max-width: 900px; margin: 4rem auto; padding: 0 2rem; }
+    .chart-bars { display: flex; flex-direction: column; gap: 1rem; }
+    .bar-row { display: grid; grid-template-columns: 180px 1fr 3rem; align-items: center; gap: 1rem; }
+    .bar-label { font-size: 0.8rem; color: var(--muted); text-align: right; }
+    .bar-track { height: 8px; background: var(--surface2); border-radius: 4px; overflow: hidden; }
+    .bar-fill { height: 100%; background: var(--accent); border-radius: 4px; transform-origin: left; transform: scaleX(0); transition: transform 1s cubic-bezier(0.4,0,0.2,1); }
+    .bar-val { font-family: 'Bebas Neue', sans-serif; font-size: 0.95rem; color: var(--accent); }
+    .footnote-section { max-width: 900px; margin: 4rem auto; padding: 2rem; background: var(--surface); border: 1px solid var(--border); font-size: 0.85rem; color: var(--muted); line-height: 1.8; font-style: italic; }
+    footer { text-align: center; padding: 3rem 2rem; border-top: 1px solid var(--border); margin-top: 4rem; }
+    .back-link { color: var(--muted); text-decoration: none; font-size: 0.85rem; letter-spacing: 0.1em; transition: color 0.2s; }
+    .back-link:hover { color: var(--accent-light); }
+  </style>
+</head>
+<body>
+<div class="progress-bar" id="progress"></div>
+<nav>
+  <a href="index.html" class="nav-back">← All Autopsies</a>
+  <div class="nav-score" id="navScore">9.7 / 10</div>
+</nav>
+<section class="hero">
+  <div class="autopsy-label">Album Autopsy · 060</div>
+  <div class="hero-artist">Fiona Apple</div>
+  <div class="hero-album">Fetch the Bolt Cutters</div>
+  <div class="hero-meta">Epic Records · 2020 · Art Rock / Chamber Pop</div>
+</section>
+<div class="verdict-bar">Eight years of silence. Then she made the most formally radical thing of her career in her house, with her dogs, during a pandemic she didn't know was coming</div>
+<section class="score-section">
+  <div class="score-number" id="scoreCounter">0<span>.0</span></div>
+  <div>
+    <div class="score-verdict">The first Pitchfork 10.0 in over two decades - not because it's perfect, but because nothing else sounds like it and nothing else says what it says.</div>
+    <div class="score-defense">Fetch the Bolt Cutters doesn't sound like anything before it and almost nothing after. Apple recorded it almost entirely at home over eight years, layering percussion from found objects, piano that deliberately fights its own resolution, and vocals that speak directly to specific women who wronged her or were wronged by the same men. The album's formal approach - rhythms that shift mid-phrase, melodies that refuse to settle - mirrors its subject: the refusal to be disciplined into silence. "Shameika" is about a girl who told Apple she had potential in middle school and who Apple tracked down to confirm it happened. "Newspaper" is addressed to a woman who slept with her abusive ex. The anger is specific and the specificity is the point - this is not a record about abstract injustice but about named, located, remembered instances of it. The dogs are audible on the recording. This was also intentional.</div>
+  </div>
+</section>
+<div class="themes-section">
+  <div class="section-label">Recurring Themes</div>
+  <div class="themes-grid">
+    <div class="theme-card">
+      <div class="theme-icon">✂️</div>
+      <div class="theme-title">Breaking Institutional Silence</div>
+      <div class="theme-body">The title comes from a line in a TV show: someone tells a character to fetch the bolt cutters and free themselves. The album is exactly that - every track is some version of cutting through a lock someone else put there. The locks are abusers, systems, social norms that demand women stay quiet.</div>
+    </div>
+    <div class="theme-card">
+      <div class="theme-icon">😤</div>
+      <div class="theme-title">Anger as Clarity</div>
+      <div class="theme-body">Most albums about rage are performing rage. Apple's anger is diagnostic. She identifies the problem, names it, and refuses to move on without naming it. The album doesn't cathart - it accumulates. By the end, the clarity is so dense it's almost physical.</div>
+    </div>
+    <div class="theme-card">
+      <div class="theme-icon">👭</div>
+      <div class="theme-title">Female Solidarity Against the Same Men</div>
+      <div class="theme-body">"Newspaper" addresses a woman who had a relationship with Apple's abusive ex. The target isn't the woman - it's the structure that pits them against each other. The album repeatedly argues that women who've been harmed by the same people are natural allies, and that refusing this solidarity is exactly what abusers count on.</div>
+    </div>
+    <div class="theme-card">
+      <div class="theme-icon">🐕</div>
+      <div class="theme-title">The Body as Political Site</div>
+      <div class="theme-body">Apple's voice on FTBC is untreated, unbeautified - cracks, breaths, physical effort all audible. The choice is ideological: the female body making noise exactly as it is, without apology or curation, is itself a political act in a genre and an industry that typically demands both.</div>
+    </div>
+  </div>
+</div>
+<section class="quote-section">
+  <div class="quote-text">"I've grown so used to being careful with my feet / I can't walk without watching / I've grown so used to being under siege / I can't drop my guard and stop watching."</div>
+  <div class="quote-attr">Relay</div>
+</section>
+<section class="egg-section">
+  <div class="section-label">Easter Eggs &amp; Annotations</div>
+  <div class="egg-grid">
+    <div class="egg-card">
+      <div class="egg-label">The Confirmation</div>
+      <div class="egg-title">Shameika Was Real</div>
+      <div class="egg-body">After the album's release, Shameika Stepney - the girl from Apple's middle school who told her she had potential - was found and confirmed the story. She had no idea a Grammy-winning musician had been carrying her words for decades. Apple sent her a gift. The documentation of an unwitnessed kindness across thirty years is one of the stranger and more beautiful things a pop album has ever done.</div>
+    </div>
+    <div class="egg-card">
+      <div class="egg-label">The Score</div>
+      <div class="egg-title">Pitchfork's First 10.0 Since 2002</div>
+      <div class="egg-body">Fetch the Bolt Cutters received a 10.0 from Pitchfork - the publication's first perfect score in eighteen years, since Radiohead's Kid A. The score became a cultural event in itself. Apple reportedly found the entire situation - the album, the pandemic release, the score - quite funny and said she'd been gardening when it dropped.</div>
+    </div>
+    <div class="egg-card">
+      <div class="egg-label">The Recording</div>
+      <div class="egg-title">Dogs on the Record</div>
+      <div class="egg-body">Apple's dogs are audible at multiple points across the album - barking, moving around, existing in the room. This was not an oversight. She chose to keep them in the final mix as a record of the actual conditions under which the album was made. The home is not hidden; it's documented. The distinction between studio and life is refused.</div>
+    </div>
+    <div class="egg-card">
+      <div class="egg-label">The Percussion</div>
+      <div class="egg-title">Everything Is the Drum</div>
+      <div class="egg-body">The percussion on FTBC was sourced from every surface in Apple's home - floors, walls, furniture, objects. The resulting rhythmic texture is unlike anything in standard studio recording. The polyrhythms in tracks like "Relay" and "For Her" create a propulsive complexity that sounds simultaneously improvised and precisely controlled.</div>
+    </div>
+  </div>
+</section>
+<section class="tracks-section">
+  <div class="section-label">Track-by-Track</div>
+  <div class="track-item">
+    <div class="track-header"><div class="track-name">Fetch the Bolt Cutters</div><div class="track-score-badge" data-score="9.9">9.9</div></div>
+    <div class="track-body"><div class="track-body-inner">The title track is the album's thesis: the command to free yourself is addressed simultaneously to the listener, to Apple herself, and to every woman who has been locked inside something by someone else's hand. The percussion is chaotic and controlled. The vocals stack until they become a crowd. The song ends before it resolves because the point is the action, not the resolution. "Fetch the bolt cutters / I've been in here too long."</div></div>
+  </div>
+  <div class="track-item">
+    <div class="track-header"><div class="track-name">Shameika</div><div class="track-score-badge" data-score="9.8">9.8</div></div>
+    <div class="track-body"><div class="track-body-inner">The most formally unusual track on the album: the chorus is just the word "Shameika said I had potential" repeated, stacked in rounds, building into something choral and enormous. The simplicity is the depth. One girl's casual encouragement, carried by Apple for thirty years, turned into a musical monument. It sounds like it took thirty years to build because it did.</div></div>
+  </div>
+  <div class="track-item">
+    <div class="track-header"><div class="track-name">Under the Table</div><div class="track-score-badge" data-score="9.7">9.7</div></div>
+    <div class="track-body"><div class="track-body-inner">The opener and the mission statement. Apple refuses to be quiet at the dinner party - literally, in the song's scenario; metaphorically, throughout the album. "Kick me under the table all you want / I won't shut up." The piano line is combative. The vocal is a dare. From the first thirty seconds, the album has told you exactly what it's going to do to you.</div></div>
+  </div>
+  <div class="track-item">
+    <div class="track-header"><div class="track-name">Newspaper</div><div class="track-score-badge" data-score="9.5">9.5</div></div>
+    <div class="track-body"><div class="track-body-inner">The album's most complex emotional situation: Apple addresses the woman who came after her in a relationship with an abusive man. The impulse to blame the woman is named and then refused. The album argues that the structure - not the woman - is the enemy. The production around this argument is some of the album's most jagged. The discomfort is formal, not incidental.</div></div>
+  </div>
+  <div class="track-item">
+    <div class="track-header"><div class="track-name">Relay</div><div class="track-score-badge" data-score="9.4">9.4</div></div>
+    <div class="track-body"><div class="track-body-inner">"Evil is a relay sport / When the one who's burned / Turns to pass the torch." The album's most economical moral argument. The hypervigilance that abuse produces - the inability to stop watching for the next threat - is named with clinical precision and then set to a groove that makes it feel like something that could be put down. Could be. The groove is the aspiration.</div></div>
+  </div>
+</section>
+<section class="chart-section">
+  <div class="section-label">Score Chart</div>
+  <div class="chart-bars">
+    <div class="bar-row"><div class="bar-label">Fetch the Bolt Cutters</div><div class="bar-track"><div class="bar-fill" data-score="9.9"></div></div><div class="bar-val">9.9</div></div>
+    <div class="bar-row"><div class="bar-label">Shameika</div><div class="bar-track"><div class="bar-fill" data-score="9.8"></div></div><div class="bar-val">9.8</div></div>
+    <div class="bar-row"><div class="bar-label">Under the Table</div><div class="bar-track"><div class="bar-fill" data-score="9.7"></div></div><div class="bar-val">9.7</div></div>
+    <div class="bar-row"><div class="bar-label">Newspaper</div><div class="bar-track"><div class="bar-fill" data-score="9.5"></div></div><div class="bar-val">9.5</div></div>
+    <div class="bar-row"><div class="bar-label">Relay</div><div class="bar-track"><div class="bar-fill" data-score="9.4"></div></div><div class="bar-val">9.4</div></div>
+    <div class="bar-row"><div class="bar-label">For Her</div><div class="bar-track"><div class="bar-fill" data-score="9.2"></div></div><div class="bar-val">9.2</div></div>
+    <div class="bar-row"><div class="bar-label">Rack of His</div><div class="bar-track"><div class="bar-fill" data-score="9.0"></div></div><div class="bar-val">9.0</div></div>
+    <div class="bar-row"><div class="bar-label">On I Go</div><div class="bar-track"><div class="bar-fill" data-score="8.8"></div></div><div class="bar-val">8.8</div></div>
+  </div>
+</section>
+<div class="footnote-section">
+  Fetch the Bolt Cutters is the record that proves what Apple has always argued: that formal experimentation and emotional directness are not in opposition. The most radical thing about the album is not the percussion or the vocal stacking or the home recording - it's that it refuses to be aestheticized into something comfortable. It is made from anger and clarity and the eight years it took to figure out how to say it, and it sounds exactly like that. Nothing about it is decorative. Everything about it is true.
+</div>
+<footer><a href="index.html" class="back-link">← Back to All Autopsies</a></footer>
+<script>
+  window.addEventListener('scroll', () => {
+    const d = document.documentElement;
+    document.getElementById('progress').style.width = (d.scrollTop / (d.scrollHeight - d.clientHeight)) * 100 + '%';
+  });
+  function animateScore(from, to, duration) {
+    const el = document.getElementById('scoreCounter');
+    const start = performance.now();
+    function step(now) {
+      const t = Math.min((now - start) / duration, 1);
+      const ease = 1 - Math.pow(1 - t, 3);
+      const val = from + (to - from) * ease;
+      el.innerHTML = Math.floor(val) + '<span>.' + Math.round((val - Math.floor(val)) * 10) + '</span>';
+      if (t < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (!e.isIntersecting) return;
+      const el = e.target;
+      if (el.id === 'scoreCounter') { animateScore(0, 9.7, 1600); io.unobserve(el); }
+      if (el.classList.contains('theme-card') || el.classList.contains('egg-card')) { el.classList.add('visible'); io.unobserve(el); }
+      if (el.classList.contains('bar-fill')) { el.style.transform = 'scaleX(' + Math.max(0, (parseFloat(el.dataset.score) - 6) / 4) + ')'; io.unobserve(el); }
+    });
+  }, { threshold: 0.15 });
+  io.observe(document.getElementById('scoreCounter'));
+  document.querySelectorAll('.theme-card, .egg-card, .bar-fill').forEach(el => io.observe(el));
+  document.querySelectorAll('.track-header').forEach(h => h.addEventListener('click', () => h.closest('.track-item').classList.toggle('open')));
+</script>
+</body>
+</html>

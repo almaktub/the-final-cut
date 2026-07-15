@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sometimes I Might Be Introvert - Album Autopsy</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #080809;
+    --bg2: #0e0e10;
+    --bg3: #131315;
+    --accent: #b07d2e;
+    --gold: #c9a84c;
+    --text: #eae6de;
+    --muted: #6e6a64;
+    --border: rgba(255,255,255,0.055);
+    --font-display: 'Bebas Neue', sans-serif;
+    --font-serif: 'Playfair Display', serif;
+    --font-body: 'DM Sans', sans-serif;
+  }
+  html { scroll-behavior: smooth; }
+  body { background: var(--bg); color: var(--text); font-family: var(--font-body); font-weight: 300; line-height: 1.7; overflow-x: hidden; }
+  body::before { content:''; position:fixed; inset:0; background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E"); pointer-events:none; z-index:9999; opacity:0.45; }
+  .progress-bar { position:fixed; top:0; left:0; height:2px; background:var(--accent); z-index:200; width:0%; transition: width 0.1s linear; }
+  nav { position:fixed; top:0; left:0; right:0; padding:1.1rem 2.5rem; display:flex; justify-content:space-between; align-items:center; z-index:100; background:linear-gradient(to bottom, rgba(8,8,9,0.92), transparent); }
+  .nav-back { font-family:var(--font-display); letter-spacing:0.25em; font-size:0.7rem; color:var(--muted); text-decoration:none; transition:color 0.2s; }
+  .nav-back:hover { color:var(--accent); }
+  .nav-score { font-family:var(--font-display); font-size:1.1rem; color:var(--accent); opacity:0; transition:opacity 0.4s; }
+  .nav-score.visible { opacity:1; }
+  .hero { min-height:100vh; display:flex; flex-direction:column; justify-content:center; align-items:center; position:relative; overflow:hidden; padding:4rem 2rem; text-align:center; }
+  .hero-bg { position:absolute; inset:0; background: radial-gradient(ellipse 80% 55% at 50% 45%, #b07d2e18 0%, transparent 68%), radial-gradient(ellipse 35% 35% at 15% 75%, #b07d2e09 0%, transparent 60%), var(--bg); z-index:0; }
+  .hero-lines { position:absolute; inset:0; background-image:repeating-linear-gradient(0deg, transparent, transparent 78px, rgba(255,255,255,0.011) 78px, rgba(255,255,255,0.011) 79px); z-index:0; }
+  .hero-content { position:relative; z-index:1; }
+  .autopsy-label { font-family:var(--font-display); letter-spacing:0.4em; font-size:0.72rem; color:var(--accent); text-transform:uppercase; margin-bottom:1.8rem; opacity:0; animation:fadeUp 0.8s ease 0.2s forwards; }
+  .hero-artist { font-family:var(--font-display); font-size:clamp(4rem,16vw,14rem); line-height:0.88; letter-spacing:-0.02em; color:var(--text); opacity:0; animation:fadeUp 0.8s ease 0.4s forwards; }
+  .hero-album { font-family:var(--font-serif); font-style:italic; font-size:clamp(1.2rem,4vw,3rem); color:var(--gold); margin-top:0.6rem; opacity:0; animation:fadeUp 0.8s ease 0.6s forwards; line-height:1.25; max-width:800px; }
+  .hero-meta { font-family:var(--font-display); letter-spacing:0.3em; font-size:0.85rem; color:var(--muted); margin-top:1.5rem; opacity:0; animation:fadeUp 0.8s ease 0.8s forwards; }
+  .hero-rule { width:1px; height:70px; background:linear-gradient(to bottom, var(--accent), transparent); margin:3rem auto 0; opacity:0; animation:fadeUp 0.8s ease 1s forwards; }
+  .scroll-hint { font-size:0.68rem; letter-spacing:0.35em; color:var(--muted); text-transform:uppercase; margin-top:0.8rem; opacity:0; animation:fadeUp 0.8s ease 1.2s forwards; }
+  .verdict-bar { background:var(--accent); padding:1.1rem 2rem; text-align:center; font-family:var(--font-body); font-size:0.92rem; color:rgba(255,255,255,0.9); font-weight:500; line-height:1.5; }
+  .score-section { background:var(--bg2); border-top:1px solid var(--border); border-bottom:1px solid var(--border); }
+  .score-inner { max-width:920px; margin:0 auto; padding:6rem 2rem; display:grid; grid-template-columns:1fr 1.5fr; gap:5rem; align-items:center; }
+  @media(max-width:640px){.score-inner{grid-template-columns:1fr;gap:2.5rem;}}
+  .score-display { text-align:center; }
+  .score-number { font-family:var(--font-display); font-size:clamp(5.5rem,16vw,11rem); line-height:1; color:var(--text); }
+  .score-number span { color:var(--accent); }
+  .score-label { font-family:var(--font-display); letter-spacing:0.35em; font-size:0.75rem; color:var(--muted); margin-top:0.4rem; }
+  .score-verdict { font-family:var(--font-serif); font-style:italic; font-size:1.3rem; line-height:1.55; margin-bottom:1.5rem; color:var(--text); }
+  .score-defense { font-size:0.88rem; color:var(--muted); line-height:1.85; }
+  .section { max-width:920px; margin:0 auto; padding:6rem 2rem; }
+  .section-label { font-family:var(--font-display); letter-spacing:0.4em; font-size:0.68rem; color:var(--accent); text-transform:uppercase; margin-bottom:1.4rem; }
+  .section-title { font-family:var(--font-serif); font-size:clamp(1.8rem,4.5vw,3.2rem); font-weight:900; line-height:1.1; margin-bottom:2.5rem; }
+  .section-title em { font-style:italic; color:var(--gold); }
+  .pill { padding:0.35rem 0.9rem; border:1px solid var(--border); border-radius:2px; font-size:0.7rem; letter-spacing:0.15em; text-transform:uppercase; font-family:var(--font-display); color:var(--text); background:transparent; transition:all 0.2s; cursor:default; }
+  .pill:hover, .pill.active { border-color:var(--accent); color:var(--accent); background:#b07d2e14; }
+  .theme-pills { display:flex; flex-wrap:wrap; gap:0.45rem; margin:0 0 3rem; }
+  .themes-section { background:var(--bg2); border-top:1px solid var(--border); }
+  .themes-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:1.5px; background:var(--border); border:1px solid var(--border); margin-top:0; }
+  .theme-card { background:var(--bg2); padding:2.2rem 1.8rem; transition:background 0.2s; cursor:default; position:relative; overflow:hidden; }
+  .theme-card::before { content:''; position:absolute; top:0; left:0; width:3px; height:0; background:var(--accent); transition:height 0.3s; }
+  .theme-card:hover::before { height:100%; }
+  .theme-card:hover { background:var(--bg3); }
+  .theme-card-icon { font-size:1.8rem; margin-bottom:0.9rem; display:block; }
+  .theme-card-title { font-family:var(--font-serif); font-size:1rem; font-weight:700; margin-bottom:0.6rem; }
+  .theme-card-text { font-size:0.82rem; color:var(--muted); line-height:1.75; }
+  .quote-section { padding:7rem 2rem; text-align:center; position:relative; overflow:hidden; }
+  .quote-bg { position:absolute; inset:0; background:radial-gradient(ellipse 55% 55% at 50% 50%, #b07d2e0a 0%, transparent 70%); }
+  .quote-mark { font-family:var(--font-serif); font-size:7rem; line-height:0; vertical-align:-1.8rem; color:#b07d2e25; margin-right:0.05em; }
+  .quote-text { font-family:var(--font-serif); font-style:italic; font-size:clamp(1.4rem,3.5vw,2.5rem); line-height:1.35; max-width:680px; margin:0 auto; position:relative; z-index:1; }
+  .quote-attr { margin-top:2rem; font-size:0.72rem; letter-spacing:0.3em; text-transform:uppercase; color:var(--muted); font-family:var(--font-display); position:relative; z-index:1; }
+  .tracks-section { background:var(--bg); border-top:1px solid var(--border); }
+  .tracks-inner { max-width:920px; margin:0 auto; padding:6rem 2rem; }
+  .track-item { border-bottom:1px solid var(--border); overflow:hidden; cursor:pointer; transition:background 0.15s; }
+  .track-item:first-of-type { border-top:1px solid var(--border); }
+  .track-item:hover { background:rgba(255,255,255,0.018); }
+  .track-header { display:grid; grid-template-columns:3rem 1fr auto; align-items:center; gap:1.2rem; padding:1.1rem 0; }
+  .track-num { font-family:var(--font-display); font-size:0.75rem; color:var(--muted); letter-spacing:0.1em; }
+  .track-name { font-family:var(--font-serif); font-size:1rem; font-weight:700; }
+  .track-right { display:flex; align-items:center; gap:1.2rem; }
+  .track-score-bar { width:70px; height:3px; background:rgba(255,255,255,0.08); border-radius:2px; overflow:hidden; }
+  .track-score-fill { height:100%; background:var(--accent); transform-origin:left; transform:scaleX(0); transition:transform 0.8s ease; border-radius:2px; }
+  .track-score-num { font-family:var(--font-display); font-size:0.95rem; color:var(--muted); min-width:2.2rem; text-align:right; }
+  .track-expand-icon { font-size:0.55rem; color:var(--muted); transition:transform 0.3s; }
+  .track-item.open .track-expand-icon { transform:rotate(180deg); }
+  .track-body { max-height:0; overflow:hidden; transition:max-height 0.38s ease; }
+  .track-body-inner { padding:0 0 1.4rem 0; margin-left:4.2rem; color:var(--muted); font-size:0.87rem; line-height:1.8; border-left:2px solid var(--accent); padding-left:1.4rem; }
+  .chart-section { background:var(--bg3); border-top:1px solid var(--border); border-bottom:1px solid var(--border); }
+  .chart-inner { max-width:920px; margin:0 auto; padding:6rem 2rem; }
+  .chart-bars { display:flex; flex-direction:column; gap:0.85rem; margin-top:3rem; }
+  .bar-row { display:grid; grid-template-columns:170px 1fr 2.8rem; align-items:center; gap:1rem; }
+  @media(max-width:500px){.bar-row{grid-template-columns:90px 1fr 2.5rem;}}
+  .bar-label { font-size:0.78rem; color:var(--muted); text-align:right; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .bar-track { height:5px; background:rgba(255,255,255,0.055); border-radius:3px; overflow:hidden; }
+  .bar-fill { height:100%; background:linear-gradient(90deg, var(--accent), var(--gold)); transform-origin:left; transform:scaleX(0); transition:transform 0.85s ease; border-radius:3px; }
+  .bar-val { font-family:var(--font-display); font-size:0.88rem; color:var(--text); }
+  .footnote-section { padding:5rem 2rem; text-align:center; border-top:1px solid var(--border); background:var(--bg2); }
+  .footnote-text { font-family:var(--font-serif); font-style:italic; font-size:1rem; color:var(--muted); line-height:1.85; max-width:640px; margin:0 auto; }
+  footer { padding:3.5rem 2rem; text-align:center; border-top:1px solid var(--border); }
+  .footer-sig { font-family:var(--font-serif); font-style:italic; font-size:0.88rem; color:var(--muted); }
+  .footer-brand { font-family:var(--font-display); letter-spacing:0.4em; font-size:0.68rem; color:rgba(255,255,255,0.12); margin-top:1.8rem; }
+  .divider { width:36px; height:1px; background:var(--accent); margin:1.8rem auto; }
+  .back-link { display:inline-block; margin-top:2rem; font-family:var(--font-display); letter-spacing:0.25em; font-size:0.72rem; color:var(--accent); text-decoration:none; border:1px solid var(--accent); padding:0.6rem 1.4rem; transition:all 0.2s; }
+  .back-link:hover { background:var(--accent); color:#fff; }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(28px)} to{opacity:1;transform:translateY(0)} }
+  .reveal { opacity:0; transform:translateY(38px); transition:opacity 0.7s ease, transform 0.7s ease; }
+  .reveal.visible { opacity:1; transform:translateY(0); }
+</style>
+</head>
+<body>
+<div class="progress-bar" id="progress"></div>
+<nav>
+  <a href="index.html" class="nav-back">← All Autopsies</a>
+  <div class="nav-score" id="navScore">9.6 / 10</div>
+</nav>
+
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-lines"></div>
+  <div class="hero-content">
+    <div class="autopsy-label">Album Autopsy · 036</div>
+    <div class="hero-artist">Little Simz</div>
+    <div class="hero-album">Sometimes I Might Be Introvert</div>
+    <div class="hero-meta">Age 101 Music · 2021</div>
+    <div class="hero-rule"></div>
+    <div class="scroll-hint">Scroll to dissect</div>
+  </div>
+</section>
+
+<div class="verdict-bar">Inflo built an orchestra. Little Simz put it in a headlock.</div>
+
+<section class="score-section">
+  <div class="score-inner">
+    <div class="score-display reveal">
+      <div class="score-number" id="scoreCounter">0<span>.0</span></div>
+      <div class="score-label">Overall Score</div>
+    </div>
+    <div class="reveal">
+      <div class="score-verdict">"The most ambitious rap album in years that actually delivers on its ambition. Every track sounds like it cost something to make - not money, just the effort of someone who cares about the result."</div>
+      <div class="score-defense">9.6 because Introvert is one of the great album openers in recent memory: a full minute of orchestral strings before she even speaks, then the drums arrive and she announces herself without ambiguity. From there SIMBI doesn't waste a track. Woman with Cleo Sol is the most graceful detour the album takes - a celebration rather than a detour, actually, and Cleo Sol turns in a vocal that matches Simz note for note. I Love You, I Hate You is the most unguarded she has been on record: a track about her absent father that doesn't reach for redemption or closure, just honesty about what absence costs. Little Q is two connected tracks that together form the emotional center of the album - Simz writing about her brother with the precision most rappers reserve for their own stories. The 0.4 missing: at 19 tracks the album occasionally works against its own intimacy. A handful of tracks in the middle are good without being necessary. The best moments here are exceptional enough that the slight middle-third sag is visible against them.</div>
+    </div>
+  </div>
+</section>
+
+<div class="themes-section">
+  <div class="section">
+    <div class="section-label reveal">Central Thesis</div>
+    <div class="section-title reveal">What <em>This Album Is Really About</em></div>
+    <div class="theme-pills reveal"><span class="pill active">Self-definition as Practice</span><span class="pill">Family as Subject</span><span class="pill">The Introvert as Cultural Statement</span><span class="pill">Blackness and Femininity</span></div>
+    <div class="themes-grid reveal">
+    <div class="theme-card">
+      <span class="theme-card-icon">🏛️</span>
+      <div class="theme-card-title">Self-definition as Practice</div>
+      <div class="theme-card-text">The album's title is not a defense - it's an explanation. Little Simz is telling you who she is before you have a chance to decide for yourself. The orchestral grandeur of the production is the argument made sonic: an introvert who thinks on a very large scale, who processes privately and arrives publicly with a finished thing that leaves no room for doubt.</div>
+    </div>
+    <div class="theme-card">
+      <span class="theme-card-icon">👨‍👩‍👧</span>
+      <div class="theme-card-title">Family as Subject</div>
+      <div class="theme-card-text">Little Q (Parts 1 and 2) and I Love You, I Hate You are the album's emotional core. Her brother's incarceration, her father's absence - both addressed with a specificity that makes the writing feel like testimony rather than art. The fact that it is both is what separates SIMBI from most records in its category.</div>
+    </div>
+    <div class="theme-card">
+      <span class="theme-card-icon">🎙️</span>
+      <div class="theme-card-title">The Introvert as Cultural Statement</div>
+      <div class="theme-card-text">In a moment when rap requires constant social media presence and personal branding, Little Simz made a large, orchestral album about being the kind of person who doesn't want to do that. The contradiction is intentional. You can be an introvert and still make the biggest statement in the room. SIMBI is that statement.</div>
+    </div>
+    <div class="theme-card">
+      <span class="theme-card-icon">👑</span>
+      <div class="theme-card-title">Blackness and Femininity</div>
+      <div class="theme-card-text">Woman is the most direct expression of it, but the theme runs through the whole album. Little Simz is operating in a lane that doesn't have a lot of precedent - British, Black, female, rap, literary, orchestral - and she built the lane rather than waiting for one to open. The album's scale is partly an argument about who gets to take up space.</div>
+    </div>
+    </div>
+  </div>
+</div>
+
+<section class="quote-section">
+  <div class="quote-bg"></div>
+  <div class="quote-text reveal"><span class="quote-mark">"</span>Sometimes I might be introvert. Don't mistake my quiet for weakness.</div>
+  <div class="quote-attr reveal">Little Simz · Introvert · Sometimes I Might Be Introvert · 2021</div>
+</section>
+
+<section class="tracks-section">
+  <div class="tracks-inner">
+    <div class="section-label reveal">Track by Track</div>
+    <div class="section-title reveal">The <em>Dissection</em></div>
+    <div id="trackList" class="reveal">
+    <div class="track-item">
+      <div class="track-header">
+        <span class="track-num">01</span>
+        <span class="track-name">Introvert</span>
+        <div class="track-right">
+          <div class="track-score-bar"><div class="track-score-fill" data-score="9.8"></div></div>
+          <span class="track-score-num">9.8</span>
+          <span class="track-expand-icon">▼</span>
+        </div>
+      </div>
+      <div class="track-body"><div class="track-body-inner">One of the great album openers. A minute of strings, then the drums, then Simz. The production expands to fill the room and she fills the production. The track establishes the album's scale in three minutes and earns every second of those three minutes. Few albums announce themselves this clearly.</div></div>
+    </div>
+    <div class="track-item">
+      <div class="track-header">
+        <span class="track-num">02</span>
+        <span class="track-name">Woman (feat. Cleo Sol)</span>
+        <div class="track-right">
+          <div class="track-score-bar"><div class="track-score-fill" data-score="9.6"></div></div>
+          <span class="track-score-num">9.6</span>
+          <span class="track-expand-icon">▼</span>
+        </div>
+      </div>
+      <div class="track-body"><div class="track-body-inner">Cleo Sol matches Simz completely, which is the correct test of a feature. The track is a celebration that doesn't feel self-congratulatory because the writing is specific enough to feel earned. The warmth here is the album's most direct moment of joy.</div></div>
+    </div>
+    <div class="track-item">
+      <div class="track-header">
+        <span class="track-num">03</span>
+        <span class="track-name">Two Worlds Apart</span>
+        <div class="track-right">
+          <div class="track-score-bar"><div class="track-score-fill" data-score="9.0"></div></div>
+          <span class="track-score-num">9.0</span>
+          <span class="track-expand-icon">▼</span>
+        </div>
+      </div>
+      <div class="track-body"><div class="track-body-inner">The album locating its emotional geography. Simz between two versions of herself - the person she was and the person she's becoming. Inflo's production gives it space to breathe without becoming ambient.</div></div>
+    </div>
+    <div class="track-item">
+      <div class="track-header">
+        <span class="track-num">04</span>
+        <span class="track-name">I Love You, I Hate You</span>
+        <div class="track-right">
+          <div class="track-score-bar"><div class="track-score-fill" data-score="9.7"></div></div>
+          <span class="track-score-num">9.7</span>
+          <span class="track-expand-icon">▼</span>
+        </div>
+      </div>
+      <div class="track-body"><div class="track-body-inner">The album's most unguarded track. Her absent father, addressed directly and without the safety of metaphor. The writing is careful in the way that only honesty can make writing careful - she's not performing the emotion, she's reporting it. One of the best tracks on any rap album in the last five years.</div></div>
+    </div>
+    <div class="track-item">
+      <div class="track-header">
+        <span class="track-num">05</span>
+        <span class="track-name">Little Q, Pt. 1</span>
+        <div class="track-right">
+          <div class="track-score-bar"><div class="track-score-fill" data-score="9.4"></div></div>
+          <span class="track-score-num">9.4</span>
+          <span class="track-expand-icon">▼</span>
+        </div>
+      </div>
+      <div class="track-body"><div class="track-body-inner">The first half of the album's emotional center. Her brother's story told from the outside of a system that took him. The specificity here is what makes it land - not a statement about incarceration in general but about this person, this family, this particular loss.</div></div>
+    </div>
+    <div class="track-item">
+      <div class="track-header">
+        <span class="track-num">06</span>
+        <span class="track-name">Little Q, Pt. 2 - No More Bridges</span>
+        <div class="track-right">
+          <div class="track-score-bar"><div class="track-score-fill" data-score="9.5"></div></div>
+          <span class="track-score-num">9.5</span>
+          <span class="track-expand-icon">▼</span>
+        </div>
+      </div>
+      <div class="track-body"><div class="track-body-inner">The continuation and the resolution, if there is one. The production opens up in the second part in a way that feels like someone finally being allowed to speak. Together the two tracks are the album's moral core.</div></div>
+    </div>
+    <div class="track-item">
+      <div class="track-header">
+        <span class="track-num">07</span>
+        <span class="track-name">Rollin Stone</span>
+        <div class="track-right">
+          <div class="track-score-bar"><div class="track-score-fill" data-score="8.8"></div></div>
+          <span class="track-score-num">8.8</span>
+          <span class="track-expand-icon">▼</span>
+        </div>
+      </div>
+      <div class="track-body"><div class="track-body-inner">The album shifting gears. A more propulsive track after the emotional weight of Little Q. Simz on her position in the game, the tone slightly cooler. Works as a structural break without becoming filler.</div></div>
+    </div>
+    <div class="track-item">
+      <div class="track-header">
+        <span class="track-num">08</span>
+        <span class="track-name">Protect My Energy</span>
+        <div class="track-right">
+          <div class="track-score-bar"><div class="track-score-fill" data-score="8.7"></div></div>
+          <span class="track-score-num">8.7</span>
+          <span class="track-expand-icon">▼</span>
+        </div>
+      </div>
+      <div class="track-body"><div class="track-body-inner">Does what the title says: a track about guarding yourself against noise and people who want to diminish you. Compact and direct. The production is the album at its most minimal, which gives the lyricism room to do the work.</div></div>
+    </div>
+    <div class="track-item">
+      <div class="track-header">
+        <span class="track-num">09</span>
+        <span class="track-name">I See You</span>
+        <div class="track-right">
+          <div class="track-score-bar"><div class="track-score-fill" data-score="9.1"></div></div>
+          <span class="track-score-num">9.1</span>
+          <span class="track-expand-icon">▼</span>
+        </div>
+      </div>
+      <div class="track-body"><div class="track-body-inner">One of the better mid-album tracks. Simz looking outward at the people around her with the same precision she's been applying to herself. The production is warmer here than most of the album.</div></div>
+    </div>
+    <div class="track-item">
+      <div class="track-header">
+        <span class="track-num">10</span>
+        <span class="track-name">Standing Ovation</span>
+        <div class="track-right">
+          <div class="track-score-bar"><div class="track-score-fill" data-score="9.3"></div></div>
+          <span class="track-score-num">9.3</span>
+          <span class="track-expand-icon">▼</span>
+        </div>
+      </div>
+      <div class="track-body"><div class="track-body-inner">The album asserting itself after the more internal middle section. Simz addressing her place in the landscape with the confidence of someone who has already proved the point. A crowd moment on an album that otherwise refuses to play to crowds.</div></div>
+    </div>
+    <div class="track-item">
+      <div class="track-header">
+        <span class="track-num">11</span>
+        <span class="track-name">Learning</span>
+        <div class="track-right">
+          <div class="track-score-bar"><div class="track-score-fill" data-score="8.9"></div></div>
+          <span class="track-score-num">8.9</span>
+          <span class="track-expand-icon">▼</span>
+        </div>
+      </div>
+      <div class="track-body"><div class="track-body-inner">Quieter and more ruminative. The album reflecting on how much work went into becoming this person. Works better in sequence than in isolation - the track is the right temperature for where the album is at this point.</div></div>
+    </div>
+    <div class="track-item">
+      <div class="track-header">
+        <span class="track-num">12</span>
+        <span class="track-name">Speed</span>
+        <div class="track-right">
+          <div class="track-score-bar"><div class="track-score-fill" data-score="8.6"></div></div>
+          <span class="track-score-num">8.6</span>
+          <span class="track-expand-icon">▼</span>
+        </div>
+      </div>
+      <div class="track-body"><div class="track-body-inner">A deliberate shift in tempo and texture. The production is the most contemporary-sounding thing on an album that otherwise sits slightly outside of any specific moment. A good track that the album doesn't strictly need but doesn't hurt.</div></div>
+    </div>
+    <div class="track-item">
+      <div class="track-header">
+        <span class="track-num">13</span>
+        <span class="track-name">How Did You Get Here</span>
+        <div class="track-right">
+          <div class="track-score-bar"><div class="track-score-fill" data-score="8.8"></div></div>
+          <span class="track-score-num">8.8</span>
+          <span class="track-expand-icon">▼</span>
+        </div>
+      </div>
+      <div class="track-body"><div class="track-body-inner">The album asking its central question plainly. How did a person like this, from a place like that, get to a stage like this? The answer is in every track that came before, which is the correct way to place a question this late in a record.</div></div>
+    </div>
+    <div class="track-item">
+      <div class="track-header">
+        <span class="track-num">14</span>
+        <span class="track-name">Miss Understood</span>
+        <div class="track-right">
+          <div class="track-score-bar"><div class="track-score-fill" data-score="9.2"></div></div>
+          <span class="track-score-num">9.2</span>
+          <span class="track-expand-icon">▼</span>
+        </div>
+      </div>
+      <div class="track-body"><div class="track-body-inner">A late-album highlight that arrives at exactly the right moment. Simz on being underestimated, on being categorized incorrectly, on the gap between who she is and who she's been told she is. One of the more quotable tracks here.</div></div>
+    </div>
+    </div>
+  </div>
+</section>
+
+<section class="chart-section">
+  <div class="chart-inner">
+    <div class="section-label reveal">Score Breakdown</div>
+    <div class="section-title reveal">Every Track, <em>Ranked</em></div>
+    <div class="chart-bars reveal" id="chartBars">
+    <div class="bar-row">
+      <div class="bar-label">Introvert</div>
+      <div class="bar-track"><div class="bar-fill" data-score="9.8"></div></div>
+      <div class="bar-val">9.8</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">I Love You, I Hate You</div>
+      <div class="bar-track"><div class="bar-fill" data-score="9.7"></div></div>
+      <div class="bar-val">9.7</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">Woman</div>
+      <div class="bar-track"><div class="bar-fill" data-score="9.6"></div></div>
+      <div class="bar-val">9.6</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">Little Q, Pt. 2</div>
+      <div class="bar-track"><div class="bar-fill" data-score="9.5"></div></div>
+      <div class="bar-val">9.5</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">Little Q, Pt. 1</div>
+      <div class="bar-track"><div class="bar-fill" data-score="9.4"></div></div>
+      <div class="bar-val">9.4</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">Standing Ovation</div>
+      <div class="bar-track"><div class="bar-fill" data-score="9.3"></div></div>
+      <div class="bar-val">9.3</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">Miss Understood</div>
+      <div class="bar-track"><div class="bar-fill" data-score="9.2"></div></div>
+      <div class="bar-val">9.2</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">I See You</div>
+      <div class="bar-track"><div class="bar-fill" data-score="9.1"></div></div>
+      <div class="bar-val">9.1</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">Two Worlds Apart</div>
+      <div class="bar-track"><div class="bar-fill" data-score="9.0"></div></div>
+      <div class="bar-val">9.0</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">Learning</div>
+      <div class="bar-track"><div class="bar-fill" data-score="8.9"></div></div>
+      <div class="bar-val">8.9</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">Rollin Stone</div>
+      <div class="bar-track"><div class="bar-fill" data-score="8.8"></div></div>
+      <div class="bar-val">8.8</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">How Did You Get Here</div>
+      <div class="bar-track"><div class="bar-fill" data-score="8.8"></div></div>
+      <div class="bar-val">8.8</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">Protect My Energy</div>
+      <div class="bar-track"><div class="bar-fill" data-score="8.7"></div></div>
+      <div class="bar-val">8.7</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">Speed</div>
+      <div class="bar-track"><div class="bar-fill" data-score="8.6"></div></div>
+      <div class="bar-val">8.6</div>
+    </div>
+    </div>
+  </div>
+</section>
+
+<div class="footnote-section">
+  <div class="section-label reveal" style="text-align:center;">Footnote</div>
+  <div class="footnote-text reveal">Sometimes I Might Be Introvert won the Mercury Prize in 2022, the BRIT Award for Album of the Year, and was widely considered the best rap album of 2021. Little Simz made the album largely independently, through her own label Age 101 Music. The production throughout is led by Inflo, the British producer behind Sault who has become one of the most important figures in Black British music. The album's title comes from a track on her 2019 record GREY Area. She has been making music since 2010. SIMBI is the record where everyone finally paid attention.</div>
+</div>
+
+<footer>
+  <div class="footer-sig reveal">Album Autopsy - A structured dissection of records that matter.</div>
+  <div class="divider"></div>
+  <a href="index.html" class="back-link reveal">← Back to All Autopsies</a>
+  <div class="footer-brand">@MyParentsDidntLeaveForThis</div>
+</footer>
+
+<script>
+  window.addEventListener('scroll', () => {
+    const p = (window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100;
+    document.getElementById('progress').style.width = p + '%';
+  });
+
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (!e.isIntersecting) return;
+      e.target.classList.add('visible');
+      if (e.target.id === 'scoreCounter') {
+        animateScore(0, 9.6, 1600);
+        document.getElementById('navScore').classList.add('visible');
+      }
+    });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+  if(document.getElementById('scoreCounter')) observer.observe(document.getElementById('scoreCounter'));
+
+  const tlObs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (!e.isIntersecting) return;
+      e.target.querySelectorAll('.track-score-fill').forEach((f,i) => {
+        setTimeout(() => { f.style.transform = `scaleX(${parseFloat(f.dataset.score)/10})`; }, i * 55);
+      });
+      tlObs.unobserve(e.target);
+    });
+  }, { threshold: 0.08 });
+  const tl = document.getElementById('trackList');
+  if(tl) tlObs.observe(tl);
+
+  const chObs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (!e.isIntersecting) return;
+      e.target.querySelectorAll('.bar-fill').forEach((f,i) => {
+        setTimeout(() => { const s = parseFloat(f.dataset.score); f.style.transform = `scaleX(${Math.max(0,(s-6)/4)})`; }, i * 70);
+      });
+      chObs.unobserve(e.target);
+    });
+  }, { threshold: 0.08 });
+  const cb = document.getElementById('chartBars');
+  if(cb) chObs.observe(cb);
+
+  function animateScore(from, to, duration) {
+    const el = document.getElementById('scoreCounter');
+    if(!el) return;
+    const start = performance.now();
+    (function tick(now) {
+      const p = Math.min((now - start) / duration, 1);
+      const ease = 1 - Math.pow(1 - p, 3);
+      const val = from + (to - from) * ease;
+      const int = Math.floor(val);
+      const dec = Math.round((val - int) * 10);
+      el.innerHTML = int + '<span>.' + dec + '</span>';
+      if(p < 1) requestAnimationFrame(tick);
+    })(start);
+  }
+
+  document.querySelectorAll('.track-item').forEach(item => {
+    item.querySelector('.track-header').addEventListener('click', () => {
+      const body = item.querySelector('.track-body');
+      const open = item.classList.toggle('open');
+      body.style.maxHeight = open ? body.scrollHeight + 'px' : '0';
+    });
+  });
+
+  document.querySelectorAll('.pill').forEach(pill => {
+    pill.addEventListener('click', () => {
+      document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+      pill.classList.add('active');
+    });
+  });
+</script>
+</body>
+</html>

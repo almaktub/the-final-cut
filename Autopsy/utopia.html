@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Utopia - Album Autopsy</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #080809;
+    --bg2: #0e0e10;
+    --bg3: #131315;
+    --accent: #7c3aed;
+    --gold: #c9a84c;
+    --text: #eae6de;
+    --muted: #6e6a64;
+    --border: rgba(255,255,255,0.055);
+    --font-display: 'Bebas Neue', sans-serif;
+    --font-serif: 'Playfair Display', serif;
+    --font-body: 'DM Sans', sans-serif;
+  }
+  html { scroll-behavior: smooth; }
+  body { background: var(--bg); color: var(--text); font-family: var(--font-body); font-weight: 300; line-height: 1.7; overflow-x: hidden; }
+  body::before { content:''; position:fixed; inset:0; background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E"); pointer-events:none; z-index:9999; opacity:0.45; }
+  .progress-bar { position:fixed; top:0; left:0; height:2px; background:var(--accent); z-index:200; width:0%; transition: width 0.1s linear; }
+  nav { position:fixed; top:0; left:0; right:0; padding:1.1rem 2.5rem; display:flex; justify-content:space-between; align-items:center; z-index:100; background:linear-gradient(to bottom, rgba(8,8,9,0.92), transparent); }
+  .nav-back { font-family:var(--font-display); letter-spacing:0.25em; font-size:0.7rem; color:var(--muted); text-decoration:none; transition:color 0.2s; }
+  .nav-back:hover { color:var(--accent); }
+  .nav-score { font-family:var(--font-display); font-size:1.1rem; color:var(--accent); opacity:0; transition:opacity 0.4s; }
+  .nav-score.visible { opacity:1; }
+  .hero { min-height:100vh; display:flex; flex-direction:column; justify-content:center; align-items:center; position:relative; overflow:hidden; padding:4rem 2rem; text-align:center; }
+  .hero-bg { position:absolute; inset:0; background: radial-gradient(ellipse 80% 55% at 50% 45%, #7c3aed18 0%, transparent 68%), radial-gradient(ellipse 35% 35% at 15% 75%, #7c3aed09 0%, transparent 60%), var(--bg); z-index:0; }
+  .hero-lines { position:absolute; inset:0; background-image:repeating-linear-gradient(0deg, transparent, transparent 78px, rgba(255,255,255,0.011) 78px, rgba(255,255,255,0.011) 79px); z-index:0; }
+  .hero-content { position:relative; z-index:1; }
+  .autopsy-label { font-family:var(--font-display); letter-spacing:0.4em; font-size:0.72rem; color:var(--accent); text-transform:uppercase; margin-bottom:1.8rem; opacity:0; animation:fadeUp 0.8s ease 0.2s forwards; }
+  .hero-artist { font-family:var(--font-display); font-size:clamp(4rem,16vw,14rem); line-height:0.88; letter-spacing:-0.02em; color:var(--text); opacity:0; animation:fadeUp 0.8s ease 0.4s forwards; }
+  .hero-album { font-family:var(--font-serif); font-style:italic; font-size:clamp(1.2rem,4vw,3rem); color:var(--gold); margin-top:0.6rem; opacity:0; animation:fadeUp 0.8s ease 0.6s forwards; line-height:1.25; max-width:800px; }
+  .hero-meta { font-family:var(--font-display); letter-spacing:0.3em; font-size:0.85rem; color:var(--muted); margin-top:1.5rem; opacity:0; animation:fadeUp 0.8s ease 0.8s forwards; }
+  .hero-rule { width:1px; height:70px; background:linear-gradient(to bottom, var(--accent), transparent); margin:3rem auto 0; opacity:0; animation:fadeUp 0.8s ease 1s forwards; }
+  .scroll-hint { font-size:0.68rem; letter-spacing:0.35em; color:var(--muted); text-transform:uppercase; margin-top:0.8rem; opacity:0; animation:fadeUp 0.8s ease 1.2s forwards; }
+  .verdict-bar { background:var(--accent); padding:1.1rem 2rem; text-align:center; font-family:var(--font-body); font-size:0.92rem; color:rgba(255,255,255,0.9); font-weight:500; line-height:1.5; }
+  .score-section { background:var(--bg2); border-top:1px solid var(--border); border-bottom:1px solid var(--border); }
+  .score-inner { max-width:920px; margin:0 auto; padding:6rem 2rem; display:grid; grid-template-columns:1fr 1.5fr; gap:5rem; align-items:center; }
+  @media(max-width:640px){.score-inner{grid-template-columns:1fr;gap:2.5rem;}}
+  .score-display { text-align:center; }
+  .score-number { font-family:var(--font-display); font-size:clamp(5.5rem,16vw,11rem); line-height:1; color:var(--text); }
+  .score-number span { color:var(--accent); }
+  .score-label { font-family:var(--font-display); letter-spacing:0.35em; font-size:0.75rem; color:var(--muted); margin-top:0.4rem; }
+  .score-verdict { font-family:var(--font-serif); font-style:italic; font-size:1.3rem; line-height:1.55; margin-bottom:1.5rem; color:var(--text); }
+  .score-defense { font-size:0.88rem; color:var(--muted); line-height:1.85; }
+  .section { max-width:920px; margin:0 auto; padding:6rem 2rem; }
+  .section-label { font-family:var(--font-display); letter-spacing:0.4em; font-size:0.68rem; color:var(--accent); text-transform:uppercase; margin-bottom:1.4rem; }
+  .section-title { font-family:var(--font-serif); font-size:clamp(1.8rem,4.5vw,3.2rem); font-weight:900; line-height:1.1; margin-bottom:2.5rem; }
+  .section-title em { font-style:italic; color:var(--gold); }
+  .pill { padding:0.35rem 0.9rem; border:1px solid var(--border); border-radius:2px; font-size:0.7rem; letter-spacing:0.15em; text-transform:uppercase; font-family:var(--font-display); color:var(--text); background:transparent; transition:all 0.2s; cursor:default; }
+  .pill:hover, .pill.active { border-color:var(--accent); color:var(--accent); background:#7c3aed14; }
+  .theme-pills { display:flex; flex-wrap:wrap; gap:0.45rem; margin:0 0 3rem; }
+  .themes-section { background:var(--bg2); border-top:1px solid var(--border); }
+  .themes-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:1.5px; background:var(--border); border:1px solid var(--border); margin-top:0; }
+  .theme-card { background:var(--bg2); padding:2.2rem 1.8rem; transition:background 0.2s; cursor:default; position:relative; overflow:hidden; }
+  .theme-card::before { content:''; position:absolute; top:0; left:0; width:3px; height:0; background:var(--accent); transition:height 0.3s; }
+  .theme-card:hover::before { height:100%; }
+  .theme-card:hover { background:var(--bg3); }
+  .theme-card-icon { font-size:1.8rem; margin-bottom:0.9rem; display:block; }
+  .theme-card-title { font-family:var(--font-serif); font-size:1rem; font-weight:700; margin-bottom:0.6rem; }
+  .theme-card-text { font-size:0.82rem; color:var(--muted); line-height:1.75; }
+  .quote-section { padding:7rem 2rem; text-align:center; position:relative; overflow:hidden; }
+  .quote-bg { position:absolute; inset:0; background:radial-gradient(ellipse 55% 55% at 50% 50%, #7c3aed0a 0%, transparent 70%); }
+  .quote-mark { font-family:var(--font-serif); font-size:7rem; line-height:0; vertical-align:-1.8rem; color:#7c3aed25; margin-right:0.05em; }
+  .quote-text { font-family:var(--font-serif); font-style:italic; font-size:clamp(1.4rem,3.5vw,2.5rem); line-height:1.35; max-width:680px; margin:0 auto; position:relative; z-index:1; }
+  .quote-attr { margin-top:2rem; font-size:0.72rem; letter-spacing:0.3em; text-transform:uppercase; color:var(--muted); font-family:var(--font-display); position:relative; z-index:1; }
+  .tracks-section { background:var(--bg); border-top:1px solid var(--border); }
+  .tracks-inner { max-width:920px; margin:0 auto; padding:6rem 2rem; }
+  .track-item { border-bottom:1px solid var(--border); overflow:hidden; cursor:pointer; transition:background 0.15s; }
+  .track-item:first-of-type { border-top:1px solid var(--border); }
+  .track-item:hover { background:rgba(255,255,255,0.018); }
+  .track-header { display:grid; grid-template-columns:3rem 1fr auto; align-items:center; gap:1.2rem; padding:1.1rem 0; }
+  .track-num { font-family:var(--font-display); font-size:0.75rem; color:var(--muted); letter-spacing:0.1em; }
+  .track-name { font-family:var(--font-serif); font-size:1rem; font-weight:700; }
+  .track-right { display:flex; align-items:center; gap:1.2rem; }
+  .track-score-bar { width:70px; height:3px; background:rgba(255,255,255,0.08); border-radius:2px; overflow:hidden; }
+  .track-score-fill { height:100%; background:var(--accent); transform-origin:left; transform:scaleX(0); transition:transform 0.8s ease; border-radius:2px; }
+  .track-score-num { font-family:var(--font-display); font-size:0.95rem; color:var(--muted); min-width:2.2rem; text-align:right; }
+  .track-expand-icon { font-size:0.55rem; color:var(--muted); transition:transform 0.3s; }
+  .track-item.open .track-expand-icon { transform:rotate(180deg); }
+  .track-body { max-height:0; overflow:hidden; transition:max-height 0.38s ease; }
+  .track-body-inner { padding:0 0 1.4rem 0; margin-left:4.2rem; color:var(--muted); font-size:0.87rem; line-height:1.8; border-left:2px solid var(--accent); padding-left:1.4rem; }
+  .chart-section { background:var(--bg3); border-top:1px solid var(--border); border-bottom:1px solid var(--border); }
+  .chart-inner { max-width:920px; margin:0 auto; padding:6rem 2rem; }
+  .chart-bars { display:flex; flex-direction:column; gap:0.85rem; margin-top:3rem; }
+  .bar-row { display:grid; grid-template-columns:170px 1fr 2.8rem; align-items:center; gap:1rem; }
+  @media(max-width:500px){.bar-row{grid-template-columns:90px 1fr 2.5rem;}}
+  .bar-label { font-size:0.78rem; color:var(--muted); text-align:right; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .bar-track { height:5px; background:rgba(255,255,255,0.055); border-radius:3px; overflow:hidden; }
+  .bar-fill { height:100%; background:linear-gradient(90deg, var(--accent), var(--gold)); transform-origin:left; transform:scaleX(0); transition:transform 0.85s ease; border-radius:3px; }
+  .bar-val { font-family:var(--font-display); font-size:0.88rem; color:var(--text); }
+  .footnote-section { padding:5rem 2rem; text-align:center; border-top:1px solid var(--border); background:var(--bg2); }
+  .footnote-text { font-family:var(--font-serif); font-style:italic; font-size:1rem; color:var(--muted); line-height:1.85; max-width:640px; margin:0 auto; }
+  footer { padding:3.5rem 2rem; text-align:center; border-top:1px solid var(--border); }
+  .footer-sig { font-family:var(--font-serif); font-style:italic; font-size:0.88rem; color:var(--muted); }
+  .footer-brand { font-family:var(--font-display); letter-spacing:0.4em; font-size:0.68rem; color:rgba(255,255,255,0.12); margin-top:1.8rem; }
+  .divider { width:36px; height:1px; background:var(--accent); margin:1.8rem auto; }
+  .back-link { display:inline-block; margin-top:2rem; font-family:var(--font-display); letter-spacing:0.25em; font-size:0.72rem; color:var(--accent); text-decoration:none; border:1px solid var(--accent); padding:0.6rem 1.4rem; transition:all 0.2s; }
+  .back-link:hover { background:var(--accent); color:#fff; }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(28px)} to{opacity:1;transform:translateY(0)} }
+  .reveal { opacity:0; transform:translateY(38px); transition:opacity 0.7s ease, transform 0.7s ease; }
+  .reveal.visible { opacity:1; transform:translateY(0); }
+</style>
+</head>
+<body>
+<div class="progress-bar" id="progress"></div>
+<nav>
+  <a href="index.html" class="nav-back">← All Autopsies</a>
+  <div class="nav-score" id="navScore">8.4 / 10</div>
+</nav>
+
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-lines"></div>
+  <div class="hero-content">
+    <div class="autopsy-label">Album Autopsy · 033</div>
+    <div class="hero-artist">Travis Scott</div>
+    <div class="hero-album">Utopia</div>
+    <div class="hero-meta">Cactus Jack / Epic Records · 2023</div>
+    <div class="hero-rule"></div>
+    <div class="scroll-hint">Scroll to dissect</div>
+  </div>
+</section>
+
+<div class="verdict-bar">Made in the shadow of the Astroworld tragedy. An album that had to prove Travis could still exist as a cultural figure - and mostly did.</div>
+
+<section class="score-section">
+  <div class="score-inner">
+    <div class="score-display reveal">
+      <div class="score-number" id="scoreCounter">0<span>.0</span></div>
+      <div class="score-label">Overall Score</div>
+    </div>
+    <div class="reveal">
+      <div class="score-verdict">"Travis in maximalist mode, throwing every collaborator at a wall and seeing what sticks. More of it works than doesn't, but the ratio is tighter than it should be at 17 tracks."</div>
+      <div class="score-defense">8.4 because Utopia is three different albums fighting for the same runtime. HYAENA is a statement of intent: aggressive, textured, and strange in all the right ways. PARASAIL is what happens when Travis finds the pocket between ambient and rap and refuses to move. MODERN JAM with Pharrell is the most fun either of them has sounded in years. FE!N with Playboi Carti is genuinely chaotic in the way Travis's best work tends to be. CIRCUS MAXIMUS runs eight minutes and earns most of them. And then there's MELTDOWN - Drake doing Drake things over a beat that deserves better - and POPSTAR, which sounds like a contractual obligation, and K-POP, which is exactly what it sounds like. The 1.6 missing: Utopia is a great hour of music masquerading as a great album. They are not the same thing. The edit that turns this into a 9.0 record exists. Travis didn't make it.</div>
+    </div>
+  </div>
+</section>
+
+<div class="themes-section">
+  <div class="section">
+    <div class="section-label reveal">Central Thesis</div>
+    <div class="section-title reveal">What <em>This Album Is Really About</em></div>
+    <div class="theme-pills reveal"><span class="pill active">Utopia as Escape</span><span class="pill">Maximalism as Statement</span><span class="pill">The Collaborator Network</span><span class="pill">Grief Displaced into Sound</span></div>
+    <div class="themes-grid reveal">
+    <div class="theme-card">
+      <span class="theme-card-icon">🌐</span>
+      <div class="theme-card-title">Utopia as Escape</div>
+      <div class="theme-card-text">The title is ironic by design. Utopia is an impossible place, and Travis is clearly aware that he's building one in the same way he built Astroworld - out of memory, loss, and the desire to exist somewhere else. The album's production creates spaces that feel unreachable. That's the point.</div>
+    </div>
+    <div class="theme-card">
+      <span class="theme-card-icon">🔊</span>
+      <div class="theme-card-title">Maximalism as Statement</div>
+      <div class="theme-card-text">Where most producers scale back after a setback, Travis scaled up. Utopia is louder, more crowded, more ambitious in its feature list than anything he's made. The message is that he's still here and he's still operating at this level. Whether the message lands depends on which ten tracks you're listening to.</div>
+    </div>
+    <div class="theme-card">
+      <span class="theme-card-icon">🤝</span>
+      <div class="theme-card-title">The Collaborator Network</div>
+      <div class="theme-card-text">Beyonce, Bad Bunny, Drake, Playboi Carti, The Weeknd, Swae Lee, 21 Savage, Pharrell, Yung Lean, Pop Smoke, Westside Gunn, James Blake. Travis treats the album as a hub. Some of these collabs produce the album's best moments. Some produce its most forgettable ones. The gap between the two is wider than on Astroworld.</div>
+    </div>
+    <div class="theme-card">
+      <span class="theme-card-icon">🕯️</span>
+      <div class="theme-card-title">Grief Displaced into Sound</div>
+      <div class="theme-card-text">Utopia arrived nearly two years after the Astroworld Festival tragedy. Travis never directly addresses it but the album is shot through with an energy that reads as something unresolved. The maximalism might be processing. The scale might be overcompensation. Or it might just be an ambitious album. All three interpretations hold.</div>
+    </div>
+    </div>
+  </div>
+</div>
+
+<section class="quote-section">
+  <div class="quote-bg"></div>
+  <div class="quote-text reveal"><span class="quote-mark">"</span>I'm living in a utopia where nothing is for real.</div>
+  <div class="quote-attr reveal">Travis Scott · Hyaena · Utopia · 2023</div>
+</section>
+
+<section class="tracks-section">
+  <div class="tracks-inner">
+    <div class="section-label reveal">Track by Track</div>
+    <div class="section-title reveal">The <em>Dissection</em></div>
+    <div id="trackList" class="reveal">
+    <div class="track-item">
+      <div class="track-header">
+        <span class="track-num">01</span>
+        <span class="track-name">HYAENA</span>
+        <div class="track-right">
+          <div class="track-score-bar"><div class="track-score-fill" data-score="9.2"></div></div>
+          <span class="track-score-num">9.2</span>
+          <span class="track-expand-icon">▼</span>
+        </div>
+      </div>
+      <div class="track-body"><div class="track-body-inner">The right opening. Aggressive without being obvious, textured without being fussy. Travis announcing that whatever happened, this is still what he sounds like. The production is doing architectural work and the track knows it.</div></div>
+    </div>
+    <div class="track-item">
+      <div class="track-header">
+        <span class="track-num">02</span>
+        <span class="track-name">THANK GOD (feat. Baby Keem)</span>
+        <div class="track-right">
+          <div class="track-score-bar"><div class="track-score-fill" data-score="8.5"></div></div>
+          <span class="track-score-num">8.5</span>
+          <span class="track-expand-icon">▼</span>
+        </div>
+      </div>
+      <div class="track-body"><div class="track-body-inner">Baby Keem arrives and does Baby Keem things at a level that makes him the better performer here. A strong track that works as a handoff between HYAENA's aggression and the middle section.</div></div>
+    </div>
+    <div class="track-item">
+      <div class="track-header">
+        <span class="track-num">03</span>
+        <span class="track-name">MODERN JAM (feat. Pharrell Williams)</span>
+        <div class="track-right">
+          <div class="track-score-bar"><div class="track-score-fill" data-score="9.1"></div></div>
+          <span class="track-score-num">9.1</span>
+          <span class="track-expand-icon">▼</span>
+        </div>
+      </div>
+      <div class="track-body"><div class="track-body-inner">Pharrell sounds genuinely alive here in a way he hasn't on a Travis record before. The production is warm, slightly retro, completely at odds with everything around it - which is exactly why it works. One of the album's best stretches.</div></div>
+    </div>
+    <div class="track-item">
+      <div class="track-header">
+        <span class="track-num">04</span>
+        <span class="track-name">MY EYES</span>
+        <div class="track-right">
+          <div class="track-score-bar"><div class="track-score-fill" data-score="8.6"></div></div>
+          <span class="track-score-num">8.6</span>
+          <span class="track-expand-icon">▼</span>
+        </div>
+      </div>
+      <div class="track-body"><div class="track-body-inner">Travis finding the melodic pocket he lives in best. A strong mid-album track that doesn't ask too much and delivers what it promises. Sequenced well against MODERN JAM.</div></div>
+    </div>
+    <div class="track-item">
+      <div class="track-header">
+        <span class="track-num">05</span>
+        <span class="track-name">GODS COUNTRY</span>
+        <div class="track-right">
+          <div class="track-score-bar"><div class="track-score-fill" data-score="8.4"></div></div>
+          <span class="track-score-num">8.4</span>
+          <span class="track-expand-icon">▼</span>
+        </div>
+      </div>
+      <div class="track-body"><div class="track-body-inner">Atmospheric and patient. The album allowing itself a brief moment of stillness before the feature-heavy second half. Good without being indispensable.</div></div>
+    </div>
+    <div class="track-item">
+      <div class="track-header">
+        <span class="track-num">06</span>
+        <span class="track-name">DELRESTO (ECHOES) (feat. Beyoncé)</span>
+        <div class="track-right">
+          <div class="track-score-bar"><div class="track-score-fill" data-score="8.8"></div></div>
+          <span class="track-score-num">8.8</span>
+          <span class="track-expand-icon">▼</span>
+        </div>
+      </div>
+      <div class="track-body"><div class="track-body-inner">Beyonce appears and the album briefly becomes something else. Her presence doesn't overpower the track - she fits into the sonic space Travis built rather than redecorating it. One of the more surprising collabs on any major rap album in recent memory.</div></div>
+    </div>
+    <div class="track-item">
+      <div class="track-header">
+        <span class="track-num">07</span>
+        <span class="track-name">I KNOW ? (feat. Bad Bunny)</span>
+        <div class="track-right">
+          <div class="track-score-bar"><div class="track-score-fill" data-score="8.3"></div></div>
+          <span class="track-score-num">8.3</span>
+          <span class="track-expand-icon">▼</span>
+        </div>
+      </div>
+      <div class="track-body"><div class="track-body-inner">Bad Bunny doing Bad Bunny. The track is good but the collaboration doesn't add up to more than the sum of its parts. Fine in the sequence, forgettable outside it.</div></div>
+    </div>
+    <div class="track-item">
+      <div class="track-header">
+        <span class="track-num">08</span>
+        <span class="track-name">MELTDOWN (feat. Drake)</span>
+        <div class="track-right">
+          <div class="track-score-bar"><div class="track-score-fill" data-score="8.1"></div></div>
+          <span class="track-score-num">8.1</span>
+          <span class="track-expand-icon">▼</span>
+        </div>
+      </div>
+      <div class="track-body"><div class="track-body-inner">Drake's verse is competent and the beat around it is genuinely interesting. The problem is that MELTDOWN sounds like a placeholder where a more unexpected choice should have gone. The most anticipated collab on the album is also its most predictable.</div></div>
+    </div>
+    <div class="track-item">
+      <div class="track-header">
+        <span class="track-num">09</span>
+        <span class="track-name">FE!N (feat. Playboi Carti)</span>
+        <div class="track-right">
+          <div class="track-score-bar"><div class="track-score-fill" data-score="9.0"></div></div>
+          <span class="track-score-num">9.0</span>
+          <span class="track-expand-icon">▼</span>
+        </div>
+      </div>
+      <div class="track-body"><div class="track-body-inner">Carti and Travis at maximum chaos, a beat that sounds like a server overheating. It became a cultural moment for a reason. The album needed at least one track that felt genuinely dangerous and this is it.</div></div>
+    </div>
+    <div class="track-item">
+      <div class="track-header">
+        <span class="track-num">10</span>
+        <span class="track-name">LOST FOREVER (feat. Westside Gunn, Swae Lee, James Blake)</span>
+        <div class="track-right">
+          <div class="track-score-bar"><div class="track-score-fill" data-score="8.2"></div></div>
+          <span class="track-score-num">8.2</span>
+          <span class="track-expand-icon">▼</span>
+        </div>
+      </div>
+      <div class="track-body"><div class="track-body-inner">The most eclectic combination of features on the album. James Blake's presence pulls it toward something interesting. Westside Gunn sounds slightly out of context. Swae Lee is Swae Lee. The track is more interesting as a concept than as a listen.</div></div>
+    </div>
+    <div class="track-item">
+      <div class="track-header">
+        <span class="track-num">11</span>
+        <span class="track-name">PARASAIL (feat. Yung Lean, Wheezy)</span>
+        <div class="track-right">
+          <div class="track-score-bar"><div class="track-score-fill" data-score="9.0"></div></div>
+          <span class="track-score-num">9.0</span>
+          <span class="track-expand-icon">▼</span>
+        </div>
+      </div>
+      <div class="track-body"><div class="track-body-inner">The album's most patient moment. Floats rather than propels. Yung Lean was the correct choice for a track this atmospheric - his delivery suits the production's temperature exactly. One of the best things here.</div></div>
+    </div>
+    <div class="track-item">
+      <div class="track-header">
+        <span class="track-num">12</span>
+        <span class="track-name">TOPIA TWINS (feat. Rob49, 21 Savage)</span>
+        <div class="track-right">
+          <div class="track-score-bar"><div class="track-score-fill" data-score="8.0"></div></div>
+          <span class="track-score-num">8.0</span>
+          <span class="track-expand-icon">▼</span>
+        </div>
+      </div>
+      <div class="track-body"><div class="track-body-inner">21 Savage sounds comfortable. Rob49 does what the track needs him to do. Competent rap music in the middle of an album that keeps promising something stranger.</div></div>
+    </div>
+    <div class="track-item">
+      <div class="track-header">
+        <span class="track-num">13</span>
+        <span class="track-name">CIRCUS MAXIMUS (feat. The Weeknd, Swae Lee)</span>
+        <div class="track-right">
+          <div class="track-score-bar"><div class="track-score-fill" data-score="8.7"></div></div>
+          <span class="track-score-num">8.7</span>
+          <span class="track-expand-icon">▼</span>
+        </div>
+      </div>
+      <div class="track-body"><div class="track-body-inner">Eight minutes and it mostly earns them. The Weeknd arrives at the four-minute mark and the track shifts into something else. One of the more genuinely ambitious pieces here - a rap-pop psychedelic structure that doesn't apologize for its length.</div></div>
+    </div>
+    <div class="track-item">
+      <div class="track-header">
+        <span class="track-num">14</span>
+        <span class="track-name">POPSTAR (feat. Pop Smoke, Quavo)</span>
+        <div class="track-right">
+          <div class="track-score-bar"><div class="track-score-fill" data-score="7.6"></div></div>
+          <span class="track-score-num">7.6</span>
+          <span class="track-expand-icon">▼</span>
+        </div>
+      </div>
+      <div class="track-body"><div class="track-body-inner">The weakest track. Feels assembled rather than made. Pop Smoke's inclusion is posthumous and the track doesn't do his catalog justice. Quavo is Quavo. The production is fine. The whole thing sounds like what it is: a late-album filler with famous names attached.</div></div>
+    </div>
+    <div class="track-item">
+      <div class="track-header">
+        <span class="track-num">15</span>
+        <span class="track-name">K-POP (feat. Bad Bunny, The Weeknd)</span>
+        <div class="track-right">
+          <div class="track-score-bar"><div class="track-score-fill" data-score="7.8"></div></div>
+          <span class="track-score-num">7.8</span>
+          <span class="track-expand-icon">▼</span>
+        </div>
+      </div>
+      <div class="track-body"><div class="track-body-inner">Does exactly what the title suggests. Fun enough but the album doesn't need two Bad Bunny appearances and this is the weaker of the two. The Weeknd is better served by CIRCUS MAXIMUS.</div></div>
+    </div>
+    <div class="track-item">
+      <div class="track-header">
+        <span class="track-num">16</span>
+        <span class="track-name">TELEKINESIS (feat. SoFaygo)</span>
+        <div class="track-right">
+          <div class="track-score-bar"><div class="track-score-fill" data-score="8.3"></div></div>
+          <span class="track-score-num">8.3</span>
+          <span class="track-expand-icon">▼</span>
+        </div>
+      </div>
+      <div class="track-body"><div class="track-body-inner">The album recalibrating toward its close. SoFaygo fits the production naturally. A decent late-album track that doesn't waste its placement.</div></div>
+    </div>
+    <div class="track-item">
+      <div class="track-header">
+        <span class="track-num">17</span>
+        <span class="track-name">SIRENS</span>
+        <div class="track-right">
+          <div class="track-score-bar"><div class="track-score-fill" data-score="8.5"></div></div>
+          <span class="track-score-num">8.5</span>
+          <span class="track-expand-icon">▼</span>
+        </div>
+      </div>
+      <div class="track-body"><div class="track-body-inner">The right closer. Cinematic, unhurried, Travis leaving a long silence before the end. The album needed a closer that felt like landing and this is it. Better than most of the tracks that came before it in the last third.</div></div>
+    </div>
+    </div>
+  </div>
+</section>
+
+<section class="chart-section">
+  <div class="chart-inner">
+    <div class="section-label reveal">Score Breakdown</div>
+    <div class="section-title reveal">Every Track, <em>Ranked</em></div>
+    <div class="chart-bars reveal" id="chartBars">
+    <div class="bar-row">
+      <div class="bar-label">HYAENA</div>
+      <div class="bar-track"><div class="bar-fill" data-score="9.2"></div></div>
+      <div class="bar-val">9.2</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">MODERN JAM</div>
+      <div class="bar-track"><div class="bar-fill" data-score="9.1"></div></div>
+      <div class="bar-val">9.1</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">FE!N</div>
+      <div class="bar-track"><div class="bar-fill" data-score="9.0"></div></div>
+      <div class="bar-val">9.0</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">PARASAIL</div>
+      <div class="bar-track"><div class="bar-fill" data-score="9.0"></div></div>
+      <div class="bar-val">9.0</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">DELRESTO (ECHOES)</div>
+      <div class="bar-track"><div class="bar-fill" data-score="8.8"></div></div>
+      <div class="bar-val">8.8</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">CIRCUS MAXIMUS</div>
+      <div class="bar-track"><div class="bar-fill" data-score="8.7"></div></div>
+      <div class="bar-val">8.7</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">MY EYES</div>
+      <div class="bar-track"><div class="bar-fill" data-score="8.6"></div></div>
+      <div class="bar-val">8.6</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">THANK GOD</div>
+      <div class="bar-track"><div class="bar-fill" data-score="8.5"></div></div>
+      <div class="bar-val">8.5</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">SIRENS</div>
+      <div class="bar-track"><div class="bar-fill" data-score="8.5"></div></div>
+      <div class="bar-val">8.5</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">GODS COUNTRY</div>
+      <div class="bar-track"><div class="bar-fill" data-score="8.4"></div></div>
+      <div class="bar-val">8.4</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">I KNOW ?</div>
+      <div class="bar-track"><div class="bar-fill" data-score="8.3"></div></div>
+      <div class="bar-val">8.3</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">TELEKINESIS</div>
+      <div class="bar-track"><div class="bar-fill" data-score="8.3"></div></div>
+      <div class="bar-val">8.3</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">LOST FOREVER</div>
+      <div class="bar-track"><div class="bar-fill" data-score="8.2"></div></div>
+      <div class="bar-val">8.2</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">MELTDOWN</div>
+      <div class="bar-track"><div class="bar-fill" data-score="8.1"></div></div>
+      <div class="bar-val">8.1</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">TOPIA TWINS</div>
+      <div class="bar-track"><div class="bar-fill" data-score="8.0"></div></div>
+      <div class="bar-val">8.0</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">K-POP</div>
+      <div class="bar-track"><div class="bar-fill" data-score="7.8"></div></div>
+      <div class="bar-val">7.8</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">POPSTAR</div>
+      <div class="bar-track"><div class="bar-fill" data-score="7.6"></div></div>
+      <div class="bar-val">7.6</div>
+    </div>
+    </div>
+  </div>
+</section>
+
+<div class="footnote-section">
+  <div class="section-label reveal" style="text-align:center;">Footnote</div>
+  <div class="footnote-text reveal">Utopia was released on July 28, 2023, almost two years after the Astroworld Festival tragedy in November 2021. Travis Scott had largely been absent from mainstream releases in the interim. The album debuted at number one in multiple countries and was accompanied by a film directed by Gaspar Noe. It was the most anticipated rap release of 2023 and arrived to a divided critical response - praised for its ambition, questioned for its length. The conversation around it has been inseparable from the circumstances of its making.</div>
+</div>
+
+<footer>
+  <div class="footer-sig reveal">Album Autopsy - A structured dissection of records that matter.</div>
+  <div class="divider"></div>
+  <a href="index.html" class="back-link reveal">← Back to All Autopsies</a>
+  <div class="footer-brand">@MyParentsDidntLeaveForThis</div>
+</footer>
+
+<script>
+  window.addEventListener('scroll', () => {
+    const p = (window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100;
+    document.getElementById('progress').style.width = p + '%';
+  });
+
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (!e.isIntersecting) return;
+      e.target.classList.add('visible');
+      if (e.target.id === 'scoreCounter') {
+        animateScore(0, 8.4, 1600);
+        document.getElementById('navScore').classList.add('visible');
+      }
+    });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+  if(document.getElementById('scoreCounter')) observer.observe(document.getElementById('scoreCounter'));
+
+  const tlObs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (!e.isIntersecting) return;
+      e.target.querySelectorAll('.track-score-fill').forEach((f,i) => {
+        setTimeout(() => { f.style.transform = `scaleX(${parseFloat(f.dataset.score)/10})`; }, i * 55);
+      });
+      tlObs.unobserve(e.target);
+    });
+  }, { threshold: 0.08 });
+  const tl = document.getElementById('trackList');
+  if(tl) tlObs.observe(tl);
+
+  const chObs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (!e.isIntersecting) return;
+      e.target.querySelectorAll('.bar-fill').forEach((f,i) => {
+        setTimeout(() => { const s = parseFloat(f.dataset.score); f.style.transform = `scaleX(${Math.max(0,(s-6)/4)})`; }, i * 70);
+      });
+      chObs.unobserve(e.target);
+    });
+  }, { threshold: 0.08 });
+  const cb = document.getElementById('chartBars');
+  if(cb) chObs.observe(cb);
+
+  function animateScore(from, to, duration) {
+    const el = document.getElementById('scoreCounter');
+    if(!el) return;
+    const start = performance.now();
+    (function tick(now) {
+      const p = Math.min((now - start) / duration, 1);
+      const ease = 1 - Math.pow(1 - p, 3);
+      const val = from + (to - from) * ease;
+      const int = Math.floor(val);
+      const dec = Math.round((val - int) * 10);
+      el.innerHTML = int + '<span>.' + dec + '</span>';
+      if(p < 1) requestAnimationFrame(tick);
+    })(start);
+  }
+
+  document.querySelectorAll('.track-item').forEach(item => {
+    item.querySelector('.track-header').addEventListener('click', () => {
+      const body = item.querySelector('.track-body');
+      const open = item.classList.toggle('open');
+      body.style.maxHeight = open ? body.scrollHeight + 'px' : '0';
+    });
+  });
+
+  document.querySelectorAll('.pill').forEach(pill => {
+    pill.addEventListener('click', () => {
+      document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+      pill.classList.add('active');
+    });
+  });
+</script>
+</body>
+</html>

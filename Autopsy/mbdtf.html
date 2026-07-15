@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Beautiful Dark Twisted Fantasy - Album Autopsy</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #080809;
+    --bg2: #0e0e10;
+    --bg3: #131315;
+    --accent: #e67e22;
+    --accent-dark: #a05010;
+    --gold: #c9a84c;
+    --text: #eae6de;
+    --muted: #6e6a64;
+    --border: rgba(255,255,255,0.055);
+    --font-display: 'Bebas Neue', sans-serif;
+    --font-serif: 'Playfair Display', serif;
+    --font-body: 'DM Sans', sans-serif;
+  }
+  html { scroll-behavior: smooth; }
+  body { background: var(--bg); color: var(--text); font-family: var(--font-body); font-weight: 300; line-height: 1.7; overflow-x: hidden; }
+  body::before { content:''; position:fixed; inset:0; background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E"); pointer-events:none; z-index:9999; opacity:0.45; }
+  .progress-bar { position:fixed; top:0; left:0; height:2px; background:var(--accent); z-index:200; width:0%; transition: width 0.1s linear; }
+  nav { position:fixed; top:0; left:0; right:0; padding:1.1rem 2.5rem; display:flex; justify-content:space-between; align-items:center; z-index:100; background:linear-gradient(to bottom, rgba(8,8,9,0.92), transparent); }
+  .nav-back { font-family:var(--font-display); letter-spacing:0.25em; font-size:0.7rem; color:var(--muted); text-decoration:none; transition:color 0.2s; }
+  .nav-back:hover { color:var(--accent); }
+  .nav-score { font-family:var(--font-display); font-size:1.1rem; color:var(--accent); opacity:0; transition:opacity 0.4s; }
+  .nav-score.visible { opacity:1; }
+
+  /* HERO */
+  .hero { min-height:100vh; display:flex; flex-direction:column; justify-content:center; align-items:center; position:relative; overflow:hidden; padding:4rem 2rem; text-align:center; }
+  .hero-bg { position:absolute; inset:0; background: radial-gradient(ellipse 80% 55% at 50% 45%, #e67e2218 0%, transparent 68%), radial-gradient(ellipse 35% 35% at 15% 75%, #e67e2209 0%, transparent 60%), var(--bg); z-index:0; }
+  .hero-lines { position:absolute; inset:0; background-image:repeating-linear-gradient(0deg, transparent, transparent 78px, rgba(255,255,255,0.011) 78px, rgba(255,255,255,0.011) 79px); z-index:0; }
+  .hero-content { position:relative; z-index:1; }
+  .autopsy-label { font-family:var(--font-display); letter-spacing:0.4em; font-size:0.72rem; color:var(--accent); text-transform:uppercase; margin-bottom:1.8rem; opacity:0; animation:fadeUp 0.8s ease 0.2s forwards; }
+  .hero-artist { font-family:var(--font-display); font-size:clamp(4rem,16vw,14rem); line-height:0.88; letter-spacing:-0.02em; color:var(--text); opacity:0; animation:fadeUp 0.8s ease 0.4s forwards; }
+  .hero-album { font-family:var(--font-serif); font-style:italic; font-size:clamp(1.2rem,4vw,3rem); color:var(--gold); margin-top:0.6rem; opacity:0; animation:fadeUp 0.8s ease 0.6s forwards; line-height:1.25; max-width:800px; }
+  .hero-meta { font-family:var(--font-display); letter-spacing:0.3em; font-size:0.85rem; color:var(--muted); margin-top:1.5rem; opacity:0; animation:fadeUp 0.8s ease 0.8s forwards; }
+  .hero-rule { width:1px; height:70px; background:linear-gradient(to bottom, var(--accent), transparent); margin:3rem auto 0; opacity:0; animation:fadeUp 0.8s ease 1s forwards; }
+  .scroll-hint { font-size:0.68rem; letter-spacing:0.35em; color:var(--muted); text-transform:uppercase; margin-top:0.8rem; opacity:0; animation:fadeUp 0.8s ease 1.2s forwards; }
+  .verdict-bar { background:var(--accent); padding:1.1rem 2rem; text-align:center; font-family:var(--font-body); font-size:0.92rem; color:rgba(0,0,0,0.85); font-weight:500; line-height:1.5; }
+
+  /* SCORE */
+  .score-section { background:var(--bg2); border-top:1px solid var(--border); border-bottom:1px solid var(--border); }
+  .score-inner { max-width:920px; margin:0 auto; padding:6rem 2rem; display:grid; grid-template-columns:1fr 1.5fr; gap:5rem; align-items:center; }
+  @media(max-width:640px){.score-inner{grid-template-columns:1fr;gap:2.5rem;}}
+  .score-display { text-align:center; }
+  .score-number { font-family:var(--font-display); font-size:clamp(5.5rem,16vw,11rem); line-height:1; color:var(--text); }
+  .score-number span { color:var(--accent); }
+  .score-label { font-family:var(--font-display); letter-spacing:0.35em; font-size:0.75rem; color:var(--muted); margin-top:0.4rem; }
+  .score-verdict { font-family:var(--font-serif); font-style:italic; font-size:1.3rem; line-height:1.55; margin-bottom:1.5rem; color:var(--text); }
+  .score-defense { font-size:0.88rem; color:var(--muted); line-height:1.85; }
+
+  /* THEMES */
+  .section { max-width:920px; margin:0 auto; padding:6rem 2rem; }
+  .section-label { font-family:var(--font-display); letter-spacing:0.4em; font-size:0.68rem; color:var(--accent); text-transform:uppercase; margin-bottom:1.4rem; }
+  .section-title { font-family:var(--font-serif); font-size:clamp(1.8rem,4.5vw,3.2rem); font-weight:900; line-height:1.1; margin-bottom:2.5rem; }
+  .section-title em { font-style:italic; color:var(--gold); }
+  .pill { padding:0.35rem 0.9rem; border:1px solid var(--border); border-radius:2px; font-size:0.7rem; letter-spacing:0.15em; text-transform:uppercase; font-family:var(--font-display); color:var(--text); background:transparent; transition:all 0.2s; cursor:default; }
+  .pill:hover, .pill.active { border-color:var(--accent); color:var(--accent); background:#e67e2214; }
+  .theme-pills { display:flex; flex-wrap:wrap; gap:0.45rem; margin:0 0 3rem; }
+  .themes-section { background:var(--bg2); border-top:1px solid var(--border); }
+  .themes-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:1.5px; background:var(--border); border:1px solid var(--border); margin-top:0; }
+  .theme-card { background:var(--bg2); padding:2.2rem 1.8rem; transition:background 0.2s; cursor:default; position:relative; overflow:hidden; }
+  .theme-card::before { content:''; position:absolute; top:0; left:0; width:3px; height:0; background:var(--accent); transition:height 0.3s; }
+  .theme-card:hover::before { height:100%; }
+  .theme-card:hover { background:var(--bg3); }
+  .theme-card-icon { font-size:1.8rem; margin-bottom:0.9rem; display:block; }
+  .theme-card-title { font-family:var(--font-serif); font-size:1rem; font-weight:700; margin-bottom:0.6rem; }
+  .theme-card-text { font-size:0.82rem; color:var(--muted); line-height:1.75; }
+
+  /* QUOTE */
+  .quote-section { padding:7rem 2rem; text-align:center; position:relative; overflow:hidden; }
+  .quote-bg { position:absolute; inset:0; background:radial-gradient(ellipse 55% 55% at 50% 50%, #e67e220a 0%, transparent 70%); }
+  .quote-mark { font-family:var(--font-serif); font-size:7rem; line-height:0; vertical-align:-1.8rem; color:#e67e2225; margin-right:0.05em; }
+  .quote-text { font-family:var(--font-serif); font-style:italic; font-size:clamp(1.4rem,3.5vw,2.5rem); line-height:1.35; max-width:680px; margin:0 auto; position:relative; z-index:1; }
+  .quote-attr { margin-top:2rem; font-size:0.72rem; letter-spacing:0.3em; text-transform:uppercase; color:var(--muted); font-family:var(--font-display); position:relative; z-index:1; }
+
+  /* TRACKS */
+  .tracks-section { background:var(--bg); border-top:1px solid var(--border); }
+  .tracks-inner { max-width:920px; margin:0 auto; padding:6rem 2rem; }
+  .track-item { border-bottom:1px solid var(--border); overflow:hidden; cursor:pointer; transition:background 0.15s; }
+  .track-item:first-of-type { border-top:1px solid var(--border); }
+  .track-item:hover { background:rgba(255,255,255,0.018); }
+  .track-header { display:grid; grid-template-columns:3rem 1fr auto; align-items:center; gap:1.2rem; padding:1.1rem 0; }
+  .track-num { font-family:var(--font-display); font-size:0.75rem; color:var(--muted); letter-spacing:0.1em; }
+  .track-name { font-family:var(--font-serif); font-size:1rem; font-weight:700; }
+  .track-right { display:flex; align-items:center; gap:1.2rem; }
+  .track-score-bar { width:70px; height:3px; background:rgba(255,255,255,0.08); border-radius:2px; overflow:hidden; }
+  .track-score-fill { height:100%; background:var(--accent); transform-origin:left; transform:scaleX(0); transition:transform 0.8s ease; border-radius:2px; }
+  .track-score-num { font-family:var(--font-display); font-size:0.95rem; color:var(--muted); min-width:2.2rem; text-align:right; }
+  .track-expand-icon { font-size:0.55rem; color:var(--muted); transition:transform 0.3s; }
+  .track-item.open .track-expand-icon { transform:rotate(180deg); }
+  .track-body { max-height:0; overflow:hidden; transition:max-height 0.38s ease; }
+  .track-body-inner { padding:0 0 1.4rem 0; margin-left:4.2rem; color:var(--muted); font-size:0.87rem; line-height:1.8; border-left:2px solid var(--accent); padding-left:1.4rem; }
+
+  /* CHART */
+  .chart-section { background:var(--bg3); border-top:1px solid var(--border); border-bottom:1px solid var(--border); }
+  .chart-inner { max-width:920px; margin:0 auto; padding:6rem 2rem; }
+  .chart-bars { display:flex; flex-direction:column; gap:0.85rem; margin-top:3rem; }
+  .bar-row { display:grid; grid-template-columns:170px 1fr 2.8rem; align-items:center; gap:1rem; }
+  @media(max-width:500px){.bar-row{grid-template-columns:90px 1fr 2.5rem;}}
+  .bar-label { font-size:0.78rem; color:var(--muted); text-align:right; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .bar-track { height:5px; background:rgba(255,255,255,0.055); border-radius:3px; overflow:hidden; }
+  .bar-fill { height:100%; background:linear-gradient(90deg, var(--accent), var(--gold)); transform-origin:left; transform:scaleX(0); transition:transform 0.85s ease; border-radius:3px; }
+  .bar-val { font-family:var(--font-display); font-size:0.88rem; color:var(--text); }
+
+  /* FOOTNOTE + FOOTER */
+  .footnote-section { padding:5rem 2rem; text-align:center; border-top:1px solid var(--border); background:var(--bg2); }
+  .footnote-text { font-family:var(--font-serif); font-style:italic; font-size:1rem; color:var(--muted); line-height:1.85; max-width:640px; margin:0 auto; }
+  footer { padding:3.5rem 2rem; text-align:center; border-top:1px solid var(--border); }
+  .footer-sig { font-family:var(--font-serif); font-style:italic; font-size:0.88rem; color:var(--muted); }
+  .footer-brand { font-family:var(--font-display); letter-spacing:0.4em; font-size:0.68rem; color:rgba(255,255,255,0.12); margin-top:1.8rem; }
+  .divider { width:36px; height:1px; background:var(--accent); margin:1.8rem auto; }
+  .back-link { display:inline-block; margin-top:2rem; font-family:var(--font-display); letter-spacing:0.25em; font-size:0.72rem; color:var(--accent); text-decoration:none; border:1px solid var(--accent); padding:0.6rem 1.4rem; transition:all 0.2s; }
+  .back-link:hover { background:var(--accent); color:#000; }
+
+  /* ANIMATIONS */
+  @keyframes fadeUp { from{opacity:0;transform:translateY(28px)} to{opacity:1;transform:translateY(0)} }
+  .reveal { opacity:0; transform:translateY(38px); transition:opacity 0.7s ease, transform 0.7s ease; }
+  .reveal.visible { opacity:1; transform:translateY(0); }
+</style>
+</head>
+<body>
+<div class="progress-bar" id="progress"></div>
+<nav>
+  <a href="index.html" class="nav-back">← All Autopsies</a>
+  <div class="nav-score" id="navScore">9.7 / 10</div>
+</nav>
+
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-lines"></div>
+  <div class="hero-content">
+    <div class="autopsy-label">Album Autopsy · 003</div>
+    <div class="hero-artist">Kanye West</div>
+    <div class="hero-album">My Beautiful Dark Twisted Fantasy</div>
+    <div class="hero-meta">Roc-A-Fella / Def Jam · 2010</div>
+    <div class="hero-rule"></div>
+    <div class="scroll-hint">Scroll to dissect</div>
+  </div>
+</section>
+
+<div class="verdict-bar">An ego at full detonation, recorded in Hawaii while the world waited to see if he'd destroy himself. He made the most maximalist rap album ever made instead.</div>
+
+<section class="score-section">
+  <div class="score-inner">
+    <div class="score-display reveal">
+      <div class="score-number" id="scoreCounter">0<span>.0</span></div>
+      <div class="score-label">Overall Score</div>
+    </div>
+    <div class="reveal">
+      <div class="score-verdict">"An ego at full detonation, recorded in Hawaii while the world waited to see if he'd destroy himself. He made the most maximalist rap album ever made instead."</div>
+      <div class="score-defense">9.7 because it is the most technically overwhelming rap record of its era and possibly any era. Every track is produced at a level that makes contemporaries sound like demos. Runaway alone - one piano note, 9 minutes, a man building a toast to himself that is also a funeral - would justify most scores. The 0.3: Blame Game goes three minutes past its own argument, and the sequencing between Runaway and the album's close loses some of the heat that first half built. But this is Kanye operating at a ceiling he never reached again, and the gap between 9.7 and 10 is thinner than it sounds. Most people's 10s don't hit this hard.</div>
+    </div>
+  </div>
+</section>
+
+<div class="themes-section">
+  <div class="section">
+    <div class="section-label reveal">Central Thesis</div>
+    <div class="section-title reveal">What <em>This Album Is Really About</em></div>
+    <div class="theme-pills reveal"><span class="pill active">The Ego as Wound</span><span class="pill">Beauty and Self-Destruction</span><span class="pill">Celebrity as Monster Myth</span><span class="pill">The Apology That Isn't</span></div>
+    <div class="themes-grid reveal">
+    <div class="theme-card">
+      <span class="theme-card-icon">👑</span>
+      <div class="theme-card-title">The Ego as Wound</div>
+      <div class="theme-card-text">Every act of bravado is also a confession of damage. Power is about having none. Runaway is an apology to everyone he's hurt. The ego is the armor, and the album keeps showing you the dents.</div>
+    </div>
+    <div class="theme-card">
+      <span class="theme-card-icon">🌹</span>
+      <div class="theme-card-title">Beauty and Self-Destruction</div>
+      <div class="theme-card-text">The title isn't ironic. The fantasy IS dark and twisted and beautiful simultaneously. Kanye doesn't resolve the contradiction - he lives inside it for 68 minutes and makes it the subject.</div>
+    </div>
+    <div class="theme-card">
+      <span class="theme-card-icon">🎭</span>
+      <div class="theme-card-title">Celebrity as Monster Myth</div>
+      <div class="theme-card-text">Monsters appear on every track - literal (Monster), metaphorical (Gorgeous), classical (So Appalled). The album casts fame as a mythology in which Kanye is both hero and creature.</div>
+    </div>
+    <div class="theme-card">
+      <span class="theme-card-icon">🔥</span>
+      <div class="theme-card-title">The Apology That Isn't</div>
+      <div class="theme-card-text">Runaway is the album's emotional center: a man who knows exactly what he is, drinks a toast to it, and still can't stop. The most self-aware track in his catalog and the least resolved.</div>
+    </div></div>
+  </div>
+</div>
+
+<section class="quote-section">
+  <div class="quote-bg"></div>
+  <div class="quote-text reveal"><span class="quote-mark">"</span>No one man should have all that power.</div>
+  <div class="quote-attr reveal">Kanye West · POWER · 2010</div>
+</section>
+
+<section class="tracks-section">
+  <div class="tracks-inner">
+    <div class="section-label reveal">Track by Track</div>
+    <div class="section-title reveal">The <em>Dissection</em></div>
+    <div id="trackList" class="reveal">
+    <div class="track-item">
+      <div class="track-header">
+        <span class="track-num">01</span>
+        <span class="track-name">Dark Fantasy</span>
+        <div class="track-right">
+          <div class="track-score-bar"><div class="track-score-fill" data-score="9.4"></div></div>
+          <span class="track-score-num">9.4</span>
+          <span class="track-expand-icon">▼</span>
+        </div>
+      </div>
+      <div class="track-body"><div class="track-body-inner">Nicki Minaj reads a poem. Then the beat drops and the album announces itself as myth. 'Can we get much higher?' is the right question to open with.</div></div>
+    </div>
+    <div class="track-item">
+      <div class="track-header">
+        <span class="track-num">02</span>
+        <span class="track-name">Gorgeous</span>
+        <div class="track-right">
+          <div class="track-score-bar"><div class="track-score-fill" data-score="9.2"></div></div>
+          <span class="track-score-num">9.2</span>
+          <span class="track-expand-icon">▼</span>
+        </div>
+      </div>
+      <div class="track-body"><div class="track-body-inner">Kid Cudi and Raekwon on a track about beauty as a system of exclusion. The guitar sample creates more emotional weight than most bands manage with a full arrangement.</div></div>
+    </div>
+    <div class="track-item">
+      <div class="track-header">
+        <span class="track-num">03</span>
+        <span class="track-name">POWER</span>
+        <div class="track-right">
+          <div class="track-score-bar"><div class="track-score-fill" data-score="9.6"></div></div>
+          <span class="track-score-num">9.6</span>
+          <span class="track-expand-icon">▼</span>
+        </div>
+      </div>
+      <div class="track-body"><div class="track-body-inner">One loop, two samples, 4:52, and the most confident statement of vulnerability in pop music that decade. The video is a single unbroken tableau.</div></div>
+    </div>
+    <div class="track-item">
+      <div class="track-header">
+        <span class="track-num">04</span>
+        <span class="track-name">All of the Lights</span>
+        <div class="track-right">
+          <div class="track-score-bar"><div class="track-score-fill" data-score="9.3"></div></div>
+          <span class="track-score-num">9.3</span>
+          <span class="track-expand-icon">▼</span>
+        </div>
+      </div>
+      <div class="track-body"><div class="track-body-inner">Rihanna, Kid Cudi, Elton John, and eleven others. A domestic violence narrative disguised as a maximalist banger. The dissonance is intentional and exact.</div></div>
+    </div>
+    <div class="track-item">
+      <div class="track-header">
+        <span class="track-num">05</span>
+        <span class="track-name">Monster</span>
+        <div class="track-right">
+          <div class="track-score-bar"><div class="track-score-fill" data-score="9.5"></div></div>
+          <span class="track-score-num">9.5</span>
+          <span class="track-expand-icon">▼</span>
+        </div>
+      </div>
+      <div class="track-body"><div class="track-body-inner">Nicki Minaj's verse is one of the ten best guest appearances in rap history. Jay-Z and Rick Ross are excellent. Nicki makes them both sound like they're in a different song.</div></div>
+    </div>
+    <div class="track-item">
+      <div class="track-header">
+        <span class="track-num">06</span>
+        <span class="track-name">So Appalled</span>
+        <div class="track-right">
+          <div class="track-score-bar"><div class="track-score-fill" data-score="8.8"></div></div>
+          <span class="track-score-num">8.8</span>
+          <span class="track-expand-icon">▼</span>
+        </div>
+      </div>
+      <div class="track-body"><div class="track-body-inner">The loosest track on the record - a cypher energy the tighter cuts don't have. Jay, Pusha, CyHi, RZA, Swizz. Works as texture.</div></div>
+    </div>
+    <div class="track-item">
+      <div class="track-header">
+        <span class="track-num">07</span>
+        <span class="track-name">Devil in a New Dress</span>
+        <div class="track-right">
+          <div class="track-score-bar"><div class="track-score-fill" data-score="9.4"></div></div>
+          <span class="track-score-num">9.4</span>
+          <span class="track-expand-icon">▼</span>
+        </div>
+      </div>
+      <div class="track-body"><div class="track-body-inner">The Rick Ross hook is the best thing Ross has ever done and he's barely on the track. The Smokey Robinson sample is treated with more care than most producers treat original compositions.</div></div>
+    </div>
+    <div class="track-item">
+      <div class="track-header">
+        <span class="track-num">08</span>
+        <span class="track-name">Runaway</span>
+        <div class="track-right">
+          <div class="track-score-bar"><div class="track-score-fill" data-score="10"></div></div>
+          <span class="track-score-num">10</span>
+          <span class="track-expand-icon">▼</span>
+        </div>
+      </div>
+      <div class="track-body"><div class="track-body-inner">One piano note. Nine minutes. A man toasting his own worst qualities while a vocoder weeps. The most honest thing Kanye has ever recorded and he disguised it as an anthem.</div></div>
+    </div>
+    <div class="track-item">
+      <div class="track-header">
+        <span class="track-num">09</span>
+        <span class="track-name">Hell of a Life</span>
+        <div class="track-right">
+          <div class="track-score-bar"><div class="track-score-fill" data-score="8.9"></div></div>
+          <span class="track-score-num">8.9</span>
+          <span class="track-expand-icon">▼</span>
+        </div>
+      </div>
+      <div class="track-body"><div class="track-body-inner">A Black Sabbath sample in a track about fame and desire. Should feel like a tonal rupture. Instead it's one of the most fun tracks on the record.</div></div>
+    </div>
+    <div class="track-item">
+      <div class="track-header">
+        <span class="track-num">10</span>
+        <span class="track-name">Blame Game</span>
+        <div class="track-right">
+          <div class="track-score-bar"><div class="track-score-fill" data-score="8.7"></div></div>
+          <span class="track-score-num">8.7</span>
+          <span class="track-expand-icon">▼</span>
+        </div>
+      </div>
+      <div class="track-body"><div class="track-body-inner">John Legend over a soul sample, then a Chris Rock breakdown that extends past its welcome. The first two-thirds are perfect. The last act is self-indulgent in a way most of the album avoids.</div></div>
+    </div>
+    <div class="track-item">
+      <div class="track-header">
+        <span class="track-num">11</span>
+        <span class="track-name">Lost in the World</span>
+        <div class="track-right">
+          <div class="track-score-bar"><div class="track-score-fill" data-score="9.1"></div></div>
+          <span class="track-score-num">9.1</span>
+          <span class="track-expand-icon">▼</span>
+        </div>
+      </div>
+      <div class="track-body"><div class="track-body-inner">Bon Iver's 'Woods' used as a foundation for something it wasn't designed to hold. That it works is the album's most unexpected miracle.</div></div>
+    </div>
+    <div class="track-item">
+      <div class="track-header">
+        <span class="track-num">12</span>
+        <span class="track-name">Who Will Survive in America</span>
+        <div class="track-right">
+          <div class="track-score-bar"><div class="track-score-fill" data-score="9"></div></div>
+          <span class="track-score-num">9</span>
+          <span class="track-expand-icon">▼</span>
+        </div>
+      </div>
+      <div class="track-body"><div class="track-body-inner">Gil Scott-Heron closes the record. The album hands its last 90 seconds to a man who didn't live to see what he started. The most dignified exit Kanye has ever made.</div></div>
+    </div></div>
+  </div>
+</section>
+
+<section class="chart-section">
+  <div class="chart-inner">
+    <div class="section-label reveal">Score Breakdown</div>
+    <div class="section-title reveal">Every Track, <em>Ranked</em></div>
+    <div class="chart-bars reveal" id="chartBars">
+    <div class="bar-row">
+      <div class="bar-label">Runaway</div>
+      <div class="bar-track"><div class="bar-fill" data-score="10"></div></div>
+      <div class="bar-val">10</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">POWER</div>
+      <div class="bar-track"><div class="bar-fill" data-score="9.6"></div></div>
+      <div class="bar-val">9.6</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">Monster</div>
+      <div class="bar-track"><div class="bar-fill" data-score="9.5"></div></div>
+      <div class="bar-val">9.5</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">Dark Fantasy</div>
+      <div class="bar-track"><div class="bar-fill" data-score="9.4"></div></div>
+      <div class="bar-val">9.4</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">Devil in a New Dress</div>
+      <div class="bar-track"><div class="bar-fill" data-score="9.4"></div></div>
+      <div class="bar-val">9.4</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">All of the Lights</div>
+      <div class="bar-track"><div class="bar-fill" data-score="9.3"></div></div>
+      <div class="bar-val">9.3</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">Gorgeous</div>
+      <div class="bar-track"><div class="bar-fill" data-score="9.2"></div></div>
+      <div class="bar-val">9.2</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">Lost in the World</div>
+      <div class="bar-track"><div class="bar-fill" data-score="9.1"></div></div>
+      <div class="bar-val">9.1</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">Who Will Survive in America</div>
+      <div class="bar-track"><div class="bar-fill" data-score="9"></div></div>
+      <div class="bar-val">9</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">Hell of a Life</div>
+      <div class="bar-track"><div class="bar-fill" data-score="8.9"></div></div>
+      <div class="bar-val">8.9</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">So Appalled</div>
+      <div class="bar-track"><div class="bar-fill" data-score="8.8"></div></div>
+      <div class="bar-val">8.8</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">Blame Game</div>
+      <div class="bar-track"><div class="bar-fill" data-score="8.7"></div></div>
+      <div class="bar-val">8.7</div>
+    </div></div>
+  </div>
+</section>
+
+<div class="footnote-section">
+  <div class="section-label reveal" style="text-align:center;">Footnote</div>
+  <div class="footnote-text reveal">The entire album was made in Hawaii, semi-exiled after the Taylor Swift VMA incident. Kanye invited musicians and producers to live and work with him for months. The recording sessions were described as a commune. What came out sounds exactly like that.</div>
+</div>
+
+<footer>
+  <div class="footer-sig reveal">Album Autopsy - A structured dissection of records that matter.</div>
+  <div class="divider"></div>
+  <a href="index.html" class="back-link reveal">← Back to All Autopsies</a>
+  <div class="footer-brand">@MyParentsDidntLeaveForThis</div>
+</footer>
+
+<script>
+  // Progress bar
+  window.addEventListener('scroll', () => {
+    const p = (window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100;
+    document.getElementById('progress').style.width = p + '%';
+  });
+
+  // Intersection observer
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (!e.isIntersecting) return;
+      e.target.classList.add('visible');
+      if (e.target.id === 'scoreCounter') {
+        animateScore(0, 9.7, 1600);
+        document.getElementById('navScore').classList.add('visible');
+      }
+    });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+  if(document.getElementById('scoreCounter')) observer.observe(document.getElementById('scoreCounter'));
+
+  // Track list observer
+  const tlObs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (!e.isIntersecting) return;
+      e.target.querySelectorAll('.track-score-fill').forEach((f,i) => {
+        setTimeout(() => { f.style.transform = `scaleX(${parseFloat(f.dataset.score)/10})`; }, i * 55);
+      });
+      tlObs.unobserve(e.target);
+    });
+  }, { threshold: 0.08 });
+  const tl = document.getElementById('trackList');
+  if(tl) tlObs.observe(tl);
+
+  // Chart observer
+  const chObs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (!e.isIntersecting) return;
+      e.target.querySelectorAll('.bar-fill').forEach((f,i) => {
+        setTimeout(() => { const s = parseFloat(f.dataset.score); f.style.transform = `scaleX(${Math.max(0,(s-6)/4)})`; }, i * 70);
+      });
+      chObs.unobserve(e.target);
+    });
+  }, { threshold: 0.08 });
+  const cb = document.getElementById('chartBars');
+  if(cb) chObs.observe(cb);
+
+  // Score counter
+  function animateScore(from, to, duration) {
+    const el = document.getElementById('scoreCounter');
+    if(!el) return;
+    const start = performance.now();
+    (function tick(now) {
+      const p = Math.min((now - start) / duration, 1);
+      const ease = 1 - Math.pow(1 - p, 3);
+      const val = from + (to - from) * ease;
+      const int = Math.floor(val);
+      const dec = Math.round((val - int) * 10);
+      el.innerHTML = int + '<span>.' + dec + '</span>';
+      if(p < 1) requestAnimationFrame(tick);
+    })(start);
+  }
+
+  // Track toggles
+  document.querySelectorAll('.track-item').forEach(item => {
+    item.querySelector('.track-header').addEventListener('click', () => {
+      const body = item.querySelector('.track-body');
+      const open = item.classList.toggle('open');
+      body.style.maxHeight = open ? body.scrollHeight + 'px' : '0';
+    });
+  });
+
+  // Pills
+  document.querySelectorAll('.pill').forEach(pill => {
+    pill.addEventListener('click', () => {
+      document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+      pill.classList.add('active');
+    });
+  });
+</script>
+</body>
+</html>

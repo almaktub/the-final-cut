@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2014 Forest Hills Drive - Album Autopsy</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #080809;
+    --bg2: #0e0e10;
+    --bg3: #131315;
+    --accent: #c4792a;
+    --accent-dark: #8a4f18;
+    --gold: #c9a84c;
+    --text: #eae6de;
+    --muted: #6e6a64;
+    --border: rgba(255,255,255,0.055);
+    --font-display: 'Bebas Neue', sans-serif;
+    --font-serif: 'Playfair Display', serif;
+    --font-body: 'DM Sans', sans-serif;
+  }
+  html { scroll-behavior: smooth; }
+  body { background: var(--bg); color: var(--text); font-family: var(--font-body); font-weight: 300; line-height: 1.7; overflow-x: hidden; }
+  body::before { content:''; position:fixed; inset:0; background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E"); pointer-events:none; z-index:9999; opacity:0.45; }
+  .progress-bar { position:fixed; top:0; left:0; height:2px; background:var(--accent); z-index:200; width:0%; transition: width 0.1s linear; }
+  nav { position:fixed; top:0; left:0; right:0; padding:1.1rem 2.5rem; display:flex; justify-content:space-between; align-items:center; z-index:100; background:linear-gradient(to bottom, rgba(8,8,9,0.92), transparent); }
+  .nav-back { font-family:var(--font-display); letter-spacing:0.25em; font-size:0.7rem; color:var(--muted); text-decoration:none; transition:color 0.2s; }
+  .nav-back:hover { color:var(--accent); }
+  .nav-score { font-family:var(--font-display); font-size:1.1rem; color:var(--accent); opacity:0; transition:opacity 0.4s; }
+  .nav-score.visible { opacity:1; }
+
+  .hero { min-height:100vh; display:flex; flex-direction:column; justify-content:center; align-items:center; position:relative; overflow:hidden; padding:4rem 2rem; text-align:center; }
+  .hero-bg { position:absolute; inset:0; background: radial-gradient(ellipse 80% 55% at 50% 45%, #c4792a18 0%, transparent 68%), radial-gradient(ellipse 35% 35% at 15% 75%, #c4792a09 0%, transparent 60%), var(--bg); z-index:0; }
+  .hero-lines { position:absolute; inset:0; background-image:repeating-linear-gradient(0deg, transparent, transparent 78px, rgba(255,255,255,0.011) 78px, rgba(255,255,255,0.011) 79px); z-index:0; }
+  .hero-content { position:relative; z-index:1; }
+  .autopsy-label { font-family:var(--font-display); letter-spacing:0.4em; font-size:0.72rem; color:var(--accent); text-transform:uppercase; margin-bottom:1.8rem; opacity:0; animation:fadeUp 0.8s ease 0.2s forwards; }
+  .hero-artist { font-family:var(--font-display); font-size:clamp(4rem,16vw,14rem); line-height:0.88; letter-spacing:-0.02em; color:var(--text); opacity:0; animation:fadeUp 0.8s ease 0.4s forwards; }
+  .hero-album { font-family:var(--font-serif); font-style:italic; font-size:clamp(1.2rem,4vw,3rem); color:var(--gold); margin-top:0.6rem; opacity:0; animation:fadeUp 0.8s ease 0.6s forwards; line-height:1.25; max-width:800px; }
+  .hero-meta { font-family:var(--font-display); letter-spacing:0.3em; font-size:0.85rem; color:var(--muted); margin-top:1.5rem; opacity:0; animation:fadeUp 0.8s ease 0.8s forwards; }
+  .hero-rule { width:1px; height:70px; background:linear-gradient(to bottom, var(--accent), transparent); margin:3rem auto 0; opacity:0; animation:fadeUp 0.8s ease 1s forwards; }
+  .scroll-hint { font-size:0.68rem; letter-spacing:0.35em; color:var(--muted); text-transform:uppercase; margin-top:0.8rem; opacity:0; animation:fadeUp 0.8s ease 1.2s forwards; }
+  .verdict-bar { background:var(--accent); padding:1.1rem 2rem; text-align:center; font-family:var(--font-body); font-size:0.92rem; color:rgba(0,0,0,0.85); font-weight:500; line-height:1.5; }
+
+  .score-section { background:var(--bg2); border-top:1px solid var(--border); border-bottom:1px solid var(--border); }
+  .score-inner { max-width:920px; margin:0 auto; padding:6rem 2rem; display:grid; grid-template-columns:1fr 1.5fr; gap:5rem; align-items:center; }
+  @media(max-width:640px){.score-inner{grid-template-columns:1fr;gap:2.5rem;}}
+  .score-display { text-align:center; }
+  .score-number { font-family:var(--font-display); font-size:clamp(5.5rem,16vw,11rem); line-height:1; color:var(--text); }
+  .score-number span { color:var(--accent); }
+  .score-label { font-family:var(--font-display); letter-spacing:0.35em; font-size:0.75rem; color:var(--muted); margin-top:0.4rem; }
+  .score-verdict { font-family:var(--font-serif); font-style:italic; font-size:1.3rem; line-height:1.55; margin-bottom:1.5rem; color:var(--text); }
+  .score-defense { font-size:0.88rem; color:var(--muted); line-height:1.85; }
+
+  .section { max-width:920px; margin:0 auto; padding:6rem 2rem; }
+  .section-label { font-family:var(--font-display); letter-spacing:0.4em; font-size:0.68rem; color:var(--accent); text-transform:uppercase; margin-bottom:1.4rem; }
+  .section-title { font-family:var(--font-serif); font-size:clamp(1.8rem,4.5vw,3.2rem); font-weight:900; line-height:1.1; margin-bottom:2.5rem; }
+  .section-title em { font-style:italic; color:var(--gold); }
+  .pill { padding:0.35rem 0.9rem; border:1px solid var(--border); border-radius:2px; font-size:0.7rem; letter-spacing:0.15em; text-transform:uppercase; font-family:var(--font-display); color:var(--text); background:transparent; transition:all 0.2s; cursor:default; }
+  .pill:hover, .pill.active { border-color:var(--accent); color:var(--accent); background:#c4792a14; }
+  .theme-pills { display:flex; flex-wrap:wrap; gap:0.45rem; margin:0 0 3rem; }
+  .themes-section { background:var(--bg2); border-top:1px solid var(--border); }
+  .themes-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:1.5px; background:var(--border); border:1px solid var(--border); margin-top:0; }
+  .theme-card { background:var(--bg2); padding:2.2rem 1.8rem; transition:background 0.2s; cursor:default; position:relative; overflow:hidden; }
+  .theme-card::before { content:''; position:absolute; top:0; left:0; width:3px; height:0; background:var(--accent); transition:height 0.3s; }
+  .theme-card:hover::before { height:100%; }
+  .theme-card:hover { background:var(--bg3); }
+  .theme-card-icon { font-size:1.8rem; margin-bottom:0.9rem; display:block; }
+  .theme-card-title { font-family:var(--font-serif); font-size:1rem; font-weight:700; margin-bottom:0.6rem; }
+  .theme-card-text { font-size:0.82rem; color:var(--muted); line-height:1.75; }
+
+  .quote-section { padding:7rem 2rem; text-align:center; position:relative; overflow:hidden; }
+  .quote-bg { position:absolute; inset:0; background:radial-gradient(ellipse 55% 55% at 50% 50%, #c4792a0a 0%, transparent 70%); }
+  .quote-mark { font-family:var(--font-serif); font-size:7rem; line-height:0; vertical-align:-1.8rem; color:#c4792a25; margin-right:0.05em; }
+  .quote-text { font-family:var(--font-serif); font-style:italic; font-size:clamp(1.4rem,3.5vw,2.5rem); line-height:1.35; max-width:680px; margin:0 auto; position:relative; z-index:1; }
+  .quote-attr { margin-top:2rem; font-size:0.72rem; letter-spacing:0.3em; text-transform:uppercase; color:var(--muted); font-family:var(--font-display); position:relative; z-index:1; }
+
+  .tracks-section { background:var(--bg); border-top:1px solid var(--border); }
+  .tracks-inner { max-width:920px; margin:0 auto; padding:6rem 2rem; }
+  .track-item { border-bottom:1px solid var(--border); overflow:hidden; cursor:pointer; transition:background 0.15s; }
+  .track-item:first-of-type { border-top:1px solid var(--border); }
+  .track-item:hover { background:rgba(255,255,255,0.018); }
+  .track-header { display:grid; grid-template-columns:3rem 1fr auto; align-items:center; gap:1.2rem; padding:1.1rem 0; }
+  .track-num { font-family:var(--font-display); font-size:0.75rem; color:var(--muted); letter-spacing:0.1em; }
+  .track-name { font-family:var(--font-serif); font-size:1rem; font-weight:700; }
+  .track-right { display:flex; align-items:center; gap:1.2rem; }
+  .track-score-bar { width:70px; height:3px; background:rgba(255,255,255,0.08); border-radius:2px; overflow:hidden; }
+  .track-score-fill { height:100%; background:var(--accent); transform-origin:left; transform:scaleX(0); transition:transform 0.8s ease; border-radius:2px; }
+  .track-score-num { font-family:var(--font-display); font-size:0.95rem; color:var(--muted); min-width:2.2rem; text-align:right; }
+  .track-expand-icon { font-size:0.55rem; color:var(--muted); transition:transform 0.3s; }
+  .track-item.open .track-expand-icon { transform:rotate(180deg); }
+  .track-body { max-height:0; overflow:hidden; transition:max-height 0.38s ease; }
+  .track-body-inner { padding:0 0 1.4rem 0; margin-left:4.2rem; color:var(--muted); font-size:0.87rem; line-height:1.8; border-left:2px solid var(--accent); padding-left:1.4rem; }
+
+  .chart-section { background:var(--bg3); border-top:1px solid var(--border); border-bottom:1px solid var(--border); }
+  .chart-inner { max-width:920px; margin:0 auto; padding:6rem 2rem; }
+  .chart-bars { display:flex; flex-direction:column; gap:0.85rem; margin-top:3rem; }
+  .bar-row { display:grid; grid-template-columns:170px 1fr 2.8rem; align-items:center; gap:1rem; }
+  @media(max-width:500px){.bar-row{grid-template-columns:90px 1fr 2.5rem;}}
+  .bar-label { font-size:0.78rem; color:var(--muted); text-align:right; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .bar-track { height:5px; background:rgba(255,255,255,0.055); border-radius:3px; overflow:hidden; }
+  .bar-fill { height:100%; background:linear-gradient(90deg, var(--accent), var(--gold)); transform-origin:left; transform:scaleX(0); transition:transform 0.85s ease; border-radius:3px; }
+  .bar-val { font-family:var(--font-display); font-size:0.88rem; color:var(--text); }
+
+  .footnote-section { padding:5rem 2rem; text-align:center; border-top:1px solid var(--border); background:var(--bg2); }
+  .footnote-text { font-family:var(--font-serif); font-style:italic; font-size:1rem; color:var(--muted); line-height:1.85; max-width:640px; margin:0 auto; }
+  footer { padding:3.5rem 2rem; text-align:center; border-top:1px solid var(--border); }
+  .footer-sig { font-family:var(--font-serif); font-style:italic; font-size:0.88rem; color:var(--muted); }
+  .footer-brand { font-family:var(--font-display); letter-spacing:0.4em; font-size:0.68rem; color:rgba(255,255,255,0.12); margin-top:1.8rem; }
+  .divider { width:36px; height:1px; background:var(--accent); margin:1.8rem auto; }
+  .back-link { display:inline-block; margin-top:2rem; font-family:var(--font-display); letter-spacing:0.25em; font-size:0.72rem; color:var(--accent); text-decoration:none; border:1px solid var(--accent); padding:0.6rem 1.4rem; transition:all 0.2s; }
+  .back-link:hover { background:var(--accent); color:#000; }
+
+  @keyframes fadeUp { from{opacity:0;transform:translateY(28px)} to{opacity:1;transform:translateY(0)} }
+  .reveal { opacity:0; transform:translateY(38px); transition:opacity 0.7s ease, transform 0.7s ease; }
+  .reveal.visible { opacity:1; transform:translateY(0); }
+</style>
+</head>
+<body>
+<div class="progress-bar" id="progress"></div>
+<nav>
+  <a href="index.html" class="nav-back">← All Autopsies</a>
+  <div class="nav-score" id="navScore">8.7 / 10</div>
+</nav>
+
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-lines"></div>
+  <div class="hero-content">
+    <div class="autopsy-label">Album Autopsy · 069</div>
+    <div class="hero-artist">J. Cole</div>
+    <div class="hero-album">2014 Forest Hills Drive</div>
+    <div class="hero-meta">Dreamville / Roc Nation / Interscope · 2014 · Hip-Hop · 57:51</div>
+    <div class="hero-rule"></div>
+    <div class="scroll-hint">Scroll to dissect</div>
+  </div>
+</section>
+
+<div class="verdict-bar">Cole went back to the house he grew up in, put a photo of it on the cover, and named the album after the address. The whole thing is that honest. No features. No apologies. No distance between the man and the record.</div>
+
+<section class="score-section">
+  <div class="score-inner">
+    <div class="score-display reveal">
+      <div class="score-number" id="scoreCounter">0<span>.0</span></div>
+      <div class="score-label">Overall Score</div>
+    </div>
+    <div class="reveal">
+      <div class="score-verdict">"Cole went back to the house he grew up in and named the album after the address. The whole thing is that honest."</div>
+      <div class="score-defense">8.7 because 2014 Forest Hills Drive is the most complete version of what J. Cole does, executed without compromise. No features means no safety net — every moment is his to own, and he owns most of them. The storytelling on "Wet Dreamz" and "03' Adolescence" is some of the finest in a decade of rap; the production is warm, unhurried, and self-assured; the closer "Note to Self" breaks the fourth wall in a way that should be embarrassing and instead is the most disarming thing on the record. The 1.3 gap from a perfect score: Cole's didacticism is real. There are moments when the album stops trusting you to draw your own conclusions and starts drawing them for you with a red pen. A rapper who moralizes at you is a preacher, not a poet. Cole walks that line carefully but crosses it enough times to matter. Still one of the decade's essential rap records. The "platinum with no features" tag undersells it. It went platinum because it was good.</div>
+    </div>
+  </div>
+</section>
+
+<div class="themes-section">
+  <div class="section">
+    <div class="section-label reveal">Central Thesis</div>
+    <div class="section-title reveal">What <em>This Album Is Really About</em></div>
+    <div class="theme-pills reveal"><span class="pill active">Nostalgia as Reckoning</span><span class="pill">Class Anxiety</span><span class="pill">Coming of Age</span><span class="pill">Success Guilt</span></div>
+    <div class="themes-grid reveal">
+    <div class="theme-card">
+      <span class="theme-card-icon">🏠</span>
+      <div class="theme-card-title">Nostalgia as Reckoning</div>
+      <div class="theme-card-text">The address on the cover is real. Cole actually grew up at 2014 Forest Hills Drive in Fayetteville, North Carolina. The album isn't using childhood as a metaphor - it's using it as a location. That specificity is the difference between nostalgia and reckoning. Nostalgia softens. Reckoning asks what you left behind and whether leaving was worth it.</div>
+    </div>
+    <div class="theme-card">
+      <span class="theme-card-icon">💸</span>
+      <div class="theme-card-title">Class Anxiety</div>
+      <div class="theme-card-text">Cole made it out of Fayetteville and never stopped feeling guilty about it. The album holds that tension without resolving it, which is the right call. "A Tale of 2 Citiez" is the clearest statement - two men, same starting point, different endings, no clean moral. The anxiety isn't about money. It's about what survival costs the people who didn't make it out with you.</div>
+    </div>
+    <div class="theme-card">
+      <span class="theme-card-icon">🌱</span>
+      <div class="theme-card-title">Coming of Age</div>
+      <div class="theme-card-text">"Wet Dreamz" and "03' Adolescence" are the album's purest expressions of this. Both tracks render teenage experience with a specificity that makes them feel like recovered memories rather than songs. The embarrassment, the tenderness, the stakes that felt enormous and were enormous - Cole doesn't condescend to his younger self. He takes him seriously.</div>
+    </div>
+    <div class="theme-card">
+      <span class="theme-card-icon">🏆</span>
+      <div class="theme-card-title">Success Guilt</div>
+      <div class="theme-card-text">By 2014 Cole was genuinely famous, and the album knows it and is uncomfortable about it. "St. Tropez" puts the discomfort on the surface: he's in the most expensive place in the world wondering why it doesn't feel like what he was promised. The album doesn't celebrate making it. It interrogates what "making it" was supposed to mean and whether the definition held up.</div>
+    </div>
+    </div>
+  </div>
+</div>
+
+<section class="quote-section">
+  <div class="quote-bg"></div>
+  <div class="quote-text reveal"><span class="quote-mark">"</span>There's love in the struggle, I hope that you know.</div>
+  <div class="quote-attr reveal">J. Cole · Apparently · 2014 Forest Hills Drive · 2014</div>
+</section>
+
+<section class="tracks-section">
+  <div class="tracks-inner">
+    <div class="section-label reveal">Track by Track</div>
+    <div class="section-title reveal">The <em>Dissection</em></div>
+    <div id="trackList" class="reveal">
+
+    <div class="track-item">
+      <div class="track-header">
+        <span class="track-num">01</span>
+        <span class="track-name">Intro</span>
+        <div class="track-right">
+          <div class="track-score-bar"><div class="track-score-fill" data-score="8.5"></div></div>
+          <span class="track-score-num">8.5</span>
+          <span class="track-expand-icon">▼</span>
+        </div>
+      </div>
+      <div class="track-body"><div class="track-body-inner">A two-minute scene-setter that earns its length. Cole over a warm, hazy beat, establishing the album's emotional register before a word about the house or the neighborhood is spoken. The best intros don't announce the album - they create its atmosphere. This one creates it correctly: unhurried, self-aware, slightly melancholy without tipping into performance.</div></div>
+    </div>
+
+    <div class="track-item">
+      <div class="track-header">
+        <span class="track-num">02</span>
+        <span class="track-name">January 28th</span>
+        <div class="track-right">
+          <div class="track-score-bar"><div class="track-score-fill" data-score="8.8"></div></div>
+          <span class="track-score-num">8.8</span>
+          <span class="track-expand-icon">▼</span>
+        </div>
+      </div>
+      <div class="track-body"><div class="track-body-inner">His birthday. Cole rapping about his own birth, his mother's situation, the accident of arriving when and where he did. The track refuses to be inspirational about it, which is the only honest approach. You didn't choose your circumstances. You just chose what to do with them. The production sounds like memory: warm, slightly out of focus, slightly out of reach.</div></div>
+    </div>
+
+    <div class="track-item">
+      <div class="track-header">
+        <span class="track-num">03</span>
+        <span class="track-name">Wet Dreamz</span>
+        <div class="track-right">
+          <div class="track-score-bar"><div class="track-score-fill" data-score="9.5"></div></div>
+          <span class="track-score-num">9.5</span>
+          <span class="track-expand-icon">▼</span>
+        </div>
+      </div>
+      <div class="track-body"><div class="track-body-inner">The album's most technically perfect track. A story about losing your virginity told from both sides of the same mutual inexperience, and the punchline is that the girl was just as terrified as he was and neither of them knew. It's funny and tender and completely specific, which is why it works. Cole doesn't generalize the story into a statement about youth. He tells one story so well that the generalization happens on its own. This is how storytelling is supposed to function.</div></div>
+    </div>
+
+    <div class="track-item">
+      <div class="track-header">
+        <span class="track-num">04</span>
+        <span class="track-name">03' Adolescence</span>
+        <div class="track-right">
+          <div class="track-score-bar"><div class="track-score-fill" data-score="9.3"></div></div>
+          <span class="track-score-num">9.3</span>
+          <span class="track-expand-icon">▼</span>
+        </div>
+      </div>
+      <div class="track-body"><div class="track-body-inner">The coming-of-age centerpiece. Cole at 18, learning what the neighborhood teaches you when no one's looking. The older boy in the car explaining how things work is one of the album's most vivid characters, and he appears in two verses. The track understands something important: the people who shaped you didn't always mean to, and they didn't always know they were doing it. The second half's beat switch is one of the better production decisions on the record.</div></div>
+    </div>
+
+    <div class="track-item">
+      <div class="track-header">
+        <span class="track-num">05</span>
+        <span class="track-name">A Tale of 2 Citiez</span>
+        <div class="track-right">
+          <div class="track-score-bar"><div class="track-score-fill" data-score="9.0"></div></div>
+          <span class="track-score-num">9.0</span>
+          <span class="track-expand-icon">▼</span>
+        </div>
+      </div>
+      <div class="track-body"><div class="track-body-inner">The hardest track on the album and the most deliberately uncomfortable. Cole rapping with the energy of someone who knows exactly what the street version of his life looks like, because he saw it from a very short distance. The Dickens reference in the title is a deliberate overstatement — Cole knows it is, which is why the track doesn't lean on it. The production is the tightest thing here, and Cole's flow matches it.</div></div>
+    </div>
+
+    <div class="track-item">
+      <div class="track-header">
+        <span class="track-num">06</span>
+        <span class="track-name">Fire Squad</span>
+        <div class="track-right">
+          <div class="track-score-bar"><div class="track-score-fill" data-score="8.9"></div></div>
+          <span class="track-score-num">8.9</span>
+          <span class="track-expand-icon">▼</span>
+        </div>
+      </div>
+      <div class="track-body"><div class="track-body-inner">The track where Cole makes his cultural observation about rap's racial dynamics and nearly overplays it. The observation itself is correct - he's talking about the history of white artists profiting from Black art forms. The problem is he names Drake and Macklemore and Iggy in a verse that was always going to age faster than the argument deserved. The beat is a banger. The idea is legitimate. The execution is about one draft away from being great.</div></div>
+    </div>
+
+    <div class="track-item">
+      <div class="track-header">
+        <span class="track-num">07</span>
+        <span class="track-name">St. Tropez</span>
+        <div class="track-right">
+          <div class="track-score-bar"><div class="track-score-fill" data-score="8.6"></div></div>
+          <span class="track-score-num">8.6</span>
+          <span class="track-expand-icon">▼</span>
+        </div>
+      </div>
+      <div class="track-body"><div class="track-body-inner">The album's most self-aware track. Cole in the most expensive place in the world, still himself, still uneasy. The luxury rap genre exists on the assumption that you're supposed to want what the rapper has. St. Tropez declines that assumption. He's there. He's not sure why the there feels like a letdown. The production is appropriately breezy and slightly hollow. That's intentional.</div></div>
+    </div>
+
+    <div class="track-item">
+      <div class="track-header">
+        <span class="track-num">08</span>
+        <span class="track-name">G.O.M.D.</span>
+        <div class="track-right">
+          <div class="track-score-bar"><div class="track-score-fill" data-score="8.4"></div></div>
+          <span class="track-score-num">8.4</span>
+          <span class="track-expand-icon">▼</span>
+        </div>
+      </div>
+      <div class="track-body"><div class="track-body-inner">Get Off My Dxck. The album's most unambiguous moment of ego, which it earns because everything else here is so stripped down. Cole is allowed one track of pure aggression, and this is it. The production goes harder than anything else on the record. The contrast is the point. It's the sound of someone who's been patient for seven tracks finally letting the thing off the leash.</div></div>
+    </div>
+
+    <div class="track-item">
+      <div class="track-header">
+        <span class="track-num">09</span>
+        <span class="track-name">No Role Modelz</span>
+        <div class="track-right">
+          <div class="track-score-bar"><div class="track-score-fill" data-score="9.4"></div></div>
+          <span class="track-score-num">9.4</span>
+          <span class="track-expand-icon">▼</span>
+        </div>
+      </div>
+      <div class="track-body"><div class="track-body-inner">The album's biggest song and deservedly so. The hook is one of the decade's catchiest, but what makes the track matter is that Cole doesn't use the hook to avoid saying something - the verses are doing the actual work. "First things first, rest in peace Uncle Phil / For real, you the only father that I ever knew" is one of the better opening couplets in contemporary rap. It's a song about missing something you never had, which is harder to write than it sounds.</div></div>
+    </div>
+
+    <div class="track-item">
+      <div class="track-header">
+        <span class="track-num">10</span>
+        <span class="track-name">Hello</span>
+        <div class="track-right">
+          <div class="track-score-bar"><div class="track-score-fill" data-score="8.3"></div></div>
+          <span class="track-score-num">8.3</span>
+          <span class="track-expand-icon">▼</span>
+        </div>
+      </div>
+      <div class="track-body"><div class="track-body-inner">The album's most romantic track, and the one where Cole's moralizing instinct is most visible. The story of a woman in a specific kind of trouble is told with real empathy and then edged slightly toward instruction. It's the gap between understanding someone and wanting to fix them, and the track lives in it without fully resolving it. Still one of the better slow tracks in his catalog.</div></div>
+    </div>
+
+    <div class="track-item">
+      <div class="track-header">
+        <span class="track-num">11</span>
+        <span class="track-name">Apparently</span>
+        <div class="track-right">
+          <div class="track-score-bar"><div class="track-score-fill" data-score="9.6"></div></div>
+          <span class="track-score-num">9.6</span>
+          <span class="track-expand-icon">▼</span>
+        </div>
+      </div>
+      <div class="track-body"><div class="track-body-inner">The emotional peak of the album. Cole rapping to his younger self, then to his mother, then to whatever version of God he's currently negotiating with. "There's love in the struggle, I hope that you know" is the line the entire album builds toward, and it lands because the album earned it. He didn't start there. He arrived. The Kendrick Lamar feature (spoken, not rapped) is a gift at the end - the two best rappers of their generation acknowledging each other across a phone call. It doesn't overplay the moment. It gives it exactly as much space as it needs.</div></div>
+    </div>
+
+    <div class="track-item">
+      <div class="track-header">
+        <span class="track-num">12</span>
+        <span class="track-name">Note to Self</span>
+        <div class="track-right">
+          <div class="track-score-bar"><div class="track-score-fill" data-score="9.1"></div></div>
+          <span class="track-score-num">9.1</span>
+          <span class="track-expand-icon">▼</span>
+        </div>
+      </div>
+      <div class="track-body"><div class="track-body-inner">Ten and a half minutes of Cole thanking his team over a gospel choir, reading names, acknowledging people who never get acknowledged on records like this. It should not work. A ten-minute credits sequence as a closing track is the kind of idea that sounds indulgent in the pitch meeting. It works because Cole commits to it completely, and because the people he's thanking feel like people rather than a list. The choir swells at the end and the album closes on something that sounds, against all reasonable expectation, like joy.</div></div>
+    </div>
+
+    </div>
+  </div>
+</section>
+
+<section class="chart-section">
+  <div class="chart-inner">
+    <div class="section-label reveal">Score Breakdown</div>
+    <div class="section-title reveal">Every Track, <em>Ranked</em></div>
+    <div class="chart-bars reveal" id="chartBars">
+    <div class="bar-row"><div class="bar-label">Apparently</div><div class="bar-track"><div class="bar-fill" data-score="9.6"></div></div><div class="bar-val">9.6</div></div>
+    <div class="bar-row"><div class="bar-label">Wet Dreamz</div><div class="bar-track"><div class="bar-fill" data-score="9.5"></div></div><div class="bar-val">9.5</div></div>
+    <div class="bar-row"><div class="bar-label">No Role Modelz</div><div class="bar-track"><div class="bar-fill" data-score="9.4"></div></div><div class="bar-val">9.4</div></div>
+    <div class="bar-row"><div class="bar-label">03' Adolescence</div><div class="bar-track"><div class="bar-fill" data-score="9.3"></div></div><div class="bar-val">9.3</div></div>
+    <div class="bar-row"><div class="bar-label">Note to Self</div><div class="bar-track"><div class="bar-fill" data-score="9.1"></div></div><div class="bar-val">9.1</div></div>
+    <div class="bar-row"><div class="bar-label">A Tale of 2 Citiez</div><div class="bar-track"><div class="bar-fill" data-score="9.0"></div></div><div class="bar-val">9.0</div></div>
+    <div class="bar-row"><div class="bar-label">Fire Squad</div><div class="bar-track"><div class="bar-fill" data-score="8.9"></div></div><div class="bar-val">8.9</div></div>
+    <div class="bar-row"><div class="bar-label">January 28th</div><div class="bar-track"><div class="bar-fill" data-score="8.8"></div></div><div class="bar-val">8.8</div></div>
+    <div class="bar-row"><div class="bar-label">St. Tropez</div><div class="bar-track"><div class="bar-fill" data-score="8.6"></div></div><div class="bar-val">8.6</div></div>
+    <div class="bar-row"><div class="bar-label">Intro</div><div class="bar-track"><div class="bar-fill" data-score="8.5"></div></div><div class="bar-val">8.5</div></div>
+    <div class="bar-row"><div class="bar-label">G.O.M.D.</div><div class="bar-track"><div class="bar-fill" data-score="8.4"></div></div><div class="bar-val">8.4</div></div>
+    <div class="bar-row"><div class="bar-label">Hello</div><div class="bar-track"><div class="bar-fill" data-score="8.3"></div></div><div class="bar-val">8.3</div></div>
+    </div>
+  </div>
+</section>
+
+<div class="footnote-section">
+  <div class="section-label reveal" style="text-align:center;">Footnote</div>
+  <div class="footnote-text reveal">Cole bought the house at 2014 Forest Hills Drive. The actual house. He owns it. The album isn't a metaphor for going home - it's a record made by a man who went back and bought the place so no one else could change it. That fact either makes the album more meaningful or more sentimental depending on your disposition. The music makes the case for more meaningful. "Platinum with no features" became the shorthand, but the real story is simpler: he made a personal record and people recognized themselves in it. That's the only formula that's ever worked.</div>
+</div>
+
+<footer>
+  <div class="footer-sig reveal">Album Autopsy - A structured dissection of records that matter.</div>
+  <div class="divider"></div>
+  <a href="index.html" class="back-link reveal">← Back to All Autopsies</a>
+  <div class="footer-brand">@MyParentsDidntLeaveForThis</div>
+</footer>
+
+<script>
+  window.addEventListener('scroll', () => {
+    const p = (window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100;
+    document.getElementById('progress').style.width = p + '%';
+  });
+
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (!e.isIntersecting) return;
+      e.target.classList.add('visible');
+      if (e.target.id === 'scoreCounter') {
+        animateScore(0, 8.7, 1600);
+        document.getElementById('navScore').classList.add('visible');
+      }
+    });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+  if(document.getElementById('scoreCounter')) observer.observe(document.getElementById('scoreCounter'));
+
+  const tlObs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (!e.isIntersecting) return;
+      e.target.querySelectorAll('.track-score-fill').forEach((f,i) => {
+        setTimeout(() => { f.style.transform = `scaleX(${parseFloat(f.dataset.score)/10})`; }, i * 55);
+      });
+      tlObs.unobserve(e.target);
+    });
+  }, { threshold: 0.08 });
+  const tl = document.getElementById('trackList');
+  if(tl) tlObs.observe(tl);
+
+  const chObs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (!e.isIntersecting) return;
+      e.target.querySelectorAll('.bar-fill').forEach((f,i) => {
+        setTimeout(() => { const s = parseFloat(f.dataset.score); f.style.transform = `scaleX(${Math.max(0,(s-6)/4)})`; }, i * 70);
+      });
+      chObs.unobserve(e.target);
+    });
+  }, { threshold: 0.08 });
+  const cb = document.getElementById('chartBars');
+  if(cb) chObs.observe(cb);
+
+  function animateScore(from, to, duration) {
+    const el = document.getElementById('scoreCounter');
+    if(!el) return;
+    const start = performance.now();
+    (function tick(now) {
+      const p = Math.min((now - start) / duration, 1);
+      const ease = 1 - Math.pow(1 - p, 3);
+      const val = from + (to - from) * ease;
+      const int = Math.floor(val);
+      const dec = Math.round((val - int) * 10);
+      el.innerHTML = int + '<span>.' + dec + '</span>';
+      if(p < 1) requestAnimationFrame(tick);
+    })(start);
+  }
+
+  document.querySelectorAll('.track-item').forEach(item => {
+    item.querySelector('.track-header').addEventListener('click', () => {
+      const body = item.querySelector('.track-body');
+      const open = item.classList.toggle('open');
+      body.style.maxHeight = open ? body.scrollHeight + 'px' : '0';
+    });
+  });
+
+  document.querySelectorAll('.pill').forEach(pill => {
+    pill.addEventListener('click', () => {
+      document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+      pill.classList.add('active');
+    });
+  });
+</script>
+</body>
+</html>

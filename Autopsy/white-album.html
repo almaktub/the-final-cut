@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Beatles (White Album) - Album Autopsy</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #080809;
+    --bg2: #0e0e10;
+    --bg3: #131315;
+    --accent: #bdc3c7;
+    --accent-dark: #7f8c8d;
+    --gold: #c9a84c;
+    --text: #eae6de;
+    --muted: #6e6a64;
+    --border: rgba(255,255,255,0.055);
+    --font-display: 'Bebas Neue', sans-serif;
+    --font-serif: 'Playfair Display', serif;
+    --font-body: 'DM Sans', sans-serif;
+  }
+  html { scroll-behavior: smooth; }
+  body { background: var(--bg); color: var(--text); font-family: var(--font-body); font-weight: 300; line-height: 1.7; overflow-x: hidden; }
+  body::before { content:''; position:fixed; inset:0; background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E"); pointer-events:none; z-index:9999; opacity:0.45; }
+  .progress-bar { position:fixed; top:0; left:0; height:2px; background:var(--accent); z-index:200; width:0%; transition: width 0.1s linear; }
+  nav { position:fixed; top:0; left:0; right:0; padding:1.1rem 2.5rem; display:flex; justify-content:space-between; align-items:center; z-index:100; background:linear-gradient(to bottom, rgba(8,8,9,0.92), transparent); }
+  .nav-back { font-family:var(--font-display); letter-spacing:0.25em; font-size:0.7rem; color:var(--muted); text-decoration:none; transition:color 0.2s; }
+  .nav-back:hover { color:var(--accent); }
+  .nav-score { font-family:var(--font-display); font-size:1.1rem; color:var(--accent); opacity:0; transition:opacity 0.4s; }
+  .nav-score.visible { opacity:1; }
+
+  /* HERO */
+  .hero { min-height:100vh; display:flex; flex-direction:column; justify-content:center; align-items:center; position:relative; overflow:hidden; padding:4rem 2rem; text-align:center; }
+  .hero-bg { position:absolute; inset:0; background: radial-gradient(ellipse 80% 55% at 50% 45%, #bdc3c718 0%, transparent 68%), radial-gradient(ellipse 35% 35% at 15% 75%, #bdc3c709 0%, transparent 60%), var(--bg); z-index:0; }
+  .hero-lines { position:absolute; inset:0; background-image:repeating-linear-gradient(0deg, transparent, transparent 78px, rgba(255,255,255,0.011) 78px, rgba(255,255,255,0.011) 79px); z-index:0; }
+  .hero-content { position:relative; z-index:1; }
+  .autopsy-label { font-family:var(--font-display); letter-spacing:0.4em; font-size:0.72rem; color:var(--accent); text-transform:uppercase; margin-bottom:1.8rem; opacity:0; animation:fadeUp 0.8s ease 0.2s forwards; }
+  .hero-artist { font-family:var(--font-display); font-size:clamp(4rem,16vw,14rem); line-height:0.88; letter-spacing:-0.02em; color:var(--text); opacity:0; animation:fadeUp 0.8s ease 0.4s forwards; }
+  .hero-album { font-family:var(--font-serif); font-style:italic; font-size:clamp(1.2rem,4vw,3rem); color:var(--gold); margin-top:0.6rem; opacity:0; animation:fadeUp 0.8s ease 0.6s forwards; line-height:1.25; max-width:800px; }
+  .hero-meta { font-family:var(--font-display); letter-spacing:0.3em; font-size:0.85rem; color:var(--muted); margin-top:1.5rem; opacity:0; animation:fadeUp 0.8s ease 0.8s forwards; }
+  .hero-rule { width:1px; height:70px; background:linear-gradient(to bottom, var(--accent), transparent); margin:3rem auto 0; opacity:0; animation:fadeUp 0.8s ease 1s forwards; }
+  .scroll-hint { font-size:0.68rem; letter-spacing:0.35em; color:var(--muted); text-transform:uppercase; margin-top:0.8rem; opacity:0; animation:fadeUp 0.8s ease 1.2s forwards; }
+  .verdict-bar { background:var(--accent); padding:1.1rem 2rem; text-align:center; font-family:var(--font-body); font-size:0.92rem; color:rgba(0,0,0,0.85); font-weight:500; line-height:1.5; }
+
+  /* SCORE */
+  .score-section { background:var(--bg2); border-top:1px solid var(--border); border-bottom:1px solid var(--border); }
+  .score-inner { max-width:920px; margin:0 auto; padding:6rem 2rem; display:grid; grid-template-columns:1fr 1.5fr; gap:5rem; align-items:center; }
+  @media(max-width:640px){.score-inner{grid-template-columns:1fr;gap:2.5rem;}}
+  .score-display { text-align:center; }
+  .score-number { font-family:var(--font-display); font-size:clamp(5.5rem,16vw,11rem); line-height:1; color:var(--text); }
+  .score-number span { color:var(--accent); }
+  .score-label { font-family:var(--font-display); letter-spacing:0.35em; font-size:0.75rem; color:var(--muted); margin-top:0.4rem; }
+  .score-verdict { font-family:var(--font-serif); font-style:italic; font-size:1.3rem; line-height:1.55; margin-bottom:1.5rem; color:var(--text); }
+  .score-defense { font-size:0.88rem; color:var(--muted); line-height:1.85; }
+
+  /* THEMES */
+  .section { max-width:920px; margin:0 auto; padding:6rem 2rem; }
+  .section-label { font-family:var(--font-display); letter-spacing:0.4em; font-size:0.68rem; color:var(--accent); text-transform:uppercase; margin-bottom:1.4rem; }
+  .section-title { font-family:var(--font-serif); font-size:clamp(1.8rem,4.5vw,3.2rem); font-weight:900; line-height:1.1; margin-bottom:2.5rem; }
+  .section-title em { font-style:italic; color:var(--gold); }
+  .pill { padding:0.35rem 0.9rem; border:1px solid var(--border); border-radius:2px; font-size:0.7rem; letter-spacing:0.15em; text-transform:uppercase; font-family:var(--font-display); color:var(--text); background:transparent; transition:all 0.2s; cursor:default; }
+  .pill:hover, .pill.active { border-color:var(--accent); color:var(--accent); background:#bdc3c714; }
+  .theme-pills { display:flex; flex-wrap:wrap; gap:0.45rem; margin:0 0 3rem; }
+  .themes-section { background:var(--bg2); border-top:1px solid var(--border); }
+  .themes-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:1.5px; background:var(--border); border:1px solid var(--border); margin-top:0; }
+  .theme-card { background:var(--bg2); padding:2.2rem 1.8rem; transition:background 0.2s; cursor:default; position:relative; overflow:hidden; }
+  .theme-card::before { content:''; position:absolute; top:0; left:0; width:3px; height:0; background:var(--accent); transition:height 0.3s; }
+  .theme-card:hover::before { height:100%; }
+  .theme-card:hover { background:var(--bg3); }
+  .theme-card-icon { font-size:1.8rem; margin-bottom:0.9rem; display:block; }
+  .theme-card-title { font-family:var(--font-serif); font-size:1rem; font-weight:700; margin-bottom:0.6rem; }
+  .theme-card-text { font-size:0.82rem; color:var(--muted); line-height:1.75; }
+
+  /* QUOTE */
+  .quote-section { padding:7rem 2rem; text-align:center; position:relative; overflow:hidden; }
+  .quote-bg { position:absolute; inset:0; background:radial-gradient(ellipse 55% 55% at 50% 50%, #bdc3c70a 0%, transparent 70%); }
+  .quote-mark { font-family:var(--font-serif); font-size:7rem; line-height:0; vertical-align:-1.8rem; color:#bdc3c725; margin-right:0.05em; }
+  .quote-text { font-family:var(--font-serif); font-style:italic; font-size:clamp(1.4rem,3.5vw,2.5rem); line-height:1.35; max-width:680px; margin:0 auto; position:relative; z-index:1; }
+  .quote-attr { margin-top:2rem; font-size:0.72rem; letter-spacing:0.3em; text-transform:uppercase; color:var(--muted); font-family:var(--font-display); position:relative; z-index:1; }
+
+  /* TRACKS */
+  .tracks-section { background:var(--bg); border-top:1px solid var(--border); }
+  .tracks-inner { max-width:920px; margin:0 auto; padding:6rem 2rem; }
+  .track-item { border-bottom:1px solid var(--border); overflow:hidden; cursor:pointer; transition:background 0.15s; }
+  .track-item:first-of-type { border-top:1px solid var(--border); }
+  .track-item:hover { background:rgba(255,255,255,0.018); }
+  .track-header { display:grid; grid-template-columns:3rem 1fr auto; align-items:center; gap:1.2rem; padding:1.1rem 0; }
+  .track-num { font-family:var(--font-display); font-size:0.75rem; color:var(--muted); letter-spacing:0.1em; }
+  .track-name { font-family:var(--font-serif); font-size:1rem; font-weight:700; }
+  .track-right { display:flex; align-items:center; gap:1.2rem; }
+  .track-score-bar { width:70px; height:3px; background:rgba(255,255,255,0.08); border-radius:2px; overflow:hidden; }
+  .track-score-fill { height:100%; background:var(--accent); transform-origin:left; transform:scaleX(0); transition:transform 0.8s ease; border-radius:2px; }
+  .track-score-num { font-family:var(--font-display); font-size:0.95rem; color:var(--muted); min-width:2.2rem; text-align:right; }
+  .track-expand-icon { font-size:0.55rem; color:var(--muted); transition:transform 0.3s; }
+  .track-item.open .track-expand-icon { transform:rotate(180deg); }
+  .track-body { max-height:0; overflow:hidden; transition:max-height 0.38s ease; }
+  .track-body-inner { padding:0 0 1.4rem 0; margin-left:4.2rem; color:var(--muted); font-size:0.87rem; line-height:1.8; border-left:2px solid var(--accent); padding-left:1.4rem; }
+
+  /* CHART */
+  .chart-section { background:var(--bg3); border-top:1px solid var(--border); border-bottom:1px solid var(--border); }
+  .chart-inner { max-width:920px; margin:0 auto; padding:6rem 2rem; }
+  .chart-bars { display:flex; flex-direction:column; gap:0.85rem; margin-top:3rem; }
+  .bar-row { display:grid; grid-template-columns:170px 1fr 2.8rem; align-items:center; gap:1rem; }
+  @media(max-width:500px){.bar-row{grid-template-columns:90px 1fr 2.5rem;}}
+  .bar-label { font-size:0.78rem; color:var(--muted); text-align:right; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .bar-track { height:5px; background:rgba(255,255,255,0.055); border-radius:3px; overflow:hidden; }
+  .bar-fill { height:100%; background:linear-gradient(90deg, var(--accent), var(--gold)); transform-origin:left; transform:scaleX(0); transition:transform 0.85s ease; border-radius:3px; }
+  .bar-val { font-family:var(--font-display); font-size:0.88rem; color:var(--text); }
+
+  /* FOOTNOTE + FOOTER */
+  .footnote-section { padding:5rem 2rem; text-align:center; border-top:1px solid var(--border); background:var(--bg2); }
+  .footnote-text { font-family:var(--font-serif); font-style:italic; font-size:1rem; color:var(--muted); line-height:1.85; max-width:640px; margin:0 auto; }
+  footer { padding:3.5rem 2rem; text-align:center; border-top:1px solid var(--border); }
+  .footer-sig { font-family:var(--font-serif); font-style:italic; font-size:0.88rem; color:var(--muted); }
+  .footer-brand { font-family:var(--font-display); letter-spacing:0.4em; font-size:0.68rem; color:rgba(255,255,255,0.12); margin-top:1.8rem; }
+  .divider { width:36px; height:1px; background:var(--accent); margin:1.8rem auto; }
+  .back-link { display:inline-block; margin-top:2rem; font-family:var(--font-display); letter-spacing:0.25em; font-size:0.72rem; color:var(--accent); text-decoration:none; border:1px solid var(--accent); padding:0.6rem 1.4rem; transition:all 0.2s; }
+  .back-link:hover { background:var(--accent); color:#000; }
+
+  /* ANIMATIONS */
+  @keyframes fadeUp { from{opacity:0;transform:translateY(28px)} to{opacity:1;transform:translateY(0)} }
+  .reveal { opacity:0; transform:translateY(38px); transition:opacity 0.7s ease, transform 0.7s ease; }
+  .reveal.visible { opacity:1; transform:translateY(0); }
+</style>
+</head>
+<body>
+<div class="progress-bar" id="progress"></div>
+<nav>
+  <a href="index.html" class="nav-back">← All Autopsies</a>
+  <div class="nav-score" id="navScore">9.3 / 10</div>
+</nav>
+
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-lines"></div>
+  <div class="hero-content">
+    <div class="autopsy-label">Album Autopsy · 005</div>
+    <div class="hero-artist">The Beatles</div>
+    <div class="hero-album">The Beatles (White Album)</div>
+    <div class="hero-meta">Apple Records · 1968</div>
+    <div class="hero-rule"></div>
+    <div class="scroll-hint">Scroll to dissect</div>
+  </div>
+</section>
+
+<div class="verdict-bar">Thirty tracks. A band falling apart at full creative velocity. The chaos isn't a flaw - it's the content.</div>
+
+<section class="score-section">
+  <div class="score-inner">
+    <div class="score-display reveal">
+      <div class="score-number" id="scoreCounter">0<span>.0</span></div>
+      <div class="score-label">Overall Score</div>
+    </div>
+    <div class="reveal">
+      <div class="score-verdict">"Thirty tracks. A band falling apart at full creative velocity. The chaos isn't a flaw - it's the content."</div>
+      <div class="score-defense">9.3 because the White Album is the most fascinatingly imperfect major work in rock. A double album that no one agreed to make the way it was made, recorded mostly in separate rooms by people who had stopped wanting to be in the same room. The result contains some of their best work (Happiness Is a Warm Gun, While My Guitar Gently Weeps, Blackbird, Helter Skelter) alongside genuine filler (Wild Honey Pie, Don't Pass Me By). Revolution 9 is either an 8-minute avant-garde collage or an unsolicited experiment in listener tolerance. Both readings are defensible.</div>
+    </div>
+  </div>
+</section>
+
+<div class="themes-section">
+  <div class="section">
+    <div class="section-label reveal">Central Thesis</div>
+    <div class="section-title reveal">What <em>This Album Is Really About</em></div>
+    <div class="theme-pills reveal"><span class="pill active">Fragmentation as Truth</span><span class="pill">The Emergence of the Solo Artist</span><span class="pill">India's Shadow</span><span class="pill">The Blank Canvas</span></div>
+    <div class="themes-grid reveal">
+    <div class="theme-card">
+      <span class="theme-card-icon">🏚️</span>
+      <div class="theme-card-title">Fragmentation as Truth</div>
+      <div class="theme-card-text">The album's thirty tracks are more different from each other than most artists' entire catalogs. The incoherence isn't failure - it's an honest document of four people who no longer shared a center.</div>
+    </div>
+    <div class="theme-card">
+      <span class="theme-card-icon">🎸</span>
+      <div class="theme-card-title">The Emergence of the Solo Artist</div>
+      <div class="theme-card-text">Blackbird is Paul alone. While My Guitar Gently Weeps uses Clapton because Harrison didn't trust his bandmates. The White Album is four solo careers in one sleeve.</div>
+    </div>
+    <div class="theme-card">
+      <span class="theme-card-icon">🌀</span>
+      <div class="theme-card-title">India's Shadow</div>
+      <div class="theme-card-text">Most of the album was written in Rishikesh during their TM retreat. The spiritual pursuit, the disillusionment that followed, and the intensified introspection all live in these tracks.</div>
+    </div>
+    <div class="theme-card">
+      <span class="theme-card-icon">⚪</span>
+      <div class="theme-card-title">The Blank Canvas</div>
+      <div class="theme-card-text">Richard Hamilton's all-white sleeve was a deliberate refusal of Sgt. Pepper's maximalism. After a year of psychedelic excess, the album announces itself by having nothing to show you.</div>
+    </div></div>
+  </div>
+</div>
+
+<section class="quote-section">
+  <div class="quote-bg"></div>
+  <div class="quote-text reveal"><span class="quote-mark">"</span>I don't believe in Beatles. I just believe in me.</div>
+  <div class="quote-attr reveal">John Lennon · 1970</div>
+</section>
+
+<section class="tracks-section">
+  <div class="tracks-inner">
+    <div class="section-label reveal">Track by Track</div>
+    <div class="section-title reveal">The <em>Dissection</em></div>
+    <div id="trackList" class="reveal">
+    <div class="track-item">
+      <div class="track-header">
+        <span class="track-num">01</span>
+        <span class="track-name">Back in the U.S.S.R.</span>
+        <div class="track-right">
+          <div class="track-score-bar"><div class="track-score-fill" data-score="9"></div></div>
+          <span class="track-score-num">9</span>
+          <span class="track-expand-icon">▼</span>
+        </div>
+      </div>
+      <div class="track-body"><div class="track-body-inner">A Chuck Berry parody of a Beach Boys parody of American rock, recorded without Ringo who had just quit. Paul, John, and George played all the drums. Unimprovable opening track.</div></div>
+    </div>
+    <div class="track-item">
+      <div class="track-header">
+        <span class="track-num">02</span>
+        <span class="track-name">Dear Prudence</span>
+        <div class="track-right">
+          <div class="track-score-bar"><div class="track-score-fill" data-score="9.4"></div></div>
+          <span class="track-score-num">9.4</span>
+          <span class="track-expand-icon">▼</span>
+        </div>
+      </div>
+      <div class="track-body"><div class="track-body-inner">Written for Mia Farrow's sister in India who wouldn't leave her room. The fingerpicking pattern Lennon invented became a foundational acoustic guitar technique.</div></div>
+    </div>
+    <div class="track-item">
+      <div class="track-header">
+        <span class="track-num">03</span>
+        <span class="track-name">Glass Onion</span>
+        <div class="track-right">
+          <div class="track-score-bar"><div class="track-score-fill" data-score="8.7"></div></div>
+          <span class="track-score-num">8.7</span>
+          <span class="track-expand-icon">▼</span>
+        </div>
+      </div>
+      <div class="track-body"><div class="track-body-inner">Lennon mocking people who over-analyzed Beatles lyrics, by inserting more lyrics to over-analyze. A trap that worked perfectly.</div></div>
+    </div>
+    <div class="track-item">
+      <div class="track-header">
+        <span class="track-num">04</span>
+        <span class="track-name">Ob-La-Di, Ob-La-Da</span>
+        <div class="track-right">
+          <div class="track-score-bar"><div class="track-score-fill" data-score="7.9"></div></div>
+          <span class="track-score-num">7.9</span>
+          <span class="track-expand-icon">▼</span>
+        </div>
+      </div>
+      <div class="track-body"><div class="track-body-inner">Paul's Jamaican-ska impulse. Lennon reportedly said something unprintable about it. That tension is audible in the recording.</div></div>
+    </div>
+    <div class="track-item">
+      <div class="track-header">
+        <span class="track-num">05</span>
+        <span class="track-name">Wild Honey Pie</span>
+        <div class="track-right">
+          <div class="track-score-bar"><div class="track-score-fill" data-score="6.5"></div></div>
+          <span class="track-score-num">6.5</span>
+          <span class="track-expand-icon">▼</span>
+        </div>
+      </div>
+      <div class="track-body"><div class="track-body-inner">A minute-long experiment that shouldn't have survived the session. The album's one genuine outlier.</div></div>
+    </div>
+    <div class="track-item">
+      <div class="track-header">
+        <span class="track-num">06</span>
+        <span class="track-name">The Continuing Story of Bungalow Bill</span>
+        <div class="track-right">
+          <div class="track-score-bar"><div class="track-score-fill" data-score="8.2"></div></div>
+          <span class="track-score-num">8.2</span>
+          <span class="track-expand-icon">▼</span>
+        </div>
+      </div>
+      <div class="track-body"><div class="track-body-inner">A singalong satire of a man who went to India for peace and went tiger hunting between meditation sessions. Based on a real person.</div></div>
+    </div>
+    <div class="track-item">
+      <div class="track-header">
+        <span class="track-num">07</span>
+        <span class="track-name">While My Guitar Gently Weeps</span>
+        <div class="track-right">
+          <div class="track-score-bar"><div class="track-score-fill" data-score="9.8"></div></div>
+          <span class="track-score-num">9.8</span>
+          <span class="track-expand-icon">▼</span>
+        </div>
+      </div>
+      <div class="track-body"><div class="track-body-inner">Harrison brought Clapton because he felt the others wouldn't take it seriously with an outsider present. He was right. The solo is Clapton being reverential.</div></div>
+    </div>
+    <div class="track-item">
+      <div class="track-header">
+        <span class="track-num">08</span>
+        <span class="track-name">Happiness Is a Warm Gun</span>
+        <div class="track-right">
+          <div class="track-score-bar"><div class="track-score-fill" data-score="9.7"></div></div>
+          <span class="track-score-num">9.7</span>
+          <span class="track-expand-icon">▼</span>
+        </div>
+      </div>
+      <div class="track-body"><div class="track-body-inner">Three completely different songs welded into one. The transitions are the composition. John said it was his favorite Beatles song and he was not wrong.</div></div>
+    </div>
+    <div class="track-item">
+      <div class="track-header">
+        <span class="track-num">09</span>
+        <span class="track-name">Martha My Dear</span>
+        <div class="track-right">
+          <div class="track-score-bar"><div class="track-score-fill" data-score="8.5"></div></div>
+          <span class="track-score-num">8.5</span>
+          <span class="track-expand-icon">▼</span>
+        </div>
+      </div>
+      <div class="track-body"><div class="track-body-inner">Paul wrote this about his sheepdog. It has a brass arrangement and a key change that would make Burt Bacharach nod.</div></div>
+    </div>
+    <div class="track-item">
+      <div class="track-header">
+        <span class="track-num">10</span>
+        <span class="track-name">I'm So Tired</span>
+        <div class="track-right">
+          <div class="track-score-bar"><div class="track-score-fill" data-score="9.1"></div></div>
+          <span class="track-score-num">9.1</span>
+          <span class="track-expand-icon">▼</span>
+        </div>
+      </div>
+      <div class="track-body"><div class="track-body-inner">Lennon couldn't sleep in India and wrote a song about it. The exhaustion in the vocal is real and the result is one of his most direct performances.</div></div>
+    </div>
+    <div class="track-item">
+      <div class="track-header">
+        <span class="track-num">11</span>
+        <span class="track-name">Blackbird</span>
+        <div class="track-right">
+          <div class="track-score-bar"><div class="track-score-fill" data-score="9.6"></div></div>
+          <span class="track-score-num">9.6</span>
+          <span class="track-expand-icon">▼</span>
+        </div>
+      </div>
+      <div class="track-body"><div class="track-body-inner">Paul alone, a guitar, and a Bach fingerpicking pattern. Written during the Civil Rights Movement. The 'broken wings' imagery was not abstract.</div></div>
+    </div>
+    <div class="track-item">
+      <div class="track-header">
+        <span class="track-num">12</span>
+        <span class="track-name">Piggies</span>
+        <div class="track-right">
+          <div class="track-score-bar"><div class="track-score-fill" data-score="7.8"></div></div>
+          <span class="track-score-num">7.8</span>
+          <span class="track-expand-icon">▼</span>
+        </div>
+      </div>
+      <div class="track-body"><div class="track-body-inner">Harrison's class critique with a harpsichord. John added the line about a damn good whacking. The combination is either inspired or unfortunate.</div></div>
+    </div>
+    <div class="track-item">
+      <div class="track-header">
+        <span class="track-num">13</span>
+        <span class="track-name">Rocky Raccoon</span>
+        <div class="track-right">
+          <div class="track-score-bar"><div class="track-score-fill" data-score="8.3"></div></div>
+          <span class="track-score-num">8.3</span>
+          <span class="track-expand-icon">▼</span>
+        </div>
+      </div>
+      <div class="track-body"><div class="track-body-inner">A cowboy story with a honky-tonk piano. Paul's music-hall instinct in a more defensible form than Maxwell's Silver Hammer.</div></div>
+    </div>
+    <div class="track-item">
+      <div class="track-header">
+        <span class="track-num">14</span>
+        <span class="track-name">Don't Pass Me By</span>
+        <div class="track-right">
+          <div class="track-score-bar"><div class="track-score-fill" data-score="7.5"></div></div>
+          <span class="track-score-num">7.5</span>
+          <span class="track-expand-icon">▼</span>
+        </div>
+      </div>
+      <div class="track-body"><div class="track-body-inner">Ringo's song, his first solo writing credit. The band's affection for him is audible in how hard they tried to make it work.</div></div>
+    </div>
+    <div class="track-item">
+      <div class="track-header">
+        <span class="track-num">15</span>
+        <span class="track-name">Why Don't We Do It in the Road?</span>
+        <div class="track-right">
+          <div class="track-score-bar"><div class="track-score-fill" data-score="8.1"></div></div>
+          <span class="track-score-num">8.1</span>
+          <span class="track-expand-icon">▼</span>
+        </div>
+      </div>
+      <div class="track-body"><div class="track-body-inner">Paul watched two monkeys in India. Made a two-minute song about it with just Ringo. John was furious he wasn't invited. That's how the White Album was made.</div></div>
+    </div>
+    <div class="track-item">
+      <div class="track-header">
+        <span class="track-num">16</span>
+        <span class="track-name">I Will</span>
+        <div class="track-right">
+          <div class="track-score-bar"><div class="track-score-fill" data-score="8.9"></div></div>
+          <span class="track-score-num">8.9</span>
+          <span class="track-expand-icon">▼</span>
+        </div>
+      </div>
+      <div class="track-body"><div class="track-body-inner">A gentle love song Paul sang 67 times to get the take he wanted. The bass line is him vocalizing rather than playing an instrument.</div></div>
+    </div>
+    <div class="track-item">
+      <div class="track-header">
+        <span class="track-num">17</span>
+        <span class="track-name">Julia</span>
+        <div class="track-right">
+          <div class="track-score-bar"><div class="track-score-fill" data-score="9.5"></div></div>
+          <span class="track-score-num">9.5</span>
+          <span class="track-expand-icon">▼</span>
+        </div>
+      </div>
+      <div class="track-body"><div class="track-body-inner">John alone, singing to his dead mother and to Yoko simultaneously. The most nakedly private thing he put on a Beatles record.</div></div>
+    </div>
+    <div class="track-item">
+      <div class="track-header">
+        <span class="track-num">18</span>
+        <span class="track-name">Birthday</span>
+        <div class="track-right">
+          <div class="track-score-bar"><div class="track-score-fill" data-score="8.8"></div></div>
+          <span class="track-score-num">8.8</span>
+          <span class="track-expand-icon">▼</span>
+        </div>
+      </div>
+      <div class="track-body"><div class="track-body-inner">Written and recorded on the same day. A raw party track that does exactly what it intends to do. No more, no less.</div></div>
+    </div>
+    <div class="track-item">
+      <div class="track-header">
+        <span class="track-num">19</span>
+        <span class="track-name">Yer Blues</span>
+        <div class="track-right">
+          <div class="track-score-bar"><div class="track-score-fill" data-score="9"></div></div>
+          <span class="track-score-num">9</span>
+          <span class="track-expand-icon">▼</span>
+        </div>
+      </div>
+      <div class="track-body"><div class="track-body-inner">Lennon parodying British blues musicians parodying American blues, while being genuinely suicidal at the time of writing. The joke and the cry for help are inseparable.</div></div>
+    </div>
+    <div class="track-item">
+      <div class="track-header">
+        <span class="track-num">20</span>
+        <span class="track-name">Mother Nature's Son</span>
+        <div class="track-right">
+          <div class="track-score-bar"><div class="track-score-fill" data-score="8.7"></div></div>
+          <span class="track-score-num">8.7</span>
+          <span class="track-expand-icon">▼</span>
+        </div>
+      </div>
+      <div class="track-body"><div class="track-body-inner">Paul, acoustic, brass, no other Beatles. The India influence is direct and unironic here.</div></div>
+    </div>
+    <div class="track-item">
+      <div class="track-header">
+        <span class="track-num">21</span>
+        <span class="track-name">Everybody's Got Something to Hide...</span>
+        <div class="track-right">
+          <div class="track-score-bar"><div class="track-score-fill" data-score="8.9"></div></div>
+          <span class="track-score-num">8.9</span>
+          <span class="track-expand-icon">▼</span>
+        </div>
+      </div>
+      <div class="track-body"><div class="track-body-inner">The fastest tempo on the album. Lennon said the title is the message.</div></div>
+    </div>
+    <div class="track-item">
+      <div class="track-header">
+        <span class="track-num">22</span>
+        <span class="track-name">Sexy Sadie</span>
+        <div class="track-right">
+          <div class="track-score-bar"><div class="track-score-fill" data-score="9.2"></div></div>
+          <span class="track-score-num">9.2</span>
+          <span class="track-expand-icon">▼</span>
+        </div>
+      </div>
+      <div class="track-body"><div class="track-body-inner">Originally called 'Maharishi' - Lennon's attack on the guru after disillusionment. He softened the name but not the venom.</div></div>
+    </div>
+    <div class="track-item">
+      <div class="track-header">
+        <span class="track-num">23</span>
+        <span class="track-name">Helter Skelter</span>
+        <div class="track-right">
+          <div class="track-score-bar"><div class="track-score-fill" data-score="9.4"></div></div>
+          <span class="track-score-num">9.4</span>
+          <span class="track-expand-icon">▼</span>
+        </div>
+      </div>
+      <div class="track-body"><div class="track-body-inner">Paul read that The Who made the loudest, most aggressive rock recording ever and decided to beat them. He did. Ringo's 'I've got blisters on my fingers' at the end is real.</div></div>
+    </div>
+    <div class="track-item">
+      <div class="track-header">
+        <span class="track-num">24</span>
+        <span class="track-name">Long Long Long</span>
+        <div class="track-right">
+          <div class="track-score-bar"><div class="track-score-fill" data-score="8.6"></div></div>
+          <span class="track-score-num">8.6</span>
+          <span class="track-expand-icon">▼</span>
+        </div>
+      </div>
+      <div class="track-body"><div class="track-body-inner">Harrison's quietest moment on the album. A love song to God that doesn't announce itself as such.</div></div>
+    </div>
+    <div class="track-item">
+      <div class="track-header">
+        <span class="track-num">25</span>
+        <span class="track-name">Revolution 1</span>
+        <div class="track-right">
+          <div class="track-score-bar"><div class="track-score-fill" data-score="8.8"></div></div>
+          <span class="track-score-num">8.8</span>
+          <span class="track-expand-icon">▼</span>
+        </div>
+      </div>
+      <div class="track-body"><div class="track-body-inner">Lennon initially included 'count me out... in' - hedging his position on political violence. The faster single version removed the hedge.</div></div>
+    </div>
+    <div class="track-item">
+      <div class="track-header">
+        <span class="track-num">26</span>
+        <span class="track-name">Honey Pie</span>
+        <div class="track-right">
+          <div class="track-score-bar"><div class="track-score-fill" data-score="7.9"></div></div>
+          <span class="track-score-num">7.9</span>
+          <span class="track-expand-icon">▼</span>
+        </div>
+      </div>
+      <div class="track-body"><div class="track-body-inner">Paul's 1930s pastiche. Better than Wild Honey Pie. That's the most that can be said for it.</div></div>
+    </div>
+    <div class="track-item">
+      <div class="track-header">
+        <span class="track-num">27</span>
+        <span class="track-name">Savoy Truffle</span>
+        <div class="track-right">
+          <div class="track-score-bar"><div class="track-score-fill" data-score="8.7"></div></div>
+          <span class="track-score-num">8.7</span>
+          <span class="track-expand-icon">▼</span>
+        </div>
+      </div>
+      <div class="track-body"><div class="track-body-inner">Harrison wrote it about Eric Clapton's sweet tooth. The horn arrangement is the best thing on Side 3.</div></div>
+    </div>
+    <div class="track-item">
+      <div class="track-header">
+        <span class="track-num">28</span>
+        <span class="track-name">Cry Baby Cry</span>
+        <div class="track-right">
+          <div class="track-score-bar"><div class="track-score-fill" data-score="8.5"></div></div>
+          <span class="track-score-num">8.5</span>
+          <span class="track-expand-icon">▼</span>
+        </div>
+      </div>
+      <div class="track-body"><div class="track-body-inner">A nursery-rhyme structure used as a container for something slightly sinister. Lennon at his most Lewis Carroll.</div></div>
+    </div>
+    <div class="track-item">
+      <div class="track-header">
+        <span class="track-num">29</span>
+        <span class="track-name">Revolution 9</span>
+        <div class="track-right">
+          <div class="track-score-bar"><div class="track-score-fill" data-score="7.2"></div></div>
+          <span class="track-score-num">7.2</span>
+          <span class="track-expand-icon">▼</span>
+        </div>
+      </div>
+      <div class="track-body"><div class="track-body-inner">An eight-minute musique concrète experiment assembled from tape loops. Whether it belongs on the album is a question the album deliberately refuses to answer.</div></div>
+    </div>
+    <div class="track-item">
+      <div class="track-header">
+        <span class="track-num">30</span>
+        <span class="track-name">Good Night</span>
+        <div class="track-right">
+          <div class="track-score-bar"><div class="track-score-fill" data-score="8.4"></div></div>
+          <span class="track-score-num">8.4</span>
+          <span class="track-expand-icon">▼</span>
+        </div>
+      </div>
+      <div class="track-body"><div class="track-body-inner">Ringo singing a lullaby, orchestrated by George Martin in full Hollywood strings. Written by Lennon for his son Julian. The most tender ending the album could have had.</div></div>
+    </div></div>
+  </div>
+</section>
+
+<section class="chart-section">
+  <div class="chart-inner">
+    <div class="section-label reveal">Score Breakdown</div>
+    <div class="section-title reveal">Every Track, <em>Ranked</em></div>
+    <div class="chart-bars reveal" id="chartBars">
+    <div class="bar-row">
+      <div class="bar-label">While My Guitar Gently Weeps</div>
+      <div class="bar-track"><div class="bar-fill" data-score="9.8"></div></div>
+      <div class="bar-val">9.8</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">Happiness Is a Warm Gun</div>
+      <div class="bar-track"><div class="bar-fill" data-score="9.7"></div></div>
+      <div class="bar-val">9.7</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">Blackbird</div>
+      <div class="bar-track"><div class="bar-fill" data-score="9.6"></div></div>
+      <div class="bar-val">9.6</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">Julia</div>
+      <div class="bar-track"><div class="bar-fill" data-score="9.5"></div></div>
+      <div class="bar-val">9.5</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">Dear Prudence</div>
+      <div class="bar-track"><div class="bar-fill" data-score="9.4"></div></div>
+      <div class="bar-val">9.4</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">Helter Skelter</div>
+      <div class="bar-track"><div class="bar-fill" data-score="9.4"></div></div>
+      <div class="bar-val">9.4</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">Sexy Sadie</div>
+      <div class="bar-track"><div class="bar-fill" data-score="9.2"></div></div>
+      <div class="bar-val">9.2</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">I'm So Tired</div>
+      <div class="bar-track"><div class="bar-fill" data-score="9.1"></div></div>
+      <div class="bar-val">9.1</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">Back in the U.S.S.R.</div>
+      <div class="bar-track"><div class="bar-fill" data-score="9"></div></div>
+      <div class="bar-val">9</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">Yer Blues</div>
+      <div class="bar-track"><div class="bar-fill" data-score="9"></div></div>
+      <div class="bar-val">9</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">I Will</div>
+      <div class="bar-track"><div class="bar-fill" data-score="8.9"></div></div>
+      <div class="bar-val">8.9</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">Everybody's Got Something to Hide...</div>
+      <div class="bar-track"><div class="bar-fill" data-score="8.9"></div></div>
+      <div class="bar-val">8.9</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">Birthday</div>
+      <div class="bar-track"><div class="bar-fill" data-score="8.8"></div></div>
+      <div class="bar-val">8.8</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">Revolution 1</div>
+      <div class="bar-track"><div class="bar-fill" data-score="8.8"></div></div>
+      <div class="bar-val">8.8</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">Glass Onion</div>
+      <div class="bar-track"><div class="bar-fill" data-score="8.7"></div></div>
+      <div class="bar-val">8.7</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">Mother Nature's Son</div>
+      <div class="bar-track"><div class="bar-fill" data-score="8.7"></div></div>
+      <div class="bar-val">8.7</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">Savoy Truffle</div>
+      <div class="bar-track"><div class="bar-fill" data-score="8.7"></div></div>
+      <div class="bar-val">8.7</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">Long Long Long</div>
+      <div class="bar-track"><div class="bar-fill" data-score="8.6"></div></div>
+      <div class="bar-val">8.6</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">Martha My Dear</div>
+      <div class="bar-track"><div class="bar-fill" data-score="8.5"></div></div>
+      <div class="bar-val">8.5</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">Cry Baby Cry</div>
+      <div class="bar-track"><div class="bar-fill" data-score="8.5"></div></div>
+      <div class="bar-val">8.5</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">Good Night</div>
+      <div class="bar-track"><div class="bar-fill" data-score="8.4"></div></div>
+      <div class="bar-val">8.4</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">Rocky Raccoon</div>
+      <div class="bar-track"><div class="bar-fill" data-score="8.3"></div></div>
+      <div class="bar-val">8.3</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">The Continuing Story of Bungalow Bill</div>
+      <div class="bar-track"><div class="bar-fill" data-score="8.2"></div></div>
+      <div class="bar-val">8.2</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">Why Don't We Do It in the Road?</div>
+      <div class="bar-track"><div class="bar-fill" data-score="8.1"></div></div>
+      <div class="bar-val">8.1</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">Ob-La-Di, Ob-La-Da</div>
+      <div class="bar-track"><div class="bar-fill" data-score="7.9"></div></div>
+      <div class="bar-val">7.9</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">Honey Pie</div>
+      <div class="bar-track"><div class="bar-fill" data-score="7.9"></div></div>
+      <div class="bar-val">7.9</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">Piggies</div>
+      <div class="bar-track"><div class="bar-fill" data-score="7.8"></div></div>
+      <div class="bar-val">7.8</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">Don't Pass Me By</div>
+      <div class="bar-track"><div class="bar-fill" data-score="7.5"></div></div>
+      <div class="bar-val">7.5</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">Revolution 9</div>
+      <div class="bar-track"><div class="bar-fill" data-score="7.2"></div></div>
+      <div class="bar-val">7.2</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">Wild Honey Pie</div>
+      <div class="bar-track"><div class="bar-fill" data-score="6.5"></div></div>
+      <div class="bar-val">6.5</div>
+    </div></div>
+  </div>
+</section>
+
+<div class="footnote-section">
+  <div class="section-label reveal" style="text-align:center;">Footnote</div>
+  <div class="footnote-text reveal">Ringo quit during the recording. He came back two weeks later to find his drum kit decorated with flowers by the other three. That's the White Album in one image: dysfunction wrapped in affection, always.</div>
+</div>
+
+<footer>
+  <div class="footer-sig reveal">Album Autopsy - A structured dissection of records that matter.</div>
+  <div class="divider"></div>
+  <a href="index.html" class="back-link reveal">← Back to All Autopsies</a>
+  <div class="footer-brand">@MyParentsDidntLeaveForThis</div>
+</footer>
+
+<script>
+  // Progress bar
+  window.addEventListener('scroll', () => {
+    const p = (window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100;
+    document.getElementById('progress').style.width = p + '%';
+  });
+
+  // Intersection observer
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (!e.isIntersecting) return;
+      e.target.classList.add('visible');
+      if (e.target.id === 'scoreCounter') {
+        animateScore(0, 9.3, 1600);
+        document.getElementById('navScore').classList.add('visible');
+      }
+    });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+  if(document.getElementById('scoreCounter')) observer.observe(document.getElementById('scoreCounter'));
+
+  // Track list observer
+  const tlObs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (!e.isIntersecting) return;
+      e.target.querySelectorAll('.track-score-fill').forEach((f,i) => {
+        setTimeout(() => { f.style.transform = `scaleX(${parseFloat(f.dataset.score)/10})`; }, i * 55);
+      });
+      tlObs.unobserve(e.target);
+    });
+  }, { threshold: 0.08 });
+  const tl = document.getElementById('trackList');
+  if(tl) tlObs.observe(tl);
+
+  // Chart observer
+  const chObs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (!e.isIntersecting) return;
+      e.target.querySelectorAll('.bar-fill').forEach((f,i) => {
+        setTimeout(() => { const s = parseFloat(f.dataset.score); f.style.transform = `scaleX(${Math.max(0,(s-6)/4)})`; }, i * 70);
+      });
+      chObs.unobserve(e.target);
+    });
+  }, { threshold: 0.08 });
+  const cb = document.getElementById('chartBars');
+  if(cb) chObs.observe(cb);
+
+  // Score counter
+  function animateScore(from, to, duration) {
+    const el = document.getElementById('scoreCounter');
+    if(!el) return;
+    const start = performance.now();
+    (function tick(now) {
+      const p = Math.min((now - start) / duration, 1);
+      const ease = 1 - Math.pow(1 - p, 3);
+      const val = from + (to - from) * ease;
+      const int = Math.floor(val);
+      const dec = Math.round((val - int) * 10);
+      el.innerHTML = int + '<span>.' + dec + '</span>';
+      if(p < 1) requestAnimationFrame(tick);
+    })(start);
+  }
+
+  // Track toggles
+  document.querySelectorAll('.track-item').forEach(item => {
+    item.querySelector('.track-header').addEventListener('click', () => {
+      const body = item.querySelector('.track-body');
+      const open = item.classList.toggle('open');
+      body.style.maxHeight = open ? body.scrollHeight + 'px' : '0';
+    });
+  });
+
+  // Pills
+  document.querySelectorAll('.pill').forEach(pill => {
+    pill.addEventListener('click', () => {
+      document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+      pill.classList.add('active');
+    });
+  });
+</script>
+</body>
+</html>

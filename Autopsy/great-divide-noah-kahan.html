@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Great Divide - Album Autopsy</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #070a0d;
+    --bg2: #0b1117;
+    --bg3: #0f1720;
+    --accent: #4a7fa5;
+    --accent2: #5d97bf;
+    --gold: #a8c8dc;
+    --text: #e8f0f4;
+    --muted: #5a7080;
+    --border: rgba(74,127,165,0.1);
+    --font-display: 'Bebas Neue', sans-serif;
+    --font-serif: 'Playfair Display', serif;
+    --font-body: 'DM Sans', sans-serif;
+  }
+  html { scroll-behavior: smooth; }
+  body { background: var(--bg); color: var(--text); font-family: var(--font-body); font-weight: 300; line-height: 1.7; overflow-x: hidden; }
+  body::before { content:''; position:fixed; inset:0; background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.055'/%3E%3C/svg%3E"); pointer-events:none; z-index:9999; opacity:0.5; }
+  .progress-bar { position:fixed; top:0; left:0; height:2px; background:linear-gradient(90deg, var(--accent), var(--gold)); z-index:200; width:0%; transition: width 0.1s linear; }
+  nav { position:fixed; top:0; left:0; right:0; padding:1.1rem 2.5rem; display:flex; justify-content:space-between; align-items:center; z-index:100; background:linear-gradient(to bottom, rgba(7,10,13,0.95), transparent); }
+  .nav-back { font-family:var(--font-display); letter-spacing:0.25em; font-size:0.7rem; color:var(--muted); text-decoration:none; transition:color 0.2s; }
+  .nav-back:hover { color:var(--accent); }
+  .nav-score { font-family:var(--font-display); font-size:1.1rem; color:var(--accent); opacity:0; transition:opacity 0.4s; }
+  .nav-score.visible { opacity:1; }
+  .hero { min-height:100vh; display:flex; flex-direction:column; justify-content:center; align-items:center; position:relative; overflow:hidden; padding:4rem 2rem; text-align:center; }
+  .hero-bg { position:absolute; inset:0; background: radial-gradient(ellipse 60% 50% at 50% 40%, rgba(74,127,165,0.12) 0%, transparent 65%), radial-gradient(ellipse 35% 35% at 20% 70%, rgba(93,151,191,0.05) 0%, transparent 55%), var(--bg); z-index:0; }
+  .hero-rings { position:absolute; inset:0; z-index:0; overflow:hidden; }
+  .hero-rings::before { content:''; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:900px; height:900px; border-radius:50%; background: radial-gradient(circle at center, transparent 38%, rgba(74,127,165,0.035) 38.5%, transparent 39%), radial-gradient(circle at center, transparent 50%, rgba(74,127,165,0.025) 50.5%, transparent 51%), radial-gradient(circle at center, transparent 62%, rgba(74,127,165,0.018) 62.5%, transparent 63%); }
+  .hero-content { position:relative; z-index:1; }
+  .autopsy-label { font-family:var(--font-display); letter-spacing:0.4em; font-size:0.72rem; color:var(--accent); text-transform:uppercase; margin-bottom:1.8rem; opacity:0; animation:fadeUp 0.8s ease 0.2s forwards; }
+  .hero-artist { font-family:var(--font-display); font-size:clamp(4rem,16vw,14rem); line-height:0.88; letter-spacing:-0.02em; color:var(--text); opacity:0; animation:fadeUp 0.8s ease 0.4s forwards; }
+  .hero-album { font-family:var(--font-serif); font-style:italic; font-size:clamp(1.2rem,4vw,3.2rem); color:var(--gold); margin-top:0.6rem; opacity:0; animation:fadeUp 0.8s ease 0.6s forwards; line-height:1.25; }
+  .hero-meta { font-family:var(--font-display); letter-spacing:0.3em; font-size:0.85rem; color:var(--muted); margin-top:1.5rem; opacity:0; animation:fadeUp 0.8s ease 0.8s forwards; }
+  .hero-rule { width:1px; height:70px; background:linear-gradient(to bottom, var(--accent), transparent); margin:3rem auto 0; opacity:0; animation:fadeUp 0.8s ease 1s forwards; }
+  .scroll-hint { font-size:0.68rem; letter-spacing:0.35em; color:var(--muted); text-transform:uppercase; margin-top:0.8rem; opacity:0; animation:fadeUp 0.8s ease 1.2s forwards; }
+  .verdict-bar { background:linear-gradient(90deg, var(--accent), #2d5f82); padding:1.1rem 2rem; text-align:center; font-size:0.92rem; color:rgba(255,255,255,0.9); font-weight:400; line-height:1.5; }
+  .score-section { background:var(--bg2); border-top:1px solid var(--border); border-bottom:1px solid var(--border); }
+  .score-inner { max-width:920px; margin:0 auto; padding:6rem 2rem; display:grid; grid-template-columns:1fr 1.5fr; gap:5rem; align-items:center; }
+  @media(max-width:640px){.score-inner{grid-template-columns:1fr;gap:2.5rem;}}
+  .score-display { text-align:center; }
+  .score-number { font-family:var(--font-display); font-size:clamp(5.5rem,16vw,11rem); line-height:1; color:var(--text); }
+  .score-number span { color:var(--accent); }
+  .score-label { font-family:var(--font-display); letter-spacing:0.35em; font-size:0.75rem; color:var(--muted); margin-top:0.4rem; }
+  .score-verdict { font-family:var(--font-serif); font-style:italic; font-size:1.3rem; line-height:1.55; margin-bottom:1.5rem; color:var(--text); }
+  .score-defense { font-size:0.88rem; color:var(--muted); line-height:1.85; }
+  .section { max-width:920px; margin:0 auto; padding:6rem 2rem; }
+  .section-label { font-family:var(--font-display); letter-spacing:0.4em; font-size:0.68rem; color:var(--accent); text-transform:uppercase; margin-bottom:1.4rem; }
+  .section-title { font-family:var(--font-serif); font-size:clamp(1.8rem,4.5vw,3.2rem); font-weight:900; line-height:1.1; margin-bottom:2.5rem; }
+  .section-title em { font-style:italic; color:var(--gold); }
+  .pill { padding:0.35rem 0.9rem; border:1px solid var(--border); border-radius:2px; font-size:0.7rem; letter-spacing:0.15em; text-transform:uppercase; font-family:var(--font-display); color:var(--text); background:transparent; transition:all 0.2s; cursor:default; }
+  .pill:hover, .pill.active { border-color:var(--accent); color:var(--accent); background:rgba(74,127,165,0.08); }
+  .theme-pills { display:flex; flex-wrap:wrap; gap:0.45rem; margin:0 0 3rem; }
+  .themes-section { background:var(--bg2); border-top:1px solid var(--border); }
+  .themes-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:1.5px; background:var(--border); border:1px solid var(--border); }
+  .theme-card { background:var(--bg2); padding:2.2rem 1.8rem; transition:background 0.2s; cursor:default; position:relative; overflow:hidden; }
+  .theme-card::before { content:''; position:absolute; top:0; left:0; width:3px; height:0; background:var(--accent); transition:height 0.3s; }
+  .theme-card:hover::before { height:100%; }
+  .theme-card:hover { background:var(--bg3); }
+  .theme-card-icon { font-size:1.8rem; margin-bottom:0.9rem; display:block; }
+  .theme-card-title { font-family:var(--font-serif); font-size:1rem; font-weight:700; margin-bottom:0.6rem; }
+  .theme-card-text { font-size:0.82rem; color:var(--muted); line-height:1.75; }
+  .egg-section { background:var(--bg3); border-top:1px solid var(--border); border-bottom:1px solid var(--border); }
+  .egg-inner { max-width:920px; margin:0 auto; padding:5rem 2rem; }
+  .egg-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:1px; background:var(--border); border:1px solid var(--border); margin-top:2.5rem; }
+  .egg-card { background:var(--bg3); padding:2rem 1.6rem; position:relative; }
+  .egg-card::after { content:'🥚'; position:absolute; top:1.2rem; right:1.4rem; font-size:1rem; opacity:0.4; }
+  .egg-num { font-family:var(--font-display); font-size:2.5rem; line-height:1; color:rgba(74,127,165,0.18); margin-bottom:0.6rem; }
+  .egg-title { font-family:var(--font-serif); font-size:0.95rem; font-weight:700; margin-bottom:0.5rem; }
+  .egg-text { font-size:0.8rem; color:var(--muted); line-height:1.75; }
+  .quote-section { padding:7rem 2rem; text-align:center; position:relative; overflow:hidden; }
+  .quote-bg { position:absolute; inset:0; background:radial-gradient(ellipse 55% 55% at 50% 50%, rgba(74,127,165,0.07) 0%, transparent 70%); }
+  .quote-mark { font-family:var(--font-serif); font-size:7rem; line-height:0; vertical-align:-1.8rem; color:rgba(74,127,165,0.18); margin-right:0.05em; }
+  .quote-text { font-family:var(--font-serif); font-style:italic; font-size:clamp(1.4rem,3.5vw,2.5rem); line-height:1.35; max-width:680px; margin:0 auto; position:relative; z-index:1; }
+  .quote-attr { margin-top:2rem; font-size:0.72rem; letter-spacing:0.3em; text-transform:uppercase; color:var(--muted); font-family:var(--font-display); position:relative; z-index:1; }
+  .tracks-section { background:var(--bg); border-top:1px solid var(--border); }
+  .tracks-inner { max-width:920px; margin:0 auto; padding:6rem 2rem; }
+  .track-item { border-bottom:1px solid var(--border); overflow:hidden; cursor:pointer; transition:background 0.15s; }
+  .track-item:first-of-type { border-top:1px solid var(--border); }
+  .track-item:hover { background:rgba(74,127,165,0.025); }
+  .track-header { display:grid; grid-template-columns:3rem 1fr auto; align-items:center; gap:1.2rem; padding:1.1rem 0; }
+  .track-num { font-family:var(--font-display); font-size:0.75rem; color:var(--muted); letter-spacing:0.1em; }
+  .track-name { font-family:var(--font-serif); font-size:1rem; font-weight:700; }
+  .track-right { display:flex; align-items:center; gap:1.2rem; }
+  .track-score-bar { width:70px; height:3px; background:rgba(255,255,255,0.06); border-radius:2px; overflow:hidden; }
+  .track-score-fill { height:100%; background:linear-gradient(90deg, var(--accent), var(--gold)); transform-origin:left; transform:scaleX(0); transition:transform 0.8s ease; border-radius:2px; }
+  .track-score-num { font-family:var(--font-display); font-size:0.95rem; color:var(--muted); min-width:2.2rem; text-align:right; }
+  .track-expand-icon { font-size:0.55rem; color:var(--muted); transition:transform 0.3s; }
+  .track-item.open .track-expand-icon { transform:rotate(180deg); }
+  .track-body { max-height:0; overflow:hidden; transition:max-height 0.38s ease; }
+  .track-body-inner { padding:0 0 1.4rem 0; margin-left:4.2rem; color:var(--muted); font-size:0.87rem; line-height:1.8; border-left:2px solid var(--accent); padding-left:1.4rem; }
+  .chart-section { background:var(--bg3); border-top:1px solid var(--border); border-bottom:1px solid var(--border); }
+  .chart-inner { max-width:920px; margin:0 auto; padding:6rem 2rem; }
+  .chart-bars { display:flex; flex-direction:column; gap:0.85rem; margin-top:3rem; }
+  .bar-row { display:grid; grid-template-columns:170px 1fr 2.8rem; align-items:center; gap:1rem; }
+  @media(max-width:500px){.bar-row{grid-template-columns:90px 1fr 2.5rem;}}
+  .bar-label { font-size:0.78rem; color:var(--muted); text-align:right; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .bar-track { height:5px; background:rgba(255,255,255,0.05); border-radius:3px; overflow:hidden; }
+  .bar-fill { height:100%; background:linear-gradient(90deg, var(--accent), var(--gold)); transform-origin:left; transform:scaleX(0); transition:transform 0.85s ease; border-radius:3px; }
+  .bar-val { font-family:var(--font-display); font-size:0.88rem; color:var(--text); }
+  .footnote-section { padding:5rem 2rem; text-align:center; border-top:1px solid var(--border); background:var(--bg2); }
+  .footnote-text { font-family:var(--font-serif); font-style:italic; font-size:1rem; color:var(--muted); line-height:1.85; max-width:640px; margin:0 auto; }
+  footer { padding:3.5rem 2rem; text-align:center; border-top:1px solid var(--border); }
+  .footer-sig { font-family:var(--font-serif); font-style:italic; font-size:0.88rem; color:var(--muted); }
+  .footer-brand { font-family:var(--font-display); letter-spacing:0.4em; font-size:0.68rem; color:rgba(255,255,255,0.1); margin-top:1.8rem; }
+  .divider { width:36px; height:1px; background:var(--accent); margin:1.8rem auto; }
+  .back-link { display:inline-block; margin-top:2rem; font-family:var(--font-display); letter-spacing:0.25em; font-size:0.72rem; color:var(--accent); text-decoration:none; border:1px solid var(--accent); padding:0.6rem 1.4rem; transition:all 0.2s; }
+  .back-link:hover { background:var(--accent); color:#fff; }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(28px)} to{opacity:1;transform:translateY(0)} }
+  .reveal { opacity:0; transform:translateY(38px); transition:opacity 0.7s ease, transform 0.7s ease; }
+  .reveal.visible { opacity:1; transform:translateY(0); }
+</style>
+</head>
+<body>
+<div class="progress-bar" id="progress"></div>
+<nav>
+  <a href="index.html" class="nav-back">← All Autopsies</a>
+  <div class="nav-score" id="navScore">8.3 / 10</div>
+</nav>
+
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-rings"></div>
+  <div class="hero-content">
+    <div class="autopsy-label">Album Autopsy · 038</div>
+    <div class="hero-artist">Noah Kahan</div>
+    <div class="hero-album">The Great Divide</div>
+    <div class="hero-meta">Mercury Records · 2026</div>
+    <div class="hero-rule"></div>
+    <div class="scroll-hint">Scroll to dissect</div>
+  </div>
+</section>
+
+<div class="verdict-bar">His first album made after becoming famous - which means it's his first album made with something to lose. The divide is geographic, generational, and psychic. You can't go home if the person who left is not the person who returns.</div>
+
+<section class="score-section">
+  <div class="score-inner">
+    <div class="score-display reveal">
+      <div class="score-number" id="scoreCounter">0<span>.0</span></div>
+      <div class="score-label">Overall Score</div>
+    </div>
+    <div class="reveal">
+      <div class="score-verdict">"The superstar's dilemma, Vermont edition: the place that made you can't hold you, and you can't stop reaching back for it."</div>
+      <div class="score-defense">8.3 because the best tracks here - "All Them Horses," "The Great Divide," "Porch Light," "Dan" - rank among the sharpest writing Kahan has done. The album earns its scale. The deduction is for a back half that loses momentum in spots ("Willing and Able," "Spoiled") where the production reaches for grandeur the songs haven't quite earned. The three or four best tracks are career-best. The rest is very good. A record that will only improve with time and context.</div>
+    </div>
+  </div>
+</section>
+
+<div class="themes-section">
+  <div class="section">
+    <div class="section-label reveal">Central Thesis</div>
+    <div class="section-title reveal">What <em>This Album Is Really About</em></div>
+    <div class="theme-pills reveal">
+      <span class="pill active">The Guilt of Leaving</span>
+      <span class="pill">Vermont as Relationship</span>
+      <span class="pill">Fame as Distance</span>
+      <span class="pill">Family as Anchor and Weight</span>
+    </div>
+    <div class="themes-grid reveal">
+      <div class="theme-card">
+        <span class="theme-card-icon">🏔️</span>
+        <div class="theme-card-title">The Guilt of Leaving</div>
+        <div class="theme-card-text">Kahan was on tour in Europe when the 2023 Vermont floods hit - the worst in the state since 1927. He couldn't get home. "All Them Horses" is that song: the guilt of absence, the helplessness of distance, the particular shame of being somewhere beautiful when the people you love are underwater.</div>
+      </div>
+      <div class="theme-card">
+        <span class="theme-card-icon">🌲</span>
+        <div class="theme-card-title">Vermont as Relationship</div>
+        <div class="theme-card-text">Not a backdrop. A person you are in a complicated long-distance relationship with. The album is full of this - he's addressing Vermont the way you address a partner you've grown away from. The state has opinions about him. He has guilt about the state. It's mutual.</div>
+      </div>
+      <div class="theme-card">
+        <span class="theme-card-icon">📺</span>
+        <div class="theme-card-title">Fame as Distance</div>
+        <div class="theme-card-text">Stick Season made him a phenomenon. The Great Divide is the first album written from the other side of that - after the late nights on Fallon, after the festival headlining, after extended time in LA. The divide is partly what celebrity does to the relationship between where you came from and who you became.</div>
+      </div>
+      <div class="theme-card">
+        <span class="theme-card-icon">🪔</span>
+        <div class="theme-card-title">Family as Anchor and Weight</div>
+        <div class="theme-card-text">"Porch Light" and "Dan" are the album's most intimate moments - direct address to specific people in his life, not to Vermont as concept. These tracks work because they don't generalize. They're particular in the way the best folk writing is particular: you know who he's talking to even though you don't know them.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<section class="quote-section">
+  <div class="quote-bg"></div>
+  <div class="quote-text reveal"><span class="quote-mark">"</span>I stare across it. I see old friends, my father, my mother, my siblings, my younger self, the great state of Vermont.</div>
+  <div class="quote-attr reveal">Noah Kahan · On the album's title · 2026</div>
+</section>
+
+<section class="egg-section">
+  <div class="egg-inner">
+    <div class="section-label reveal">Rare Frequencies</div>
+    <div class="section-title reveal">Things You <em>Didn't Know</em></div>
+    <div class="egg-grid reveal">
+      <div class="egg-card">
+        <div class="egg-num">01</div>
+        <div class="egg-title">The Album That Almost Wasn't Called This</div>
+        <div class="egg-text">The album was almost titled The Last of the Bugs, taken from a line in "The View Between Villages" off Stick Season. Kahan ran a mysterious TikTok account with that name for months, dropping clues - fans pieced it together before any announcement. He ultimately felt it was too esoteric for an album title. He kept it for the expanded edition instead.</div>
+      </div>
+      <div class="egg-card">
+        <div class="egg-num">02</div>
+        <div class="egg-title">The Vermont Floods</div>
+        <div class="egg-text">July 2023: Vermont flooded. Roads washed out. Bridges collapsed. Kahan was mid-tour in Europe. He watched it on his phone from a hotel in another country, unable to get home, watching his neighbors wade through their living rooms. "All Them Horses" is the direct result. He wrote it quickly, almost compulsively. It shows.</div>
+      </div>
+      <div class="egg-card">
+        <div class="egg-num">03</div>
+        <div class="egg-title">Number One, Both Sides</div>
+        <div class="egg-text">The Great Divide debuted at #1 in both the US and UK - the best first-week sales for a rock album in the US in over a decade. This from a singer-songwriter from Vermont who got famous on TikTok with songs about not being able to leave. He left. It went to number one. He still can't stop writing about leaving.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="tracks-section">
+  <div class="tracks-inner">
+    <div class="section-label reveal">Track by Track</div>
+    <div class="section-title reveal">The <em>Dissection</em></div>
+    <div id="trackList" class="reveal">
+
+      <div class="track-item">
+        <div class="track-header"><span class="track-num">01</span><span class="track-name">End of August</span><div class="track-right"><div class="track-score-bar"><div class="track-score-fill" data-score="8.5"></div></div><span class="track-score-num">8.5</span><span class="track-expand-icon">▼</span></div></div>
+        <div class="track-body"><div class="track-body-inner">The album's opening move - setting the season, the temperature, the emotional register. August in Vermont means summer is almost over, school is coming, something is ending. Kahan uses the month not as a date but as a feeling. A clean, precise opener that doesn't oversell what follows.</div></div>
+      </div>
+
+      <div class="track-item">
+        <div class="track-header"><span class="track-num">06</span><span class="track-name">The Great Divide</span><div class="track-right"><div class="track-score-bar"><div class="track-score-fill" data-score="9.0"></div></div><span class="track-score-num">9.0</span><span class="track-expand-icon">▼</span></div></div>
+        <div class="track-body"><div class="track-body-inner">The thesis track and the album's first genuinely large moment. The production here earns the space it takes up. The divide he's singing about is not metaphor dressed up as landscape - it's the actual psychic gap between who he was in Vermont and who he became on the road. The chorus lands because the verses build honestly toward it.</div></div>
+      </div>
+
+      <div class="track-item">
+        <div class="track-header"><span class="track-num">11</span><span class="track-name">Porch Light</span><div class="track-right"><div class="track-score-bar"><div class="track-score-fill" data-score="8.8"></div></div><span class="track-score-num">8.8</span><span class="track-expand-icon">▼</span></div></div>
+        <div class="track-body"><div class="track-body-inner">A direct address to his parents. Specific in the way great folk writing is specific - you don't need to know who he's talking to, but you feel the weight of someone who does. The porch light as the thing that stays on when you don't come home. Simple image. Earns every syllable.</div></div>
+      </div>
+
+      <div class="track-item">
+        <div class="track-header"><span class="track-num">16</span><span class="track-name">All Them Horses</span><div class="track-right"><div class="track-score-bar"><div class="track-score-fill" data-score="9.3"></div></div><span class="track-score-num">9.3</span><span class="track-expand-icon">▼</span></div></div>
+        <div class="track-body"><div class="track-body-inner">The album's best song. Written about the 2023 Vermont floods - he was in Europe, watching from a hotel, unable to get home. The guilt of having left is everywhere in this record, but here it becomes acute, particular, unmistakably real. The image of horses specifically - animals that couldn't evacuate themselves - lands with the weight of the actual thing that happened.</div></div>
+      </div>
+
+      <div class="track-item">
+        <div class="track-header"><span class="track-num">17</span><span class="track-name">Dan</span><div class="track-right"><div class="track-score-bar"><div class="track-score-fill" data-score="8.7"></div></div><span class="track-score-num">8.7</span><span class="track-expand-icon">▼</span></div></div>
+        <div class="track-body"><div class="track-body-inner">Named after a specific person. Closes the album. Whatever distance the record opened up, this track attempts the crossing - not successfully, necessarily, but honestly. An ending that doesn't resolve everything because not everything resolves. The correct call.</div></div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<section class="chart-section">
+  <div class="chart-inner">
+    <div class="section-label reveal">Score Breakdown</div>
+    <div class="section-title reveal">Every Track, <em>Ranked</em></div>
+    <div class="chart-bars reveal" id="chartBars">
+      <div class="bar-row"><div class="bar-label">All Them Horses</div><div class="bar-track"><div class="bar-fill" data-score="9.3"></div></div><div class="bar-val">9.3</div></div>
+      <div class="bar-row"><div class="bar-label">The Great Divide</div><div class="bar-track"><div class="bar-fill" data-score="9.0"></div></div><div class="bar-val">9.0</div></div>
+      <div class="bar-row"><div class="bar-label">Porch Light</div><div class="bar-track"><div class="bar-fill" data-score="8.8"></div></div><div class="bar-val">8.8</div></div>
+      <div class="bar-row"><div class="bar-label">Dan</div><div class="bar-track"><div class="bar-fill" data-score="8.7"></div></div><div class="bar-val">8.7</div></div>
+      <div class="bar-row"><div class="bar-label">End of August</div><div class="bar-track"><div class="bar-fill" data-score="8.5"></div></div><div class="bar-val">8.5</div></div>
+      <div class="bar-row"><div class="bar-label">Headed North</div><div class="bar-track"><div class="bar-fill" data-score="8.3"></div></div><div class="bar-val">8.3</div></div>
+      <div class="bar-row"><div class="bar-label">23</div><div class="bar-track"><div class="bar-fill" data-score="8.2"></div></div><div class="bar-val">8.2</div></div>
+      <div class="bar-row"><div class="bar-label">Haircut</div><div class="bar-track"><div class="bar-fill" data-score="8.1"></div></div><div class="bar-val">8.1</div></div>
+      <div class="bar-row"><div class="bar-label">American Cars</div><div class="bar-track"><div class="bar-fill" data-score="8.0"></div></div><div class="bar-val">8.0</div></div>
+      <div class="bar-row"><div class="bar-label">Doors</div><div class="bar-track"><div class="bar-fill" data-score="7.9"></div></div><div class="bar-val">7.9</div></div>
+      <div class="bar-row"><div class="bar-label">Deny Deny Deny</div><div class="bar-track"><div class="bar-fill" data-score="7.8"></div></div><div class="bar-val">7.8</div></div>
+      <div class="bar-row"><div class="bar-label">Dashboard</div><div class="bar-track"><div class="bar-fill" data-score="7.7"></div></div><div class="bar-val">7.7</div></div>
+      <div class="bar-row"><div class="bar-label">Downfall</div><div class="bar-track"><div class="bar-fill" data-score="7.6"></div></div><div class="bar-val">7.6</div></div>
+      <div class="bar-row"><div class="bar-label">We Go Way Back</div><div class="bar-track"><div class="bar-fill" data-score="7.5"></div></div><div class="bar-val">7.5</div></div>
+      <div class="bar-row"><div class="bar-label">Paid Time Off</div><div class="bar-track"><div class="bar-fill" data-score="7.3"></div></div><div class="bar-val">7.3</div></div>
+      <div class="bar-row"><div class="bar-label">Spoiled</div><div class="bar-track"><div class="bar-fill" data-score="7.1"></div></div><div class="bar-val">7.1</div></div>
+      <div class="bar-row"><div class="bar-label">Willing and Able</div><div class="bar-track"><div class="bar-fill" data-score="7.0"></div></div><div class="bar-val">7.0</div></div>
+    </div>
+  </div>
+</section>
+
+<div class="footnote-section">
+  <div class="section-label reveal" style="text-align:center;">Footnote</div>
+  <div class="footnote-text reveal">Kahan said the album title came from an image he kept returning to: standing at the edge of a vast distance, looking across at the people and places he came from. The divide is not a metaphor for anything. It is the actual feeling of leaving a place that formed you and watching it get smaller in the rearview and knowing you made the choice to drive.</div>
+</div>
+
+<footer>
+  <div class="footer-sig reveal">Album Autopsy - A structured dissection of records that matter.</div>
+  <div class="divider"></div>
+  <a href="index.html" class="back-link reveal">← Back to All Autopsies</a>
+  <div class="footer-brand">@MyParentsDidntLeaveForThis</div>
+</footer>
+
+<script>
+  window.addEventListener('scroll', () => {
+    const p = (window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100;
+    document.getElementById('progress').style.width = p + '%';
+  });
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (!e.isIntersecting) return;
+      e.target.classList.add('visible');
+      if (e.target.id === 'scoreCounter') { animateScore(0, 8.3, 1600); document.getElementById('navScore').classList.add('visible'); }
+    });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+  if(document.getElementById('scoreCounter')) observer.observe(document.getElementById('scoreCounter'));
+  const tlObs = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (!e.isIntersecting) return; e.target.querySelectorAll('.track-score-fill').forEach((f,i) => { setTimeout(() => { f.style.transform = `scaleX(${parseFloat(f.dataset.score)/10})`; }, i * 55); }); tlObs.unobserve(e.target); });
+  }, { threshold: 0.08 });
+  const tl = document.getElementById('trackList'); if(tl) tlObs.observe(tl);
+  const chObs = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (!e.isIntersecting) return; e.target.querySelectorAll('.bar-fill').forEach((f,i) => { setTimeout(() => { const s = parseFloat(f.dataset.score); f.style.transform = `scaleX(${Math.max(0,(s-6)/4)})`; }, i * 70); }); chObs.unobserve(e.target); });
+  }, { threshold: 0.08 });
+  const cb = document.getElementById('chartBars'); if(cb) chObs.observe(cb);
+  function animateScore(from, to, duration) {
+    const el = document.getElementById('scoreCounter'); if(!el) return;
+    const start = performance.now();
+    (function tick(now) { const p = Math.min((now - start) / duration, 1); const ease = 1 - Math.pow(1 - p, 3); const val = from + (to - from) * ease; const int = Math.floor(val); const dec = Math.round((val - int) * 10); el.innerHTML = int + '<span>.' + dec + '</span>'; if(p < 1) requestAnimationFrame(tick); })(start);
+  }
+  document.querySelectorAll('.track-item').forEach(item => {
+    item.querySelector('.track-header').addEventListener('click', () => { const body = item.querySelector('.track-body'); const open = item.classList.toggle('open'); body.style.maxHeight = open ? body.scrollHeight + 'px' : '0'; });
+  });
+  document.querySelectorAll('.pill').forEach(pill => {
+    pill.addEventListener('click', () => { document.querySelectorAll('.pill').forEach(p => p.classList.remove('active')); pill.classList.add('active'); });
+  });
+</script>
+</body>
+</html>

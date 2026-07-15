@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>God Does Like Ugly - Album Autopsy</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #080809;
+    --bg2: #0e0e10;
+    --bg3: #131315;
+    --accent: #c4622a;
+    --accent-dark: #8a3e17;
+    --gold: #c9a84c;
+    --text: #eae6de;
+    --muted: #6e6a64;
+    --border: rgba(255,255,255,0.055);
+    --font-display: 'Bebas Neue', sans-serif;
+    --font-serif: 'Playfair Display', serif;
+    --font-body: 'DM Sans', sans-serif;
+  }
+  html { scroll-behavior: smooth; }
+  body { background: var(--bg); color: var(--text); font-family: var(--font-body); font-weight: 300; line-height: 1.7; overflow-x: hidden; }
+  body::before { content:''; position:fixed; inset:0; background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E"); pointer-events:none; z-index:9999; opacity:0.45; }
+  .progress-bar { position:fixed; top:0; left:0; height:2px; background:var(--accent); z-index:200; width:0%; transition: width 0.1s linear; }
+  nav { position:fixed; top:0; left:0; right:0; padding:1.1rem 2.5rem; display:flex; justify-content:space-between; align-items:center; z-index:100; background:linear-gradient(to bottom, rgba(8,8,9,0.92), transparent); }
+  .nav-back { font-family:var(--font-display); letter-spacing:0.25em; font-size:0.7rem; color:var(--muted); text-decoration:none; transition:color 0.2s; }
+  .nav-back:hover { color:var(--accent); }
+  .nav-score { font-family:var(--font-display); font-size:1.1rem; color:var(--accent); opacity:0; transition:opacity 0.4s; }
+  .nav-score.visible { opacity:1; }
+
+  .hero { min-height:100vh; display:flex; flex-direction:column; justify-content:center; align-items:center; position:relative; overflow:hidden; padding:4rem 2rem; text-align:center; }
+  .hero-bg { position:absolute; inset:0; background: radial-gradient(ellipse 80% 55% at 50% 45%, #c4622a18 0%, transparent 68%), radial-gradient(ellipse 35% 35% at 15% 75%, #c4622a09 0%, transparent 60%), var(--bg); z-index:0; }
+  .hero-lines { position:absolute; inset:0; background-image:repeating-linear-gradient(0deg, transparent, transparent 78px, rgba(255,255,255,0.011) 78px, rgba(255,255,255,0.011) 79px); z-index:0; }
+  .hero-content { position:relative; z-index:1; }
+  .autopsy-label { font-family:var(--font-display); letter-spacing:0.4em; font-size:0.72rem; color:var(--accent); text-transform:uppercase; margin-bottom:1.8rem; opacity:0; animation:fadeUp 0.8s ease 0.2s forwards; }
+  .hero-artist { font-family:var(--font-display); font-size:clamp(4rem,16vw,14rem); line-height:0.88; letter-spacing:-0.02em; color:var(--text); opacity:0; animation:fadeUp 0.8s ease 0.4s forwards; }
+  .hero-album { font-family:var(--font-serif); font-style:italic; font-size:clamp(1.2rem,4vw,3rem); color:var(--gold); margin-top:0.6rem; opacity:0; animation:fadeUp 0.8s ease 0.6s forwards; line-height:1.25; max-width:800px; }
+  .hero-meta { font-family:var(--font-display); letter-spacing:0.3em; font-size:0.85rem; color:var(--muted); margin-top:1.5rem; opacity:0; animation:fadeUp 0.8s ease 0.8s forwards; }
+  .hero-rule { width:1px; height:70px; background:linear-gradient(to bottom, var(--accent), transparent); margin:3rem auto 0; opacity:0; animation:fadeUp 0.8s ease 1s forwards; }
+  .scroll-hint { font-size:0.68rem; letter-spacing:0.35em; color:var(--muted); text-transform:uppercase; margin-top:0.8rem; opacity:0; animation:fadeUp 0.8s ease 1.2s forwards; }
+  .verdict-bar { background:var(--accent); padding:1.1rem 2rem; text-align:center; font-family:var(--font-body); font-size:0.92rem; color:rgba(0,0,0,0.85); font-weight:500; line-height:1.5; }
+
+  .score-section { background:var(--bg2); border-top:1px solid var(--border); border-bottom:1px solid var(--border); }
+  .score-inner { max-width:920px; margin:0 auto; padding:6rem 2rem; display:grid; grid-template-columns:1fr 1.5fr; gap:5rem; align-items:center; }
+  @media(max-width:640px){.score-inner{grid-template-columns:1fr;gap:2.5rem;}}
+  .score-display { text-align:center; }
+  .score-number { font-family:var(--font-display); font-size:clamp(5.5rem,16vw,11rem); line-height:1; color:var(--text); }
+  .score-number span { color:var(--accent); }
+  .score-label { font-family:var(--font-display); letter-spacing:0.35em; font-size:0.75rem; color:var(--muted); margin-top:0.4rem; }
+  .score-verdict { font-family:var(--font-serif); font-style:italic; font-size:1.3rem; line-height:1.55; margin-bottom:1.5rem; color:var(--text); }
+  .score-defense { font-size:0.88rem; color:var(--muted); line-height:1.85; }
+
+  .section { max-width:920px; margin:0 auto; padding:6rem 2rem; }
+  .section-label { font-family:var(--font-display); letter-spacing:0.4em; font-size:0.68rem; color:var(--accent); text-transform:uppercase; margin-bottom:1.4rem; }
+  .section-title { font-family:var(--font-serif); font-size:clamp(1.8rem,4.5vw,3.2rem); font-weight:900; line-height:1.1; margin-bottom:2.5rem; }
+  .section-title em { font-style:italic; color:var(--gold); }
+  .pill { padding:0.35rem 0.9rem; border:1px solid var(--border); border-radius:2px; font-size:0.7rem; letter-spacing:0.15em; text-transform:uppercase; font-family:var(--font-display); color:var(--text); background:transparent; transition:all 0.2s; cursor:default; }
+  .pill:hover, .pill.active { border-color:var(--accent); color:var(--accent); background:#c4622a14; }
+  .theme-pills { display:flex; flex-wrap:wrap; gap:0.45rem; margin:0 0 3rem; }
+  .themes-section { background:var(--bg2); border-top:1px solid var(--border); }
+  .themes-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:1.5px; background:var(--border); border:1px solid var(--border); margin-top:0; }
+  .theme-card { background:var(--bg2); padding:2.2rem 1.8rem; transition:background 0.2s; cursor:default; position:relative; overflow:hidden; }
+  .theme-card::before { content:''; position:absolute; top:0; left:0; width:3px; height:0; background:var(--accent); transition:height 0.3s; }
+  .theme-card:hover::before { height:100%; }
+  .theme-card:hover { background:var(--bg3); }
+  .theme-card-icon { font-size:1.8rem; margin-bottom:0.9rem; display:block; }
+  .theme-card-title { font-family:var(--font-serif); font-size:1rem; font-weight:700; margin-bottom:0.6rem; }
+  .theme-card-text { font-size:0.82rem; color:var(--muted); line-height:1.75; }
+
+  .quote-section { padding:7rem 2rem; text-align:center; position:relative; overflow:hidden; }
+  .quote-bg { position:absolute; inset:0; background:radial-gradient(ellipse 55% 55% at 50% 50%, #c4622a0a 0%, transparent 70%); }
+  .quote-mark { font-family:var(--font-serif); font-size:7rem; line-height:0; vertical-align:-1.8rem; color:#c4622a25; margin-right:0.05em; }
+  .quote-text { font-family:var(--font-serif); font-style:italic; font-size:clamp(1.4rem,3.5vw,2.5rem); line-height:1.35; max-width:680px; margin:0 auto; position:relative; z-index:1; }
+  .quote-attr { margin-top:2rem; font-size:0.72rem; letter-spacing:0.3em; text-transform:uppercase; color:var(--muted); font-family:var(--font-display); position:relative; z-index:1; }
+
+  .tracks-section { background:var(--bg); border-top:1px solid var(--border); }
+  .tracks-inner { max-width:920px; margin:0 auto; padding:6rem 2rem; }
+  .track-item { border-bottom:1px solid var(--border); overflow:hidden; cursor:pointer; transition:background 0.15s; }
+  .track-item:first-of-type { border-top:1px solid var(--border); }
+  .track-item:hover { background:rgba(255,255,255,0.018); }
+  .track-header { display:grid; grid-template-columns:3rem 1fr auto; align-items:center; gap:1.2rem; padding:1.1rem 0; }
+  .track-num { font-family:var(--font-display); font-size:0.75rem; color:var(--muted); letter-spacing:0.1em; }
+  .track-name { font-family:var(--font-serif); font-size:1rem; font-weight:700; }
+  .track-right { display:flex; align-items:center; gap:1.2rem; }
+  .track-score-bar { width:70px; height:3px; background:rgba(255,255,255,0.08); border-radius:2px; overflow:hidden; }
+  .track-score-fill { height:100%; background:var(--accent); transform-origin:left; transform:scaleX(0); transition:transform 0.8s ease; border-radius:2px; }
+  .track-score-num { font-family:var(--font-display); font-size:0.95rem; color:var(--muted); min-width:2.2rem; text-align:right; }
+  .track-expand-icon { font-size:0.55rem; color:var(--muted); transition:transform 0.3s; }
+  .track-item.open .track-expand-icon { transform:rotate(180deg); }
+  .track-body { max-height:0; overflow:hidden; transition:max-height 0.38s ease; }
+  .track-body-inner { padding:0 0 1.4rem 0; margin-left:4.2rem; color:var(--muted); font-size:0.87rem; line-height:1.8; border-left:2px solid var(--accent); padding-left:1.4rem; }
+
+  .chart-section { background:var(--bg3); border-top:1px solid var(--border); border-bottom:1px solid var(--border); }
+  .chart-inner { max-width:920px; margin:0 auto; padding:6rem 2rem; }
+  .chart-bars { display:flex; flex-direction:column; gap:0.85rem; margin-top:3rem; }
+  .bar-row { display:grid; grid-template-columns:170px 1fr 2.8rem; align-items:center; gap:1rem; }
+  @media(max-width:500px){.bar-row{grid-template-columns:90px 1fr 2.5rem;}}
+  .bar-label { font-size:0.78rem; color:var(--muted); text-align:right; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .bar-track { height:5px; background:rgba(255,255,255,0.055); border-radius:3px; overflow:hidden; }
+  .bar-fill { height:100%; background:linear-gradient(90deg, var(--accent), var(--gold)); transform-origin:left; transform:scaleX(0); transition:transform 0.85s ease; border-radius:3px; }
+  .bar-val { font-family:var(--font-display); font-size:0.88rem; color:var(--text); }
+
+  .footnote-section { padding:5rem 2rem; text-align:center; border-top:1px solid var(--border); background:var(--bg2); }
+  .footnote-text { font-family:var(--font-serif); font-style:italic; font-size:1rem; color:var(--muted); line-height:1.85; max-width:640px; margin:0 auto; }
+  footer { padding:3.5rem 2rem; text-align:center; border-top:1px solid var(--border); }
+  .footer-sig { font-family:var(--font-serif); font-style:italic; font-size:0.88rem; color:var(--muted); }
+  .footer-brand { font-family:var(--font-display); letter-spacing:0.4em; font-size:0.68rem; color:rgba(255,255,255,0.12); margin-top:1.8rem; }
+  .divider { width:36px; height:1px; background:var(--accent); margin:1.8rem auto; }
+  .back-link { display:inline-block; margin-top:2rem; font-family:var(--font-display); letter-spacing:0.25em; font-size:0.72rem; color:var(--accent); text-decoration:none; border:1px solid var(--accent); padding:0.6rem 1.4rem; transition:all 0.2s; }
+  .back-link:hover { background:var(--accent); color:#000; }
+
+  @keyframes fadeUp { from{opacity:0;transform:translateY(28px)} to{opacity:1;transform:translateY(0)} }
+  .reveal { opacity:0; transform:translateY(38px); transition:opacity 0.7s ease, transform 0.7s ease; }
+  .reveal.visible { opacity:1; transform:translateY(0); }
+</style>
+</head>
+<body>
+<div class="progress-bar" id="progress"></div>
+<nav>
+  <a href="index.html" class="nav-back">← All Autopsies</a>
+  <div class="nav-score" id="navScore">8.2 / 10</div>
+</nav>
+
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-lines"></div>
+  <div class="hero-content">
+    <div class="autopsy-label">Album Autopsy · 068</div>
+    <div class="hero-artist">JID</div>
+    <div class="hero-album">God Does Like Ugly</div>
+    <div class="hero-meta">Dreamville / Interscope · 2025 · Southern Hip-Hop · 57:18</div>
+    <div class="hero-rule"></div>
+    <div class="scroll-hint">Scroll to dissect</div>
+  </div>
+</section>
+
+<div class="verdict-bar">JID came back with more features, more producers, more ambition, and less of a point. The talent is still untouchable. The album just doesn't know what it came to say until the very last track.</div>
+
+<section class="score-section">
+  <div class="score-inner">
+    <div class="score-display reveal">
+      <div class="score-number" id="scoreCounter">0<span>.0</span></div>
+      <div class="score-label">Overall Score</div>
+    </div>
+    <div class="reveal">
+      <div class="score-verdict">"The talent is still untouchable. The album just doesn't know what it came to say until the very last track."</div>
+      <div class="score-defense">8.2 because God Does Like Ugly is a genuinely good rap album that happens to follow a genuinely great one. The gap between the two isn't ability, it's architecture. The Forever Story knew exactly what it was building toward on track one. GDLU figures it out on track fifteen. Everything in between is JID doing what JID does, which is more than almost anyone else in the genre can say, but the scattering across 15 tracks, 30-something producers, and a dozen features means the moments of brilliance never accumulate into a full argument. What keeps it from dropping lower: "Glory" and "For Keeps" are two of the best things JID has ever recorded, the Clipse reunion on "Community" earns every bit of its anticipation, and JID's technical ceiling is as high as it's ever been. What keeps it from going higher: the album needed a spine. It got a setlist instead.</div>
+    </div>
+  </div>
+</section>
+
+<div class="themes-section">
+  <div class="section">
+    <div class="section-label reveal">Central Thesis</div>
+    <div class="section-title reveal">What <em>This Album Is Really About</em></div>
+    <div class="theme-pills reveal"><span class="pill active">Faith &amp; the Ugly World</span><span class="pill">Black Southern Gospel</span><span class="pill">Fatherhood</span><span class="pill">The Sequel Problem</span></div>
+    <div class="themes-grid reveal">
+    <div class="theme-card">
+      <span class="theme-card-icon">🙏</span>
+      <div class="theme-card-title">Faith &amp; the Ugly World</div>
+      <div class="theme-card-text">The title comes from JID's grandmother, who said "God does like ugly" watching the world fall apart. It's a statement of resigned theology: God permits ugliness. Doesn't stop it. The album tries to live inside that tension, but it never quite commits to it the way the title promises. The idea is more interesting than the album's follow-through on it.</div>
+    </div>
+    <div class="theme-card">
+      <span class="theme-card-icon">⛪</span>
+      <div class="theme-card-title">Black Southern Gospel</div>
+      <div class="theme-card-text">The Bible Belt runs through this album in ways The Forever Story never touched. "Glory" is the clearest statement: a Memphis choir praying over JID, a brother in prison, Christian tradition as both comfort and trap. The gospel production on "Wholeheartedly" and the pastor samples scattered through the record make religion feel less like theme and more like air pressure. Atlanta raised in this.</div>
+    </div>
+    <div class="theme-card">
+      <span class="theme-card-icon">👶</span>
+      <div class="theme-card-title">Fatherhood</div>
+      <div class="theme-card-text">The album's biggest secret and its best card. On "For Keeps," the closing track, JID reveals he's a father. The whole album, in retrospect, has been circling this - the family obsession, the mortality talk, the question of what you pass down and what you break. It lands because he waited. If he'd put this on track one, you could have built an album around it. He saved it for the end instead.</div>
+    </div>
+    <div class="theme-card">
+      <span class="theme-card-icon">🔄</span>
+      <div class="theme-card-title">The Sequel Problem</div>
+      <div class="theme-card-text">The Forever Story was a conceptual album with a clear emotional spine. GDLU is the record JID made when he couldn't figure out how to follow it. That's not a criticism dressed up as observation - it's the oldest problem in music. What do you do after the best thing you've done? JID's answer was to try more things. More features, more styles, more beats. Sometimes that's the right answer. Here, it reads like a search.</div>
+    </div>
+    </div>
+  </div>
+</div>
+
+<section class="quote-section">
+  <div class="quote-bg"></div>
+  <div class="quote-text reveal"><span class="quote-mark">"</span>God does like ugly, letting all this happen.</div>
+  <div class="quote-attr reveal">JID's grandmother · The idea behind the album</div>
+</section>
+
+<section class="tracks-section">
+  <div class="tracks-inner">
+    <div class="section-label reveal">Track by Track</div>
+    <div class="section-title reveal">The <em>Dissection</em></div>
+    <div id="trackList" class="reveal">
+
+    <div class="track-item">
+      <div class="track-header">
+        <span class="track-num">01</span>
+        <span class="track-name">YouUgly (feat. Westside Gunn)</span>
+        <div class="track-right">
+          <div class="track-score-bar"><div class="track-score-fill" data-score="8.8"></div></div>
+          <span class="track-score-num">8.8</span>
+          <span class="track-expand-icon">▼</span>
+        </div>
+      </div>
+      <div class="track-body"><div class="track-body-inner">The darkest opener JID has ever recorded. Westside Gunn's bombastic rant sets a tone that the rest of the album doesn't quite sustain - which is either brave sequencing or a miscalculation, depending on how you feel by track eight. The industrial, glitchy beat sounds genuinely ugly, which is the point. Starting a record by doing exactly what the title says is a statement of intent. You just wish the intent held.</div></div>
+    </div>
+
+    <div class="track-item">
+      <div class="track-header">
+        <span class="track-num">02</span>
+        <span class="track-name">Glory</span>
+        <div class="track-right">
+          <div class="track-score-bar"><div class="track-score-fill" data-score="9.4"></div></div>
+          <span class="track-score-num">9.4</span>
+          <span class="track-expand-icon">▼</span>
+        </div>
+      </div>
+      <div class="track-body"><div class="track-body-inner">The album's best track and one of JID's best, period. A Memphis choir actually prayed over the man after they cleared their sample - that's not a press release detail, that's the track. JID raps about his older brother in prison, about the Bible Belt, about how Christian tradition in the Black South is simultaneously a structure for survival and a mechanism of control. The choir doesn't feel like a feature. It feels like the song breathing. The only fully clean track on the album, which is also the right call.</div></div>
+    </div>
+
+    <div class="track-item">
+      <div class="track-header">
+        <span class="track-num">03</span>
+        <span class="track-name">WRK</span>
+        <div class="track-right">
+          <div class="track-score-bar"><div class="track-score-fill" data-score="8.9"></div></div>
+          <span class="track-score-num">8.9</span>
+          <span class="track-expand-icon">▼</span>
+        </div>
+      </div>
+      <div class="track-body"><div class="track-body-inner">The lead single that came out three months before the album and proved JID hadn't lost a step technically. Rolling Stone noted it felt wordy - which is a criticism only interesting because JID's whole thing is density, and "wordy" is usually where he lives. Here the words pile up without quite landing anywhere. Still a strong track. The bar is just JID's own previous work.</div></div>
+    </div>
+
+    <div class="track-item">
+      <div class="track-header">
+        <span class="track-num">04</span>
+        <span class="track-name">Community (feat. Clipse)</span>
+        <div class="track-right">
+          <div class="track-score-bar"><div class="track-score-fill" data-score="9.1"></div></div>
+          <span class="track-score-num">9.1</span>
+          <span class="track-expand-icon">▼</span>
+        </div>
+      </div>
+      <div class="track-body"><div class="track-body-inner">The Clipse reunion everyone needed. Pusha T and Malice on the same track in 2025 is already a moment before a word is rapped. What makes it more than a cameo: they're actually trying. Pusha pulls his usual trick of making menace sound effortless; Malice's verse carries the weight of someone who actually examined his life and found it complicated. JID holds his own between them, which is the highest compliment available here.</div></div>
+    </div>
+
+    <div class="track-item">
+      <div class="track-header">
+        <span class="track-num">05</span>
+        <span class="track-name">Gz</span>
+        <div class="track-right">
+          <div class="track-score-bar"><div class="track-score-fill" data-score="7.9"></div></div>
+          <span class="track-score-num">7.9</span>
+          <span class="track-expand-icon">▼</span>
+        </div>
+      </div>
+      <div class="track-body"><div class="track-body-inner">The album's lowest-profile track, which says something about an album this stuffed. JID solo, Atlanta as subject, no guest to complicate it. It's fine. It does its job. After "Community" it feels like a breath between courses rather than a full dish. Not every track needs to carry the album, and this one doesn't try to.</div></div>
+    </div>
+
+    <div class="track-item">
+      <div class="track-header">
+        <span class="track-num">06</span>
+        <span class="track-name">VCRs (feat. Vince Staples)</span>
+        <div class="track-right">
+          <div class="track-score-bar"><div class="track-score-fill" data-score="8.6"></div></div>
+          <span class="track-score-num">8.6</span>
+          <span class="track-expand-icon">▼</span>
+        </div>
+      </div>
+      <div class="track-body"><div class="track-body-inner">Vince Staples is incapable of a bad verse, and this is not a bad verse. The track works because the two rappers share a register: controlled, dry, slightly detached from the chaos they're describing. JID sounds sharper here than he does on "WRK" - something about Vince's presence tightens him up. The nostalgia angle (VCRs, old things) fits an album theoretically about what gets preserved and what doesn't.</div></div>
+    </div>
+
+    <div class="track-item">
+      <div class="track-header">
+        <span class="track-num">07</span>
+        <span class="track-name">Sk8 (feat. Ciara &amp; EarthGang)</span>
+        <div class="track-right">
+          <div class="track-score-bar"><div class="track-score-fill" data-score="7.7"></div></div>
+          <span class="track-score-num">7.7</span>
+          <span class="track-expand-icon">▼</span>
+        </div>
+      </div>
+      <div class="track-body"><div class="track-body-inner">Miami bass on a JID album - which is an interesting sentence. It's also the track that most nakedly shows the album trying to be multiple things at once. EarthGang is the right choice; Ciara is a flex choice. The song is danceable, which on a record named after an old woman watching the world go ugly reads either as deliberate tonal contrast or tonal confusion. It's probably both. Fun track. Doesn't belong here.</div></div>
+    </div>
+
+    <div class="track-item">
+      <div class="track-header">
+        <span class="track-num">08</span>
+        <span class="track-name">What We On (feat. Don Toliver)</span>
+        <div class="track-right">
+          <div class="track-score-bar"><div class="track-score-fill" data-score="7.8"></div></div>
+          <span class="track-score-num">7.8</span>
+          <span class="track-expand-icon">▼</span>
+        </div>
+      </div>
+      <div class="track-body"><div class="track-body-inner">Don Toliver does what Don Toliver does, which is float. The combination works on a surface level and doesn't work on any level beneath it. Rolling Stone noted JID felt wordy here too - the critique lands this time. The track is pleasant and forgettable, which are two things very few JID tracks manage to be simultaneously.</div></div>
+    </div>
+
+    <div class="track-item">
+      <div class="track-header">
+        <span class="track-num">09</span>
+        <span class="track-name">Wholeheartedly (feat. Ty Dolla $ign &amp; 6LACK)</span>
+        <div class="track-right">
+          <div class="track-score-bar"><div class="track-score-fill" data-score="8.3"></div></div>
+          <span class="track-score-num">8.3</span>
+          <span class="track-expand-icon">▼</span>
+        </div>
+      </div>
+      <div class="track-body"><div class="track-body-inner">The album's gospel-soul section works here because the production doesn't try to disguise what it is. Ty Dolla $ign and 6LACK are the exact right feature pair for a track this emotionally open. JID sounds like he means it, which on an album where some tracks feel like exercises, is noticeable. The Thundercat bass credit in the liner notes makes sense the moment you hear it.</div></div>
+    </div>
+
+    <div class="track-item">
+      <div class="track-header">
+        <span class="track-num">10</span>
+        <span class="track-name">No Boo (feat. Jessie Reyez)</span>
+        <div class="track-right">
+          <div class="track-score-bar"><div class="track-score-fill" data-score="8.2"></div></div>
+          <span class="track-score-num">8.2</span>
+          <span class="track-expand-icon">▼</span>
+        </div>
+      </div>
+      <div class="track-body"><div class="track-body-inner">JID rapping quickly in Spanish here is the most unexpected move on the album, which says a lot about a man raised in Atlanta who speaks Spanish well enough to do it on record. Jessie Reyez is always a reliable presence. The track has an energy the middle of the album needed but arrived slightly late.</div></div>
+    </div>
+
+    <div class="track-item">
+      <div class="track-header">
+        <span class="track-num">11</span>
+        <span class="track-name">And We Vibing (Interlude)</span>
+        <div class="track-right">
+          <div class="track-score-bar"><div class="track-score-fill" data-score="7.4"></div></div>
+          <span class="track-score-num">7.4</span>
+          <span class="track-expand-icon">▼</span>
+        </div>
+      </div>
+      <div class="track-body"><div class="track-body-inner">An interlude that functions as breathing room after the run from "Wholeheartedly" through "No Boo." It does what interludes are supposed to do. Nothing more.</div></div>
+    </div>
+
+    <div class="track-item">
+      <div class="track-header">
+        <span class="track-num">12</span>
+        <span class="track-name">On McAfee (feat. Baby Kia)</span>
+        <div class="track-right">
+          <div class="track-score-bar"><div class="track-score-fill" data-score="8.0"></div></div>
+          <span class="track-score-num">8.0</span>
+          <span class="track-expand-icon">▼</span>
+        </div>
+      </div>
+      <div class="track-body"><div class="track-body-inner">Baby Kia's chorus is the track. It's "fiery" is the word every review reaches for, and it earns it. McAfee Road is a real Atlanta street and the specificity does what JID's specificity always does: makes a local story feel like it's about your neighborhood too, even if your neighborhood is nowhere near Georgia.</div></div>
+    </div>
+
+    <div class="track-item">
+      <div class="track-header">
+        <span class="track-num">13</span>
+        <span class="track-name">Of Blue (feat. Mereba)</span>
+        <div class="track-right">
+          <div class="track-score-bar"><div class="track-score-fill" data-score="8.6"></div></div>
+          <span class="track-score-num">8.6</span>
+          <span class="track-expand-icon">▼</span>
+        </div>
+      </div>
+      <div class="track-body"><div class="track-body-inner">One of the album's more formally ambitious tracks: divided into three distinct phases that don't feel like stitched-together ideas but like a single thought changing shape. Mereba is one of Atlanta's most underused voices and this track is a reminder of that. The song released as a single the day before the album dropped, which in retrospect was the right call - it needed to land independently before it could work as part of the sequence.</div></div>
+    </div>
+
+    <div class="track-item">
+      <div class="track-header">
+        <span class="track-num">14</span>
+        <span class="track-name">K-Word (feat. Pastor Troy)</span>
+        <div class="track-right">
+          <div class="track-score-bar"><div class="track-score-fill" data-score="9.0"></div></div>
+          <span class="track-score-num">9.0</span>
+          <span class="track-expand-icon">▼</span>
+        </div>
+      </div>
+      <div class="track-body"><div class="track-body-inner">Hans Zimmer strings on a JID track - not a comparison, an actual influence, according to every review that mentioned it. The penultimate track earns its density: JID packs more into this meditation on karma than most rappers put in an album side. Pastor Troy, Atlanta legend, closing out the city's throughline in the record. The strings make the track feel like it's building to something. It is. The next track is what it's building to.</div></div>
+    </div>
+
+    <div class="track-item">
+      <div class="track-header">
+        <span class="track-num">15</span>
+        <span class="track-name">For Keeps</span>
+        <div class="track-right">
+          <div class="track-score-bar"><div class="track-score-fill" data-score="9.3"></div></div>
+          <span class="track-score-num">9.3</span>
+          <span class="track-expand-icon">▼</span>
+        </div>
+      </div>
+      <div class="track-body"><div class="track-body-inner">JID is a father. He tells you here, on the last track, which is the correct place to put the most important thing you have to say. The reveal reframes everything: the grandmother's saying about ugly, the brother in prison, the talk about legacy and cycles and what gets passed down. He wasn't making an album about Atlanta. He was making an album for someone who doesn't exist yet. "For Keeps" is the spine the rest of the album needed. It arrived on track fifteen. Better late than never.</div></div>
+    </div>
+
+    </div>
+  </div>
+</section>
+
+<section class="chart-section">
+  <div class="chart-inner">
+    <div class="section-label reveal">Score Breakdown</div>
+    <div class="section-title reveal">Every Track, <em>Ranked</em></div>
+    <div class="chart-bars reveal" id="chartBars">
+    <div class="bar-row"><div class="bar-label">Glory</div><div class="bar-track"><div class="bar-fill" data-score="9.4"></div></div><div class="bar-val">9.4</div></div>
+    <div class="bar-row"><div class="bar-label">For Keeps</div><div class="bar-track"><div class="bar-fill" data-score="9.3"></div></div><div class="bar-val">9.3</div></div>
+    <div class="bar-row"><div class="bar-label">Community</div><div class="bar-track"><div class="bar-fill" data-score="9.1"></div></div><div class="bar-val">9.1</div></div>
+    <div class="bar-row"><div class="bar-label">K-Word</div><div class="bar-track"><div class="bar-fill" data-score="9.0"></div></div><div class="bar-val">9.0</div></div>
+    <div class="bar-row"><div class="bar-label">WRK</div><div class="bar-track"><div class="bar-fill" data-score="8.9"></div></div><div class="bar-val">8.9</div></div>
+    <div class="bar-row"><div class="bar-label">YouUgly</div><div class="bar-track"><div class="bar-fill" data-score="8.8"></div></div><div class="bar-val">8.8</div></div>
+    <div class="bar-row"><div class="bar-label">VCRs</div><div class="bar-track"><div class="bar-fill" data-score="8.6"></div></div><div class="bar-val">8.6</div></div>
+    <div class="bar-row"><div class="bar-label">Of Blue</div><div class="bar-track"><div class="bar-fill" data-score="8.6"></div></div><div class="bar-val">8.6</div></div>
+    <div class="bar-row"><div class="bar-label">Wholeheartedly</div><div class="bar-track"><div class="bar-fill" data-score="8.3"></div></div><div class="bar-val">8.3</div></div>
+    <div class="bar-row"><div class="bar-label">No Boo</div><div class="bar-track"><div class="bar-fill" data-score="8.2"></div></div><div class="bar-val">8.2</div></div>
+    <div class="bar-row"><div class="bar-label">On McAfee</div><div class="bar-track"><div class="bar-fill" data-score="8.0"></div></div><div class="bar-val">8.0</div></div>
+    <div class="bar-row"><div class="bar-label">Gz</div><div class="bar-track"><div class="bar-fill" data-score="7.9"></div></div><div class="bar-val">7.9</div></div>
+    <div class="bar-row"><div class="bar-label">What We On</div><div class="bar-track"><div class="bar-fill" data-score="7.8"></div></div><div class="bar-val">7.8</div></div>
+    <div class="bar-row"><div class="bar-label">Sk8</div><div class="bar-track"><div class="bar-fill" data-score="7.7"></div></div><div class="bar-val">7.7</div></div>
+    <div class="bar-row"><div class="bar-label">And We Vibing</div><div class="bar-track"><div class="bar-fill" data-score="7.4"></div></div><div class="bar-val">7.4</div></div>
+    </div>
+  </div>
+</section>
+
+<div class="footnote-section">
+  <div class="section-label reveal" style="text-align:center;">Footnote</div>
+  <div class="footnote-text reveal">JID's grandmother passed in 2019. He started working on this album in 2020. He spent five years sitting with her words before putting them on a record. The album is named for a sentence she said watching the world get ugly - God permits it, doesn't fix it. Whether that's theology or resignation probably depends on where you are in life when you hear it. JID buried the most personal reveal at the end. That's either artistic restraint or a man who wasn't ready to say it until the last possible moment. Both are good reasons.</div>
+</div>
+
+<footer>
+  <div class="footer-sig reveal">Album Autopsy - A structured dissection of records that matter.</div>
+  <div class="divider"></div>
+  <a href="index.html" class="back-link reveal">← Back to All Autopsies</a>
+  <div class="footer-brand">@MyParentsDidntLeaveForThis</div>
+</footer>
+
+<script>
+  window.addEventListener('scroll', () => {
+    const p = (window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100;
+    document.getElementById('progress').style.width = p + '%';
+  });
+
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (!e.isIntersecting) return;
+      e.target.classList.add('visible');
+      if (e.target.id === 'scoreCounter') {
+        animateScore(0, 8.2, 1600);
+        document.getElementById('navScore').classList.add('visible');
+      }
+    });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+  if(document.getElementById('scoreCounter')) observer.observe(document.getElementById('scoreCounter'));
+
+  const tlObs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (!e.isIntersecting) return;
+      e.target.querySelectorAll('.track-score-fill').forEach((f,i) => {
+        setTimeout(() => { f.style.transform = `scaleX(${parseFloat(f.dataset.score)/10})`; }, i * 55);
+      });
+      tlObs.unobserve(e.target);
+    });
+  }, { threshold: 0.08 });
+  const tl = document.getElementById('trackList');
+  if(tl) tlObs.observe(tl);
+
+  const chObs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (!e.isIntersecting) return;
+      e.target.querySelectorAll('.bar-fill').forEach((f,i) => {
+        setTimeout(() => { const s = parseFloat(f.dataset.score); f.style.transform = `scaleX(${Math.max(0,(s-6)/4)})`; }, i * 70);
+      });
+      chObs.unobserve(e.target);
+    });
+  }, { threshold: 0.08 });
+  const cb = document.getElementById('chartBars');
+  if(cb) chObs.observe(cb);
+
+  function animateScore(from, to, duration) {
+    const el = document.getElementById('scoreCounter');
+    if(!el) return;
+    const start = performance.now();
+    (function tick(now) {
+      const p = Math.min((now - start) / duration, 1);
+      const ease = 1 - Math.pow(1 - p, 3);
+      const val = from + (to - from) * ease;
+      const int = Math.floor(val);
+      const dec = Math.round((val - int) * 10);
+      el.innerHTML = int + '<span>.' + dec + '</span>';
+      if(p < 1) requestAnimationFrame(tick);
+    })(start);
+  }
+
+  document.querySelectorAll('.track-item').forEach(item => {
+    item.querySelector('.track-header').addEventListener('click', () => {
+      const body = item.querySelector('.track-body');
+      const open = item.classList.toggle('open');
+      body.style.maxHeight = open ? body.scrollHeight + 'px' : '0';
+    });
+  });
+
+  document.querySelectorAll('.pill').forEach(pill => {
+    pill.addEventListener('click', () => {
+      document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+      pill.classList.add('active');
+    });
+  });
+</script>
+</body>
+</html>

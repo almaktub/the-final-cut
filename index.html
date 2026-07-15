@@ -1,0 +1,1557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Final Cut</title>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Space+Grotesk:wght@300;400;500&family=IBM+Plex+Mono:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+  :root {
+    --bg:#0a0908; --bg2:#100f0c;
+    --text:#e9e4d8; --muted:#76705f;
+    --border:rgba(255,255,255,0.06);
+    --font-display:'Anton',sans-serif;
+    --font-body:'Space Grotesk',sans-serif;
+    --font-mono:'IBM Plex Mono',monospace;
+  }
+  html { scroll-behavior:smooth; }
+  body { background:var(--bg); color:var(--text); font-family:var(--font-body); font-weight:300; overflow-x:hidden; }
+
+  /* HEADER */
+  header { padding:5rem 2.4rem 4rem; max-width:1200px; margin:0 auto; }
+  .site-label { font-family:var(--font-mono); letter-spacing:0.45em; font-size:0.6rem; text-transform:uppercase; color:var(--muted); margin-bottom:1.2rem; }
+  .site-title { font-family:var(--font-display); font-size:clamp(3.5rem,10vw,8rem); text-transform:uppercase; line-height:0.88; color:var(--text); }
+  .site-sub { font-family:var(--font-mono); font-size:0.78rem; color:var(--muted); letter-spacing:0.2em; margin-top:1.4rem; max-width:420px; line-height:1.75; }
+
+  /* DIVIDER */
+  .header-rule { max-width:1200px; margin:0 auto; padding:0 2.4rem 4rem; }
+  .header-rule hr { border:none; border-top:1px solid var(--border); }
+
+  /* TABS */
+  .tabs { max-width:1200px; margin:0 auto; padding:0 2.4rem 2.5rem; display:flex; gap:2.2rem; }
+  .tab-btn { background:none; border:none; cursor:pointer; font-family:var(--font-mono); letter-spacing:0.3em; font-size:0.68rem; text-transform:uppercase; color:var(--muted); padding:0 0 0.6rem; position:relative; transition:color 0.2s; }
+  .tab-btn::after { content:''; position:absolute; left:0; right:0; bottom:0; height:2px; background:var(--text); transform:scaleX(0); transition:transform 0.25s ease; }
+  .tab-btn:hover { color:var(--text); }
+  .tab-btn.active { color:var(--text); }
+  .tab-btn.active::after { transform:scaleX(1); }
+  .tab-panel { display:none; }
+  .tab-panel.active { display:block; }
+  .tab-empty { font-family:var(--font-mono); font-size:0.8rem; color:var(--muted); letter-spacing:0.05em; padding:2rem 0 5rem; max-width:1200px; margin:0 auto; }
+  @media(max-width:600px){ .tabs { padding:0 1.2rem 1.8rem; gap:1.5rem; } .tab-empty { padding:1.5rem 1.2rem 4rem; } }
+
+  /* GRID */
+  .grid { max-width:1200px; margin:0 auto; padding:0 2.4rem 6rem; display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:1.5rem; }
+  @media(max-width:600px){ .grid { grid-template-columns:1fr 1fr; gap:1rem; padding:0 1.2rem 4rem; } }
+  @media(max-width:380px){ .grid { grid-template-columns:1fr; } }
+
+  /* CARD */
+  .card { display:block; text-decoration:none; position:relative; overflow:hidden; background:var(--bg2); aspect-ratio:2/3; }
+  .card-img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:center top; transition:transform 0.55s ease; }
+  .card-fallback { position:absolute; inset:0; }
+  .card-overlay { position:absolute; inset:0; background:linear-gradient(to top, rgba(10,9,8,0.95) 0%, rgba(10,9,8,0.2) 55%, rgba(10,9,8,0) 100%); transition:opacity 0.3s; }
+  .card:hover .card-img { transform:scale(1.04); }
+  .card:hover .card-overlay { opacity:0.85; }
+  .card-content { position:absolute; bottom:0; left:0; right:0; padding:1.4rem 1.2rem; }
+  .card-num { font-family:var(--font-mono); letter-spacing:0.35em; font-size:0.55rem; text-transform:uppercase; color:rgba(255,255,255,0.3); margin-bottom:0.4rem; }
+  .card-title { font-family:var(--font-display); font-size:clamp(1.05rem,3vw,1.4rem); text-transform:uppercase; line-height:1; color:#fff; }
+  .card-score { font-family:var(--font-mono); font-size:0.65rem; color:rgba(255,255,255,0.5); margin-top:0.55rem; letter-spacing:0.15em; }
+
+  /* FOOTER */
+  footer { border-top:1px solid var(--border); padding:3rem 2.4rem; text-align:center; }
+  .footer-note { font-family:var(--font-mono); font-size:0.6rem; letter-spacing:0.3em; text-transform:uppercase; color:var(--muted); }
+
+  /* REVEAL */
+  .reveal { opacity:0; transform:translateY(24px); transition:opacity 0.55s ease, transform 0.55s ease; }
+  .reveal.visible { opacity:1; transform:translateY(0); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="site-label reveal">A film journal</div>
+  <div class="site-title reveal">Final<br>Cut</div>
+  <div class="site-sub reveal">62 films, 3 shows, 70 albums. One take each. No craft scorecards, no numbered categories — just the review and the score.</div>
+</header>
+
+<div class="header-rule"><hr></div>
+
+<div class="tabs">
+  <button class="tab-btn active" data-tab="movies" onclick="switchTab('movies')">Movies</button>
+  <button class="tab-btn" data-tab="tv" onclick="switchTab('tv')">TV Shows</button>
+  <button class="tab-btn" data-tab="music" onclick="switchTab('music')">Music</button>
+</div>
+
+<div class="tab-panel active" id="movies-panel">
+<main class="grid" id="filmGrid">
+
+  <a href="parasite.html" class="card reveal" style="--accent:#4ba37e">
+    <img src="img/parasite.jpg" alt="Parasite" class="card-img" onerror="this.style.opacity=0">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(75,163,126,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">No. 01</div>
+      <div class="card-title">Parasite</div>
+      <div class="card-score">9.5 / 10</div>
+    </div>
+  </a>
+
+  <a href="pulp-fiction.html" class="card reveal" style="--accent:#d23c2a">
+    <img src="img/pulp-fiction.jpg" alt="Pulp Fiction" class="card-img" onerror="this.style.opacity=0">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(210,60,42,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">No. 02</div>
+      <div class="card-title">Pulp Fiction</div>
+      <div class="card-score">9.3 / 10</div>
+    </div>
+  </a>
+
+  <a href="there-will-be-blood.html" class="card reveal" style="--accent:#bf5b27">
+    <img src="img/there-will-be-blood.jpg" alt="There Will Be Blood" class="card-img" onerror="this.style.opacity=0">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(191,91,39,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">No. 03</div>
+      <div class="card-title">There Will Be Blood</div>
+      <div class="card-score">10.0 / 10</div>
+    </div>
+  </a>
+
+  <a href="spirited-away.html" class="card reveal" style="--accent:#5fb3a1">
+    <img src="img/spirited-away.jpg" alt="Spirited Away" class="card-img" onerror="this.style.opacity=0">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(95,179,161,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">No. 04</div>
+      <div class="card-title">Spirited Away</div>
+      <div class="card-score">10.0 / 10</div>
+    </div>
+  </a>
+
+  <a href="2001-a-space-odyssey.html" class="card reveal" style="--accent:#6f9fd8">
+    <img src="img/2001.jpg" alt="2001: A Space Odyssey" class="card-img" onerror="this.style.opacity=0">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(111,159,216,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">No. 05</div>
+      <div class="card-title">2001: A Space Odyssey</div>
+      <div class="card-score">10.0 / 10</div>
+    </div>
+  </a>
+
+  <a href="no-country-for-old-men.html" class="card reveal" style="--accent:#a89968">
+    <img src="img/no-country.jpg" alt="No Country for Old Men" class="card-img" onerror="this.style.opacity=0">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(168,153,104,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">No. 06</div>
+      <div class="card-title">No Country for Old Men</div>
+      <div class="card-score">10.0 / 10</div>
+    </div>
+  </a>
+
+  <a href="goodfellas.html" class="card reveal" style="--accent:#9e3347">
+    <img src="img/goodfellas.jpg" alt="Goodfellas" class="card-img" onerror="this.style.opacity=0">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(158,51,71,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">No. 07</div>
+      <div class="card-title">Goodfellas</div>
+      <div class="card-score">10.0 / 10</div>
+    </div>
+  </a>
+
+  <a href="a-separation.html" class="card reveal" style="--accent:#7f96a8">
+    <img src="img/a-separation.jpg" alt="A Separation" class="card-img" onerror="this.style.opacity=0">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(127,150,168,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">No. 08</div>
+      <div class="card-title">A Separation</div>
+      <div class="card-score">10.0 / 10</div>
+    </div>
+  </a>
+
+  <a href="stalker.html" class="card reveal" style="--accent:#7a8a4f">
+    <img src="img/stalker.jpg" alt="Stalker" class="card-img" onerror="this.style.opacity=0">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(122,138,79,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">No. 09</div>
+      <div class="card-title">Stalker</div>
+      <div class="card-score">10.0 / 10</div>
+    </div>
+  </a>
+
+  <a href="chinatown.html" class="card reveal" style="--accent:#c79456">
+    <img src="img/chinatown.jpg" alt="Chinatown" class="card-img" onerror="this.style.opacity=0">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(199,148,86,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">No. 10</div>
+      <div class="card-title">Chinatown</div>
+      <div class="card-score">10.0 / 10</div>
+    </div>
+  </a>
+
+  <a href="eternal-sunshine.html" class="card reveal" style="--accent:#5b8fd4">
+    <img src="img/eternal-sunshine.jpg" alt="Eternal Sunshine of the Spotless Mind" class="card-img" onerror="this.style.opacity=0">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(91,143,212,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">No. 11</div>
+      <div class="card-title">Eternal Sunshine of the Spotless Mind</div>
+      <div class="card-score">9.6 / 10</div>
+    </div>
+  </a>
+
+  <a href="star-wars.html" class="card reveal" style="--accent:#d4a843">
+    <img src="img/star-wars.jpg" alt="Star Wars" class="card-img" onerror="this.style.opacity=0">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(212,168,67,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">No. 12</div>
+      <div class="card-title">Star Wars</div>
+      <div class="card-score">Series Review · I–IX</div>
+    </div>
+  </a>
+
+  <a href="joker.html" class="card reveal" style="--accent:#8b3a52">
+    <img src="img/joker.jpg" alt="Joker" class="card-img" onerror="this.style.opacity=0">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(139,58,82,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">No. 13</div>
+      <div class="card-title">Joker</div>
+      <div class="card-score">8.8 / 10</div>
+    </div>
+  </a>
+
+  <a href="3-idiots.html" class="card reveal" style="--accent:#4ba37e">
+    <img src="img/3-idiots.jpg" alt="3 Idiots" class="card-img" onerror="this.style.opacity=0">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(75,163,126,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">No. 14</div>
+      <div class="card-title">3 Idiots</div>
+      <div class="card-score">8.5 / 10</div>
+    </div>
+  </a>
+
+  <a href="oldboy.html" class="card reveal" style="--accent:#a0522d">
+    <img src="img/oldboy.jpg" alt="Oldboy" class="card-img" onerror="this.style.opacity=0">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(160,82,45,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">No. 15</div>
+      <div class="card-title">Oldboy</div>
+      <div class="card-score">9.5 / 10</div>
+    </div>
+  </a>
+
+  <a href="toy-story.html" class="card reveal" style="--accent:#4169e1">
+    <img src="img/toy-story.jpg" alt="Toy Story" class="card-img" onerror="this.style.opacity=0">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(65,105,225,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">No. 16</div>
+      <div class="card-title">Toy Story</div>
+      <div class="card-score">9.0 / 10</div>
+    </div>
+  </a>
+
+  <a href="dark-knight-rises.html" class="card reveal" style="--accent:#7a8a9f">
+    <img src="img/dark-knight-rises.jpg" alt="The Dark Knight Rises" class="card-img" onerror="this.style.opacity=0">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(122,138,159,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">No. 17</div>
+      <div class="card-title">The Dark Knight Rises</div>
+      <div class="card-score">7.8 / 10</div>
+    </div>
+  </a>
+
+  <a href="dark-knight.html" class="card reveal" style="--accent:#e8a33d">
+    <img src="img/dark-knight.jpg" alt="The Dark Knight" class="card-img" onerror="this.style.opacity=0">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(232,163,61,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">No. 18</div>
+      <div class="card-title">The Dark Knight</div>
+      <div class="card-score">9.8 / 10</div>
+    </div>
+  </a>
+
+  <a href="good-will-hunting.html" class="card reveal" style="--accent:#5e7e6a">
+    <img src="img/good-will-hunting.jpg" alt="Good Will Hunting" class="card-img" onerror="this.style.opacity=0">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(94,126,106,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">No. 19</div>
+      <div class="card-title">Good Will Hunting</div>
+      <div class="card-score">8.8 / 10</div>
+    </div>
+  </a>
+
+  <a href="avengers-endgame.html" class="card reveal" style="--accent:#a0282a">
+    <img src="img/avengers-endgame.jpg" alt="Avengers: Endgame" class="card-img" onerror="this.style.opacity=0">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(160,40,42,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">No. 20</div>
+      <div class="card-title">Avengers: Endgame</div>
+      <div class="card-score">8.5 / 10</div>
+    </div>
+  </a>
+
+  <a href="inglourious-basterds.html" class="card reveal" style="--accent:#c2964a">
+    <img src="img/inglourious-basterds.jpg" alt="Inglourious Basterds" class="card-img" onerror="this.style.opacity=0">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(194,150,74,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">No. 21</div>
+      <div class="card-title">Inglourious Basterds</div>
+      <div class="card-score">9.4 / 10</div>
+    </div>
+  </a>
+
+  <a href="the-shining.html" class="card reveal" style="--accent:#b03030">
+    <img src="img/the-shining.jpg" alt="The Shining" class="card-img" onerror="this.style.opacity=0">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(176,48,48,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">No. 22</div>
+      <div class="card-title">The Shining</div>
+      <div class="card-score">9.7 / 10</div>
+    </div>
+  </a>
+
+  <a href="into-the-spider-verse.html" class="card reveal" style="--accent:#e83e8c">
+    <img src="img/into-the-spider-verse.jpg" alt="Spider-Man: Into the Spider-Verse" class="card-img" onerror="this.style.opacity=0">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(232,62,140,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">No. 23</div>
+      <div class="card-title">Spider-Man: Into the Spider-Verse</div>
+      <div class="card-score">9.4 / 10</div>
+    </div>
+  </a>
+
+  <a href="raiders.html" class="card reveal" style="--accent:#c4a45a">
+    <img src="img/raiders.jpg" alt="Raiders of the Lost Ark" class="card-img" onerror="this.style.opacity=0">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(196,164,90,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">No. 24</div>
+      <div class="card-title">Raiders of the Lost Ark</div>
+      <div class="card-score">9.2 / 10</div>
+    </div>
+  </a>
+
+  <a href="avengers-infinity-war.html" class="card reveal" style="--accent:#7b4a8a">
+    <img src="img/avengers-infinity-war.jpg" alt="Avengers: Infinity War" class="card-img" onerror="this.style.opacity=0">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(123,74,138,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">No. 25</div>
+      <div class="card-title">Avengers: Infinity War</div>
+      <div class="card-score">8.8 / 10</div>
+    </div>
+  </a>
+
+  <a href="dune-part-two.html" class="card reveal" style="--accent:#d4843a">
+    <img src="img/dune-part-two.jpg" alt="Dune: Part Two" class="card-img" onerror="this.style.opacity=0">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(212,132,58,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">No. 26</div>
+      <div class="card-title">Dune: Part Two</div>
+      <div class="card-score">9.0 / 10</div>
+    </div>
+  </a>
+
+  <a href="memento.html" class="card reveal" style="--accent:#8a8a7a">
+    <img src="img/memento.jpg" alt="Memento" class="card-img" onerror="this.style.opacity=0">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(138,138,122,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">No. 27</div>
+      <div class="card-title">Memento</div>
+      <div class="card-score">9.4 / 10</div>
+    </div>
+  </a>
+
+  <a href="wall-e.html" class="card reveal" style="--accent:#e8b43d">
+    <img src="img/wall-e.jpg" alt="WALL-E" class="card-img" onerror="this.style.opacity=0">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(232,180,61,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">No. 28</div>
+      <div class="card-title">WALL-E</div>
+      <div class="card-score">9.3 / 10</div>
+    </div>
+  </a>
+
+  <a href="apocalypse-now.html" class="card reveal" style="--accent:#b87a3a">
+    <img src="img/apocalypse-now.jpg" alt="Apocalypse Now" class="card-img" onerror="this.style.opacity=0">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(184,122,58,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">No. 29</div>
+      <div class="card-title">Apocalypse Now</div>
+      <div class="card-score">9.8 / 10</div>
+    </div>
+  </a>
+
+  <a href="once-upon-a-time-in-the-west.html" class="card reveal" style="--accent:#c4823a">
+    <img src="img/once-upon-a-time-in-the-west.jpg" alt="Once Upon a Time in the West" class="card-img" onerror="this.style.opacity=0">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(196,130,58,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">No. 30</div>
+      <div class="card-title">Once Upon a Time in the West</div>
+      <div class="card-score">9.8 / 10</div>
+    </div>
+  </a>
+
+  <a href="rear-window.html" class="card reveal" style="--accent:#6a8aaf">
+    <img src="img/rear-window.jpg" alt="Rear Window" class="card-img" onerror="this.style.opacity=0">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(106,138,175,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">No. 31</div>
+      <div class="card-title">Rear Window</div>
+      <div class="card-score">9.5 / 10</div>
+    </div>
+  </a>
+
+  <a href="alien.html" class="card reveal" style="--accent:#4a7a5a">
+    <img src="img/alien.jpg" alt="Alien" class="card-img" onerror="this.style.opacity=0">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(74,122,90,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">No. 32</div>
+      <div class="card-title">Alien</div>
+      <div class="card-score">9.5 / 10</div>
+    </div>
+  </a>
+
+  <a href="django-unchained.html" class="card reveal" style="--accent:#8b1a2a">
+    <img src="img/django-unchained.jpg" alt="Django Unchained" class="card-img" onerror="this.style.opacity=0">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(139,26,42,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">No. 33</div>
+      <div class="card-title">Django Unchained</div>
+      <div class="card-score">8.8 / 10</div>
+    </div>
+  </a>
+
+  <a href="usual-suspects.html" class="card reveal" style="--accent:#7a7a9a">
+    <img src="img/usual-suspects.jpg" alt="The Usual Suspects" class="card-img" onerror="this.style.opacity=0">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(122,122,154,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">No. 34</div>
+      <div class="card-title">The Usual Suspects</div>
+      <div class="card-score">9.0 / 10</div>
+    </div>
+  </a>
+
+  <a href="casablanca.html" class="card reveal" style="--accent:#a89068">
+    <img src="img/casablanca.jpg" alt="Casablanca" class="card-img" onerror="this.style.opacity=0">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(168,144,104,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">No. 35</div>
+      <div class="card-title">Casablanca</div>
+      <div class="card-score">9.5 / 10</div>
+    </div>
+  </a>
+
+  <a href="across-the-spider-verse.html" class="card reveal" style="--accent:#e05a2a">
+    <img src="img/across-the-spider-verse.jpg" alt="Spider-Man: Across the Spider-Verse" class="card-img" onerror="this.style.opacity=0">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(224,90,42,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">No. 36</div>
+      <div class="card-title">Spider-Man: Across the Spider-Verse</div>
+      <div class="card-score">9.2 / 10</div>
+    </div>
+  </a>
+
+  <a href="american-history-x.html" class="card reveal" style="--accent:#8a8a8a">
+    <img src="img/american-history-x.jpg" alt="American History X" class="card-img" onerror="this.style.opacity=0">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(138,138,138,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">No. 37</div>
+      <div class="card-title">American History X</div>
+      <div class="card-score">9.0 / 10</div>
+    </div>
+  </a>
+
+  <a href="the-prestige.html" class="card reveal" style="--accent:#5a7a9a">
+    <img src="img/the-prestige.jpg" alt="The Prestige" class="card-img" onerror="this.style.opacity=0">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(90,122,154,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">No. 38</div>
+      <div class="card-title">The Prestige</div>
+      <div class="card-score">9.0 / 10</div>
+    </div>
+  </a>
+
+  <a href="whiplash.html" class="card reveal" style="--accent:#c23a2a">
+    <img src="img/whiplash.jpg" alt="Whiplash" class="card-img" onerror="this.style.opacity=0">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(194,58,42,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">No. 39</div>
+      <div class="card-title">Whiplash</div>
+      <div class="card-score">9.5 / 10</div>
+    </div>
+  </a>
+
+  <a href="the-departed.html" class="card reveal" style="--accent:#9e3347">
+    <img src="img/the-departed.jpg" alt="The Departed" class="card-img" onerror="this.style.opacity=0">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(158,51,71,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">No. 40</div>
+      <div class="card-title">The Departed</div>
+      <div class="card-score">9.3 / 10</div>
+    </div>
+  </a>
+
+  <a href="psycho.html" class="card reveal" style="--accent:#7a6a5a">
+    <img src="img/psycho.jpg" alt="Psycho" class="card-img" onerror="this.style.opacity=0">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(122,106,90,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">No. 41</div>
+      <div class="card-title">Psycho</div>
+      <div class="card-score">9.3 / 10</div>
+    </div>
+  </a>
+
+  <a href="gladiator.html" class="card reveal" style="--accent:#c4883a">
+    <img src="img/gladiator.jpg" alt="Gladiator" class="card-img" onerror="this.style.opacity=0">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(196,136,58,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">No. 42</div>
+      <div class="card-title">Gladiator</div>
+      <div class="card-score">8.5 / 10</div>
+    </div>
+  </a>
+
+  <a href="city-of-god.html" class="card reveal" style="--accent:#d4843a">
+    <img src="img/city-of-god.jpg" alt="City of God" class="card-img" onerror="this.style.opacity=0">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(212,132,58,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">No. 43</div>
+      <div class="card-title">City of God</div>
+      <div class="card-score">9.8 / 10</div>
+    </div>
+  </a>
+
+  <a href="green-mile.html" class="card reveal" style="--accent:#4a7a5a">
+    <img src="img/green-mile.jpg" alt="The Green Mile" class="card-img" onerror="this.style.opacity=0">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(74,122,90,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">No. 44</div>
+      <div class="card-title">The Green Mile</div>
+      <div class="card-score">8.0 / 10</div>
+    </div>
+  </a>
+
+  <a href="seven-samurai.html" class="card reveal" style="--accent:#8a7a5a">
+    <img src="img/seven-samurai.jpg" alt="Seven Samurai" class="card-img" onerror="this.style.opacity=0">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(138,122,90,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">No. 45</div>
+      <div class="card-title">Seven Samurai</div>
+      <div class="card-score">9.8 / 10</div>
+    </div>
+  </a>
+
+  <a href="saving-private-ryan.html" class="card reveal" style="--accent:#7a8a6a">
+    <img src="img/saving-private-ryan.jpg" alt="Saving Private Ryan" class="card-img" onerror="this.style.opacity=0">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(122,138,106,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">No. 46</div>
+      <div class="card-title">Saving Private Ryan</div>
+      <div class="card-score">9.5 / 10</div>
+    </div>
+  </a>
+
+  <a href="silence-of-the-lambs.html" class="card reveal" style="--accent:#6a4a6a">
+    <img src="img/silence-of-the-lambs.jpg" alt="The Silence of the Lambs" class="card-img" onerror="this.style.opacity=0">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(106,74,106,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">No. 47</div>
+      <div class="card-title">The Silence of the Lambs</div>
+      <div class="card-score">9.5 / 10</div>
+    </div>
+  </a>
+
+  <a href="seven.html" class="card reveal" style="--accent:#6a5a4a">
+    <img src="img/seven.jpg" alt="Se7en" class="card-img" onerror="this.style.opacity=0">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(106,90,74,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">No. 48</div>
+      <div class="card-title">Se7en</div>
+      <div class="card-score">9.0 / 10</div>
+    </div>
+  </a>
+
+  <a href="one-flew.html" class="card reveal" style="--accent:#5a7a8a">
+    <img src="img/one-flew.jpg" alt="One Flew Over the Cuckoo's Nest" class="card-img" onerror="this.style.opacity=0">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(90,122,138,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">No. 49</div>
+      <div class="card-title">One Flew Over the Cuckoo's Nest</div>
+      <div class="card-score">9.5 / 10</div>
+    </div>
+  </a>
+
+  <a href="interstellar.html" class="card reveal" style="--accent:#5a7abf">
+    <img src="img/interstellar.jpg" alt="Interstellar" class="card-img" onerror="this.style.opacity=0">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(90,122,191,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">No. 50</div>
+      <div class="card-title">Interstellar</div>
+      <div class="card-score">8.8 / 10</div>
+    </div>
+  </a>
+
+  <a href="the-matrix.html" class="card reveal" style="--accent:#1a8a3a">
+    <img src="img/the-matrix.jpg" alt="The Matrix" class="card-img" onerror="this.style.opacity=0">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(26,138,58,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">No. 51</div>
+      <div class="card-title">The Matrix</div>
+      <div class="card-score">9.0 / 10</div>
+    </div>
+  </a>
+
+  <a href="fight-club.html" class="card reveal" style="--accent:#c23a2a">
+    <img src="img/fight-club.jpg" alt="Fight Club" class="card-img" onerror="this.style.opacity=0">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(194,58,42,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">No. 52</div>
+      <div class="card-title">Fight Club</div>
+      <div class="card-score">9.2 / 10</div>
+    </div>
+  </a>
+
+  <a href="forrest-gump.html" class="card reveal" style="--accent:#4a9a6a">
+    <img src="img/forrest-gump.jpg" alt="Forrest Gump" class="card-img" onerror="this.style.opacity=0">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(74,154,106,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">No. 53</div>
+      <div class="card-title">Forrest Gump</div>
+      <div class="card-score">8.5 / 10</div>
+    </div>
+  </a>
+
+  <a href="two-towers.html" class="card reveal" style="--accent:#7a8a5a">
+    <img src="img/two-towers.jpg" alt="The Lord of the Rings: The Two Towers" class="card-img" onerror="this.style.opacity=0">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(122,138,90,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">No. 54</div>
+      <div class="card-title">The Two Towers</div>
+      <div class="card-score">9.2 / 10</div>
+    </div>
+  </a>
+
+  <a href="good-bad-ugly.html" class="card reveal" style="--accent:#c4823a">
+    <img src="img/good-bad-ugly.jpg" alt="The Good, the Bad and the Ugly" class="card-img" onerror="this.style.opacity=0">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(196,130,58,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">No. 55</div>
+      <div class="card-title">The Good, the Bad and the Ugly</div>
+      <div class="card-score">9.7 / 10</div>
+    </div>
+  </a>
+
+  <a href="fellowship-of-the-ring.html" class="card reveal" style="--accent:#5a7a4a">
+    <img src="img/fellowship-of-the-ring.jpg" alt="The Lord of the Rings: The Fellowship of the Ring" class="card-img" onerror="this.style.opacity=0">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(90,122,74,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">No. 56</div>
+      <div class="card-title">The Fellowship of the Ring</div>
+      <div class="card-score">9.5 / 10</div>
+    </div>
+  </a>
+
+  <a href="schindlers-list.html" class="card reveal" style="--accent:#e03030">
+    <img src="img/schindlers-list.jpg" alt="Schindler's List" class="card-img" onerror="this.style.opacity=0">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(224,48,48,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">No. 57</div>
+      <div class="card-title">Schindler's List</div>
+      <div class="card-score">10.0 / 10</div>
+    </div>
+  </a>
+
+  <a href="return-of-the-king.html" class="card reveal" style="--accent:#c4883a">
+    <img src="img/return-of-the-king.jpg" alt="The Lord of the Rings: The Return of the King" class="card-img" onerror="this.style.opacity=0">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(196,136,58,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">No. 58</div>
+      <div class="card-title">The Return of the King</div>
+      <div class="card-score">9.6 / 10</div>
+    </div>
+  </a>
+
+  <a href="12-angry-men.html" class="card reveal" style="--accent:#8a7a6a">
+    <img src="img/12-angry-men.jpg" alt="12 Angry Men" class="card-img" onerror="this.style.opacity=0">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(138,122,106,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">No. 59</div>
+      <div class="card-title">12 Angry Men</div>
+      <div class="card-score">9.8 / 10</div>
+    </div>
+  </a>
+
+  <a href="godfather.html" class="card reveal" style="--accent:#8a6a4a">
+    <img src="img/godfather.jpg" alt="The Godfather" class="card-img" onerror="this.style.opacity=0">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(138,106,74,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">No. 60</div>
+      <div class="card-title">The Godfather</div>
+      <div class="card-score">Trilogy Review · I–III</div>
+    </div>
+  </a>
+
+  <a href="shawshank-redemption.html" class="card reveal" style="--accent:#5a7a9a">
+    <img src="img/shawshank-redemption.jpg" alt="The Shawshank Redemption" class="card-img" onerror="this.style.opacity=0">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(90,122,154,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">No. 61</div>
+      <div class="card-title">The Shawshank Redemption</div>
+      <div class="card-score">9.5 / 10</div>
+    </div>
+  </a>
+
+  <a href="spotlight.html" class="card reveal" style="--accent:#5c7a99">
+    <img src="img/spotlight.jpg" alt="Spotlight" class="card-img" onerror="this.style.opacity=0">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(92,122,153,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">No. 62</div>
+      <div class="card-title">Spotlight</div>
+      <div class="card-score">9.4 / 10</div>
+    </div>
+  </a>
+
+</main>
+</div>
+
+<div class="tab-panel" id="tv-panel">
+<main class="grid" id="tvGrid">
+
+  <!-- TV CARD TEMPLATE — copy for each new show, No. counter is independent from the movie side:
+  <a href="show-slug.html" class="card reveal" style="--accent:#ACCENT">
+    <img src="img/show-slug.jpg" alt="SHOW TITLE" class="card-img" onerror="this.style.opacity=0">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(R,G,B,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">TV No. 01</div>
+      <div class="card-title">SHOW TITLE</div>
+      <div class="card-score">X.X / 10</div>
+    </div>
+  </a>
+  -->
+
+  <a href="sopranos.html" class="card reveal" style="--accent:#8c3a3a">
+    <img src="img/sopranos.jpg" alt="The Sopranos" class="card-img" onerror="this.style.opacity=0">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(140,58,58,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">TV No. 01</div>
+      <div class="card-title">The Sopranos</div>
+      <div class="card-score">10.0 / 10</div>
+    </div>
+  </a>
+
+  <a href="breaking-bad.html" class="card reveal" style="--accent:#7a8c3f">
+    <img src="img/breaking-bad.jpg" alt="Breaking Bad" class="card-img" onerror="this.style.opacity=0">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(122,140,63,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">TV No. 02</div>
+      <div class="card-title">Breaking Bad</div>
+      <div class="card-score">9.7 / 10</div>
+    </div>
+  </a>
+
+  <a href="game-of-thrones.html" class="card reveal" style="--accent:#5a7d9a">
+    <img src="img/game-of-thrones.jpg" alt="Game of Thrones" class="card-img" onerror="this.style.opacity=0">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(90,125,154,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">TV No. 03</div>
+      <div class="card-title">Game of Thrones</div>
+      <div class="card-score">8.6 / 10</div>
+    </div>
+  </a>
+
+</main>
+</div>
+
+<div class="tab-panel" id="music-panel">
+<main class="grid" id="musicGrid">
+
+  <a href="Autopsy/tpab.html" class="card reveal" style="--accent:#27ae60">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(39,174,96,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">Music No. 01</div>
+      <div class="card-title">Kendrick Lamar — To Pimp a Butterfly</div>
+      <div class="card-score">10.0 / 10</div>
+    </div>
+  </a>
+
+  <a href="Autopsy/mbdtf.html" class="card reveal" style="--accent:#e67e22">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(230,126,34,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">Music No. 02</div>
+      <div class="card-title">Kanye West — My Beautiful Dark Twisted Fantasy</div>
+      <div class="card-score">9.7 / 10</div>
+    </div>
+  </a>
+
+  <a href="Autopsy/abbey-road.html" class="card reveal" style="--accent:#3498db">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(52,152,219,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">Music No. 03</div>
+      <div class="card-title">The Beatles — Abbey Road</div>
+      <div class="card-score">10.0 / 10</div>
+    </div>
+  </a>
+
+  <a href="Autopsy/white-album.html" class="card reveal" style="--accent:#bdc3c7">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(189,195,199,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">Music No. 04</div>
+      <div class="card-title">The Beatles — The Beatles (White Album)</div>
+      <div class="card-score">9.3 / 10</div>
+    </div>
+  </a>
+
+  <a href="Autopsy/blonde.html" class="card reveal" style="--accent:#d4a853">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(212,168,83,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">Music No. 05</div>
+      <div class="card-title">Frank Ocean — Blonde</div>
+      <div class="card-score">9.2 / 10</div>
+    </div>
+  </a>
+
+  <a href="Autopsy/dark-side.html" class="card reveal" style="--accent:#9b59b6">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(155,89,182,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">Music No. 06</div>
+      <div class="card-title">Pink Floyd — The Dark Side of the Moon</div>
+      <div class="card-score">10.0 / 10</div>
+    </div>
+  </a>
+
+  <a href="Autopsy/the-wall.html" class="card reveal" style="--accent:#d8d0c4">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(216,208,196,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">Music No. 07</div>
+      <div class="card-title">Pink Floyd — The Wall</div>
+      <div class="card-score">9.4 / 10</div>
+    </div>
+  </a>
+
+  <a href="Autopsy/ok-computer.html" class="card reveal" style="--accent:#2e86ab">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(46,134,171,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">Music No. 08</div>
+      <div class="card-title">Radiohead — OK Computer</div>
+      <div class="card-score">10.0 / 10</div>
+    </div>
+  </a>
+
+  <a href="Autopsy/in-rainbows.html" class="card reveal" style="--accent:#c0392b">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(192,57,43,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">Music No. 09</div>
+      <div class="card-title">Radiohead — In Rainbows</div>
+      <div class="card-score">9.6 / 10</div>
+    </div>
+  </a>
+
+  <a href="Autopsy/whats-going-on.html" class="card reveal" style="--accent:#c97a2a">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(201,122,42,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">Music No. 10</div>
+      <div class="card-title">Marvin Gaye — What's Going On</div>
+      <div class="card-score">10.0 / 10</div>
+    </div>
+  </a>
+
+  <a href="Autopsy/kind-of-blue.html" class="card reveal" style="--accent:#1a6b9a">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(26,107,154,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">Music No. 11</div>
+      <div class="card-title">Miles Davis — Kind of Blue</div>
+      <div class="card-score">10.0 / 10</div>
+    </div>
+  </a>
+
+  <a href="Autopsy/illmatic.html" class="card reveal" style="--accent:#b8972a">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(184,151,42,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">Music No. 12</div>
+      <div class="card-title">Nas — Illmatic</div>
+      <div class="card-score">10.0 / 10</div>
+    </div>
+  </a>
+
+  <a href="Autopsy/purple-rain.html" class="card reveal" style="--accent:#7d3c98">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(125,60,152,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">Music No. 13</div>
+      <div class="card-title">Prince — Purple Rain</div>
+      <div class="card-score">10.0 / 10</div>
+    </div>
+  </a>
+
+  <a href="Autopsy/blue-joni.html" class="card reveal" style="--accent:#4a90c4">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(74,144,196,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">Music No. 14</div>
+      <div class="card-title">Joni Mitchell — Blue</div>
+      <div class="card-score">10.0 / 10</div>
+    </div>
+  </a>
+
+  <a href="Autopsy/currents.html" class="card reveal" style="--accent:#e91e63">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(233,30,99,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">Music No. 15</div>
+      <div class="card-title">Tame Impala — Currents</div>
+      <div class="card-score">9.5 / 10</div>
+    </div>
+  </a>
+
+  <a href="Autopsy/damn.html" class="card reveal" style="--accent:#b71c1c">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(183,28,28,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">Music No. 16</div>
+      <div class="card-title">Kendrick Lamar — DAMN.</div>
+      <div class="card-score">9.7 / 10</div>
+    </div>
+  </a>
+
+  <a href="Autopsy/the-fall-off.html" class="card reveal" style="--accent:#f39c12">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(243,156,18,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">Music No. 17</div>
+      <div class="card-title">J. Cole — The Fall-Off</div>
+      <div class="card-score">9.3 / 10</div>
+    </div>
+  </a>
+
+  <a href="Autopsy/the-forever-story.html" class="card reveal" style="--accent:#16a085">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(22,160,133,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">Music No. 18</div>
+      <div class="card-title">JID — The Forever Story</div>
+      <div class="card-score">9.4 / 10</div>
+    </div>
+  </a>
+
+  <a href="Autopsy/madvillainy.html" class="card reveal" style="--accent:#c4a882">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(196,168,130,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">Music No. 19</div>
+      <div class="card-title">Madvillain — Madvillainy</div>
+      <div class="card-score">10.0 / 10</div>
+    </div>
+  </a>
+
+  <a href="Autopsy/miseducation.html" class="card reveal" style="--accent:#c4872a">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(196,135,42,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">Music No. 20</div>
+      <div class="card-title">Lauryn Hill — The Miseducation of Lauryn Hill</div>
+      <div class="card-score">10.0 / 10</div>
+    </div>
+  </a>
+
+  <a href="Autopsy/born-to-run.html" class="card reveal" style="--accent:#4e7d9e">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(78,125,158,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">Music No. 21</div>
+      <div class="card-title">Bruce Springsteen — Born to Run</div>
+      <div class="card-score">9.8 / 10</div>
+    </div>
+  </a>
+
+  <a href="Autopsy/songs-key-of-life.html" class="card reveal" style="--accent:#d49c2a">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(212,156,42,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">Music No. 22</div>
+      <div class="card-title">Stevie Wonder — Songs in the Key of Life</div>
+      <div class="card-score">10.0 / 10</div>
+    </div>
+  </a>
+
+  <a href="Autopsy/ctrl-sza.html" class="card reveal" style="--accent:#9b6b8a">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(155,107,138,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">Music No. 23</div>
+      <div class="card-title">SZA — Ctrl</div>
+      <div class="card-score">9.5 / 10</div>
+    </div>
+  </a>
+
+  <a href="Autopsy/led-zeppelin-iv.html" class="card reveal" style="--accent:#c4882a">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(196,136,42,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">Music No. 24</div>
+      <div class="card-title">Led Zeppelin — Led Zeppelin IV</div>
+      <div class="card-score">9.8 / 10</div>
+    </div>
+  </a>
+
+  <a href="Autopsy/revolver.html" class="card reveal" style="--accent:#5a8a64">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(90,138,100,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">Music No. 25</div>
+      <div class="card-title">The Beatles — Revolver</div>
+      <div class="card-score">10.0 / 10</div>
+    </div>
+  </a>
+
+  <a href="Autopsy/gkmc.html" class="card reveal" style="--accent:#546e7a">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(84,110,122,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">Music No. 26</div>
+      <div class="card-title">Kendrick Lamar — good kid, m.A.A.d city</div>
+      <div class="card-score">9.8 / 10</div>
+    </div>
+  </a>
+
+  <a href="Autopsy/mr-morale.html" class="card reveal" style="--accent:#a05c3a">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(160,92,58,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">Music No. 27</div>
+      <div class="card-title">Kendrick Lamar — Mr. Morale & the Big Steppers</div>
+      <div class="card-score">9.0 / 10</div>
+    </div>
+  </a>
+
+  <a href="Autopsy/aquemini.html" class="card reveal" style="--accent:#bf6340">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(191,99,64,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">Music No. 28</div>
+      <div class="card-title">Outkast — Aquemini</div>
+      <div class="card-score">9.5 / 10</div>
+    </div>
+  </a>
+
+  <a href="Autopsy/low-end-theory.html" class="card reveal" style="--accent:#4a6fa5">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(74,111,165,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">Music No. 29</div>
+      <div class="card-title">A Tribe Called Quest — The Low End Theory</div>
+      <div class="card-score">9.7 / 10</div>
+    </div>
+  </a>
+
+  <a href="Autopsy/hell-hath-no-fury.html" class="card reveal" style="--accent:#8a9bb0">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(138,155,176,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">Music No. 30</div>
+      <div class="card-title">Clipse — Hell Hath No Fury</div>
+      <div class="card-score">9.6 / 10</div>
+    </div>
+  </a>
+
+  <a href="Autopsy/thriller.html" class="card reveal" style="--accent:#c4162a">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(196,22,42,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">Music No. 31</div>
+      <div class="card-title">Michael Jackson — Thriller</div>
+      <div class="card-score">9.5 / 10</div>
+    </div>
+  </a>
+
+  <a href="Autopsy/the-infamous.html" class="card reveal" style="--accent:#6b7280">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(107,114,128,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">Music No. 32</div>
+      <div class="card-title">Mobb Deep — The Infamous</div>
+      <div class="card-score">9.9 / 10</div>
+    </div>
+  </a>
+
+  <a href="Autopsy/astroworld.html" class="card reveal" style="--accent:#e07b3a">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(224,123,58,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">Music No. 33</div>
+      <div class="card-title">Travis Scott — Astroworld</div>
+      <div class="card-score">9.1 / 10</div>
+    </div>
+  </a>
+
+  <a href="Autopsy/utopia.html" class="card reveal" style="--accent:#7c3aed">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(124,58,237,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">Music No. 34</div>
+      <div class="card-title">Travis Scott — Utopia</div>
+      <div class="card-score">8.4 / 10</div>
+    </div>
+  </a>
+
+  <a href="Autopsy/beauty-behind-the-madness.html" class="card reveal" style="--accent:#8b2fc9">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(139,47,201,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">Music No. 35</div>
+      <div class="card-title">The Weeknd — Beauty Behind the Madness</div>
+      <div class="card-score">8.9 / 10</div>
+    </div>
+  </a>
+
+  <a href="Autopsy/after-hours.html" class="card reveal" style="--accent:#c0392b">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(192,57,43,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">Music No. 36</div>
+      <div class="card-title">The Weeknd — After Hours</div>
+      <div class="card-score">9.4 / 10</div>
+    </div>
+  </a>
+
+  <a href="Autopsy/sometimes-i-might-be-introvert.html" class="card reveal" style="--accent:#b07d2e">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(176,125,46,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">Music No. 37</div>
+      <div class="card-title">Little Simz — Sometimes I Might Be Introvert</div>
+      <div class="card-score">9.6 / 10</div>
+    </div>
+  </a>
+
+  <a href="Autopsy/no-thank-you.html" class="card reveal" style="--accent:#3d7a5c">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(61,122,92,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">Music No. 38</div>
+      <div class="card-title">Little Simz — No Thank You</div>
+      <div class="card-score">9.2 / 10</div>
+    </div>
+  </a>
+
+  <a href="Autopsy/great-divide-noah-kahan.html" class="card reveal" style="--accent:#4a7fa5">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(74,127,165,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">Music No. 39</div>
+      <div class="card-title">Noah Kahan — The Great Divide</div>
+      <div class="card-score">8.3 / 10</div>
+    </div>
+  </a>
+
+  <a href="Autopsy/velvet-underground-and-nico.html" class="card reveal" style="--accent:#c9a227">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(201,162,39,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">Music No. 40</div>
+      <div class="card-title">The Velvet Underground — The Velvet Underground & Nico</div>
+      <div class="card-score">9.8 / 10</div>
+    </div>
+  </a>
+
+  <a href="Autopsy/ants-from-up-there.html" class="card reveal" style="--accent:#5b8ea6">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(91,142,166,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">Music No. 41</div>
+      <div class="card-title">Black Country, New Road — Ants From Up There</div>
+      <div class="card-score">9.5 / 10</div>
+    </div>
+  </a>
+
+  <a href="Autopsy/love-and-hate-kiwanuka.html" class="card reveal" style="--accent:#c87830">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(200,120,48,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">Music No. 42</div>
+      <div class="card-title">Kiwanuka — Love & Hate</div>
+      <div class="card-score">8.7 / 10</div>
+    </div>
+  </a>
+
+  <a href="Autopsy/kiwanuka.html" class="card reveal" style="--accent:#c49030">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(196,144,48,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">Music No. 43</div>
+      <div class="card-title">Kiwanuka — Kiwanuka</div>
+      <div class="card-score">8.9 / 10</div>
+    </div>
+  </a>
+
+  <a href="Autopsy/unreal-unearth.html" class="card reveal" style="--accent:#8b2d3a">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(139,45,58,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">Music No. 44</div>
+      <div class="card-title">Hozier — Unreal Unearth</div>
+      <div class="card-score">8.4 / 10</div>
+    </div>
+  </a>
+
+  <a href="Autopsy/nevermind.html" class="card reveal" style="--accent:#1a7a8e">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(26,122,142,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">Music No. 45</div>
+      <div class="card-title">Nirvana — Nevermind</div>
+      <div class="card-score">9.5 / 10</div>
+    </div>
+  </a>
+
+  <a href="Autopsy/hit-me-hard-and-soft.html" class="card reveal" style="--accent:#3a7a9a">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(58,122,154,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">Music No. 46</div>
+      <div class="card-title">Billie Eilish — Hit Me Hard and Soft</div>
+      <div class="card-score">9.0 / 10</div>
+    </div>
+  </a>
+
+  <a href="Autopsy/alligator-bites-never-heal.html" class="card reveal" style="--accent:#7a2d9a">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(122,45,154,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">Music No. 47</div>
+      <div class="card-title">Doechii — Alligator Bites Never Heal</div>
+      <div class="card-score">9.3 / 10</div>
+    </div>
+  </a>
+
+  <a href="Autopsy/gorillaz.html" class="card reveal" style="--accent:#4a7a1e">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(74,122,30,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">Music No. 48</div>
+      <div class="card-title">Gorillaz — Gorillaz</div>
+      <div class="card-score">8.8 / 10</div>
+    </div>
+  </a>
+
+  <a href="Autopsy/honeymoon.html" class="card reveal" style="--accent:#b07858">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(176,120,88,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">Music No. 49</div>
+      <div class="card-title">Lana Del Rey — Honeymoon</div>
+      <div class="card-score">8.5 / 10</div>
+    </div>
+  </a>
+
+  <a href="Autopsy/black-on-both-sides.html" class="card reveal" style="--accent:#2a6a42">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(42,106,66,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">Music No. 50</div>
+      <div class="card-title">Mos Def — Black on Both Sides</div>
+      <div class="card-score">9.6 / 10</div>
+    </div>
+  </a>
+
+  <a href="Autopsy/the-bends.html" class="card reveal" style="--accent:#5a8a5a">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(90,138,90,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">Music No. 51</div>
+      <div class="card-title">Radiohead — The Bends</div>
+      <div class="card-score">9.3 / 10</div>
+    </div>
+  </a>
+
+  <a href="Autopsy/maps-billy-woods.html" class="card reveal" style="--accent:#c4854a">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(196,133,74,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">Music No. 52</div>
+      <div class="card-title">billy woods & Kenny Segal — Maps</div>
+      <div class="card-score">9.4 / 10</div>
+    </div>
+  </a>
+
+  <a href="Autopsy/pure-heroine.html" class="card reveal" style="--accent:#8b7ec8">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(139,126,200,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">Music No. 53</div>
+      <div class="card-title">Lorde — Pure Heroine</div>
+      <div class="card-score">8.9 / 10</div>
+    </div>
+  </a>
+
+  <a href="Autopsy/melodrama.html" class="card reveal" style="--accent:#c45a7a">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(196,90,122,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">Music No. 54</div>
+      <div class="card-title">Lorde — Melodrama</div>
+      <div class="card-score">9.5 / 10</div>
+    </div>
+  </a>
+
+  <a href="Autopsy/torches.html" class="card reveal" style="--accent:#4a9ec4">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(74,158,196,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">Music No. 55</div>
+      <div class="card-title">Foster the People — Torches</div>
+      <div class="card-score">7.9 / 10</div>
+    </div>
+  </a>
+
+  <a href="Autopsy/clipse.html" class="card reveal" style="--accent:#a07840">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(160,120,64,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">Music No. 56</div>
+      <div class="card-title">Clipse — Let God Sort Em Out</div>
+      <div class="card-score">9.5 / 10</div>
+    </div>
+  </a>
+
+  <a href="Autopsy/channel-orange.html" class="card reveal" style="--accent:#d4873a">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(212,135,58,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">Music No. 57</div>
+      <div class="card-title">Frank Ocean — Channel Orange</div>
+      <div class="card-score">9.5 / 10</div>
+    </div>
+  </a>
+
+  <a href="Autopsy/college-dropout.html" class="card reveal" style="--accent:#c8a020">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(200,160,32,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">Music No. 58</div>
+      <div class="card-title">Kanye West — The College Dropout</div>
+      <div class="card-score">9.6 / 10</div>
+    </div>
+  </a>
+
+  <a href="Autopsy/igor.html" class="card reveal" style="--accent:#7a5a9a">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(122,90,154,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">Music No. 59</div>
+      <div class="card-title">Tyler, the Creator — Igor</div>
+      <div class="card-score">9.4 / 10</div>
+    </div>
+  </a>
+
+  <a href="Autopsy/reasonable-doubt.html" class="card reveal" style="--accent:#8a6a4a">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(138,106,74,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">Music No. 60</div>
+      <div class="card-title">Jay-Z — Reasonable Doubt</div>
+      <div class="card-score">9.6 / 10</div>
+    </div>
+  </a>
+
+  <a href="Autopsy/fetch-the-bolt-cutters.html" class="card reveal" style="--accent:#7a9a5a">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(122,154,90,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">Music No. 61</div>
+      <div class="card-title">Fiona Apple — Fetch the Bolt Cutters</div>
+      <div class="card-score">9.7 / 10</div>
+    </div>
+  </a>
+
+  <a href="Autopsy/is-this-it.html" class="card reveal" style="--accent:#c87040">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(200,112,64,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">Music No. 62</div>
+      <div class="card-title">The Strokes — Is This It</div>
+      <div class="card-score">9.2 / 10</div>
+    </div>
+  </a>
+
+  <a href="Autopsy/brat.html" class="card reveal" style="--accent:#b4e400">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(180,228,0,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">Music No. 63</div>
+      <div class="card-title">Charli XCX — Brat</div>
+      <div class="card-score">8.7 / 10</div>
+    </div>
+  </a>
+
+  <a href="Autopsy/dragon-new-warm-mountain.html" class="card reveal" style="--accent:#c4903a">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(196,144,58,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">Music No. 64</div>
+      <div class="card-title">Big Thief — Dragon New Warm Mountain I Believe in You</div>
+      <div class="card-score">9.1 / 10</div>
+    </div>
+  </a>
+
+  <a href="Autopsy/saint-cloud.html" class="card reveal" style="--accent:#7ab0cc">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(122,176,204,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">Music No. 65</div>
+      <div class="card-title">Waxahatchee — Saint Cloud</div>
+      <div class="card-score">8.9 / 10</div>
+    </div>
+  </a>
+
+  <a href="Autopsy/motomami.html" class="card reveal" style="--accent:#d4203a">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(212,32,58,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">Music No. 66</div>
+      <div class="card-title">Rosalía — MOTOMAMI</div>
+      <div class="card-score">9.3 / 10</div>
+    </div>
+  </a>
+
+  <a href="Autopsy/sos-sza.html" class="card reveal" style="--accent:#2a5a9a">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(42,90,154,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">Music No. 67</div>
+      <div class="card-title">SZA — SOS</div>
+      <div class="card-score">8.4 / 10</div>
+    </div>
+  </a>
+
+  <a href="Autopsy/forest-hills-drive.html" class="card reveal" style="--accent:#c4792a">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(196,121,42,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">Music No. 68</div>
+      <div class="card-title">J. Cole — 2014 Forest Hills Drive</div>
+      <div class="card-score">8.7 / 10</div>
+    </div>
+  </a>
+
+  <a href="Autopsy/god-does-like-ugly.html" class="card reveal" style="--accent:#c4622a">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(196,98,42,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">Music No. 69</div>
+      <div class="card-title">JID — God Does Like Ugly</div>
+      <div class="card-score">8.2 / 10</div>
+    </div>
+  </a>
+
+  <a href="Autopsy/funeral.html" class="card reveal" style="--accent:#9a5a5a">
+    <div class="card-fallback" style="background:radial-gradient(ellipse 80% 80% at 50% 30%, rgba(154,90,90,0.18), #0a0908 70%)"></div>
+    <div class="card-overlay"></div>
+    <div class="card-content">
+      <div class="card-num">Music No. 70</div>
+      <div class="card-title">Arcade Fire — Funeral</div>
+      <div class="card-score">9.5 / 10</div>
+    </div>
+  </a>
+
+</main>
+</div>
+
+<footer>
+  <div class="footer-note">Final Cut &nbsp;·&nbsp; One take per film</div>
+</footer>
+
+<script>
+  function switchTab(tab) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+    const moviesPanel = document.getElementById('movies-panel');
+    const tvPanel = document.getElementById('tv-panel');
+    const musicPanel = document.getElementById('music-panel');
+    moviesPanel.classList.toggle('active', tab === 'movies');
+    tvPanel.classList.toggle('active', tab === 'tv');
+    musicPanel.classList.toggle('active', tab === 'music');
+    // Tab switches show cards instantly, no re-running the entrance stagger.
+    const panels = { movies: moviesPanel, tv: tvPanel, music: musicPanel };
+    panels[tab].querySelectorAll('.reveal').forEach(el => el.classList.add('visible'));
+  }
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold:0.08 });
+  document.querySelectorAll('.reveal').forEach((el, i) => {
+    el.style.transitionDelay = Math.min(i, 20) * 0.05 + 's';
+    io.observe(el);
+  });
+</script>
+</body>
+</html>

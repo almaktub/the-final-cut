@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Godfather Trilogy - Final Cut</title>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Space+Grotesk:wght@300;400;500&family=IBM+Plex+Mono:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+  :root {
+    --bg:#0a0908; --bg2:#100f0c;
+    --accent:#8a6a4a;
+    --accent-glow:rgba(138,106,74,0.15);
+    --text:#e9e4d8; --muted:#76705f;
+    --border:rgba(255,255,255,0.06);
+    --font-display:'Anton',sans-serif;
+    --font-body:'Space Grotesk',sans-serif;
+    --font-mono:'IBM Plex Mono',monospace;
+  }
+  html { scroll-behavior:smooth; }
+  body { background:var(--bg); color:var(--text); font-family:var(--font-body); font-weight:300; line-height:1.75; overflow-x:hidden; }
+
+  /* PROGRESS */
+  .progress-bar { position:fixed; top:0; left:0; height:2px; background:var(--accent); z-index:200; width:0%; transition:width 0.1s linear; }
+
+  /* NAV */
+  nav { position:fixed; top:0; left:0; right:0; padding:1.1rem 2.2rem; display:flex; justify-content:space-between; align-items:center; z-index:100; background:linear-gradient(to bottom, rgba(10,9,8,0.9) 0%, transparent 100%); }
+  .nav-back { font-family:var(--font-mono); letter-spacing:0.25em; font-size:0.64rem; text-transform:uppercase; color:rgba(255,255,255,0.45); text-decoration:none; transition:color 0.2s; }
+  .nav-back:hover { color:var(--accent); }
+  .nav-score { font-family:var(--font-display); font-size:1.05rem; color:var(--accent); opacity:0; transition:opacity 0.4s; }
+  .nav-score.visible { opacity:1; }
+
+  /* HERO */
+  .hero { position:relative; height:100vh; min-height:560px; overflow:hidden; display:flex; align-items:flex-end; }
+  .hero-img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:center; }
+  .hero-fallback { position:absolute; inset:0; background:radial-gradient(ellipse 80% 60% at 50% 40%, var(--accent-glow), var(--bg) 70%); }
+  .hero-overlay { position:absolute; inset:0; background:linear-gradient(to top, rgba(10,9,8,0.96) 0%, rgba(10,9,8,0.45) 45%, rgba(10,9,8,0.1) 100%); }
+  .hero-content { position:relative; z-index:1; width:100%; padding:0 2.4rem 3.5rem; }
+  .cut-label { font-family:var(--font-mono); letter-spacing:0.4em; font-size:0.62rem; color:var(--accent); text-transform:uppercase; margin-bottom:1rem; opacity:0; animation:fadeUp 0.7s ease 0.2s forwards; }
+  .hero-title { font-family:var(--font-display); font-size:clamp(3rem,11vw,9rem); line-height:0.9; text-transform:uppercase; color:var(--text); opacity:0; animation:fadeUp 0.7s ease 0.4s forwards; max-width:900px; }
+  .hero-credits { font-family:var(--font-mono); font-size:0.78rem; color:rgba(255,255,255,0.38); letter-spacing:0.2em; text-transform:uppercase; margin-top:1.1rem; opacity:0; animation:fadeUp 0.7s ease 0.6s forwards; }
+
+  /* TRILOGY INTRO */
+  .trilogy-intro { max-width:780px; margin:0 auto; padding:5rem 2.4rem 2rem; }
+  .trilogy-intro p { font-size:0.97rem; color:var(--text); line-height:1.85; margin-bottom:1.2rem; }
+
+  /* FILMS STACK */
+  .films-stack { max-width:1020px; margin:0 auto; padding:2rem 2.4rem 6rem; }
+  .film-entry { display:grid; grid-template-columns:160px 1fr; gap:4rem; align-items:start; padding:4rem 0; border-bottom:1px solid var(--border); }
+  .film-entry:last-child { border-bottom:none; }
+  @media(max-width:700px){ .film-entry { grid-template-columns:1fr; gap:2rem; } }
+
+  .film-score-col { position:sticky; top:5rem; }
+  .film-part { font-family:var(--font-mono); letter-spacing:0.35em; font-size:0.58rem; text-transform:uppercase; color:var(--muted); margin-bottom:0.4rem; }
+  .film-title { font-family:var(--font-display); font-size:1.2rem; text-transform:uppercase; line-height:1.1; color:var(--text); margin-bottom:1rem; }
+  .film-score-number { font-family:var(--font-display); font-size:clamp(3.5rem,8vw,5.5rem); line-height:1; color:var(--text); }
+  .film-score-number span { color:var(--accent); }
+  .film-score-denom { font-family:var(--font-mono); font-size:0.58rem; letter-spacing:0.3em; text-transform:uppercase; color:var(--muted); }
+  .film-verdict { font-family:var(--font-mono); font-style:italic; font-size:0.8rem; color:var(--accent); line-height:1.6; margin-top:1rem; padding-top:1rem; border-top:1px solid var(--border); }
+  @media(max-width:700px){ .film-score-col { position:static; } }
+
+  .film-review p { font-size:0.96rem; color:var(--text); line-height:1.85; margin-bottom:1.4rem; }
+  .film-review p:last-child { margin-bottom:0; }
+  .film-meta { font-family:var(--font-mono); font-size:0.62rem; letter-spacing:0.2em; text-transform:uppercase; color:var(--muted); margin-bottom:1.6rem; }
+
+  /* DIVIDER */
+  .divider { max-width:1020px; margin:0 auto; padding:0 2.4rem; }
+  .divider hr { border:none; border-top:1px solid var(--border); }
+
+  /* QUOTE */
+  .quote-section { padding:6rem 2.4rem; text-align:center; }
+  .quote-text { font-family:var(--font-mono); font-style:italic; font-size:clamp(1.1rem,2.8vw,1.75rem); line-height:1.5; max-width:680px; margin:0 auto; color:var(--text); }
+  .quote-attr { font-family:var(--font-mono); letter-spacing:0.3em; font-size:0.6rem; text-transform:uppercase; color:var(--muted); margin-top:1.4rem; }
+
+  /* REWATCH */
+  .rewatch-section { background:var(--bg2); border-top:1px solid var(--border); border-bottom:1px solid var(--border); padding:5rem 2.4rem; text-align:center; }
+  .rewatch-label { font-family:var(--font-mono); letter-spacing:0.4em; font-size:0.62rem; text-transform:uppercase; color:var(--muted); margin-bottom:1.8rem; }
+  .rewatch-stamp { display:inline-block; font-family:var(--font-display); font-size:clamp(1.5rem,3.5vw,2.6rem); text-transform:uppercase; color:var(--accent); border:2px solid var(--accent); padding:0.5rem 2rem; transform:rotate(-1.5deg); letter-spacing:0.04em; }
+  .rewatch-note { font-size:0.88rem; color:var(--muted); max-width:520px; margin:1.8rem auto 0; line-height:1.85; font-family:var(--font-mono); font-style:italic; }
+
+  /* FOOTER */
+  footer { padding:3.5rem 2.4rem; text-align:center; }
+  .footer-back { font-family:var(--font-mono); letter-spacing:0.3em; font-size:0.62rem; text-transform:uppercase; color:var(--muted); text-decoration:none; transition:color 0.2s; }
+  .footer-back:hover { color:var(--accent); }
+
+  @keyframes fadeUp { from{opacity:0;transform:translateY(22px)} to{opacity:1;transform:translateY(0)} }
+  .reveal { opacity:0; transform:translateY(30px); transition:opacity 0.65s ease, transform 0.65s ease; }
+  .reveal.visible { opacity:1; transform:translateY(0); }
+</style>
+</head>
+<body>
+<div class="progress-bar" id="progress"></div>
+
+<nav>
+  <a href="index.html" class="nav-back">← All Cuts</a>
+  <div class="nav-score" id="navScore">I–III</div>
+</nav>
+
+<section class="hero">
+  <img src="img/godfather.jpg" alt="The Godfather" class="hero-img" onerror="this.style.opacity=0">
+  <div class="hero-fallback"></div>
+  <div class="hero-overlay"></div>
+  <div class="hero-content">
+    <div class="cut-label">Final Cut No. 60 — Trilogy Review</div>
+    <h1 class="hero-title">THE GODFATHER</h1>
+    <div class="hero-credits">Parts I–III &nbsp;·&nbsp; dir. Francis Ford Coppola &nbsp;·&nbsp; 1972–1990 &nbsp;·&nbsp; Crime / Drama</div>
+  </div>
+</section>
+
+<section class="trilogy-intro reveal">
+  <p>The Godfather trilogy is the greatest crime saga in American cinema and also a study in diminishing returns. That second fact does not cancel the first. What Coppola built across three films, across nearly two decades, has no real equivalent: a family portrait that turns into a meditation on power, corruption, and the specific cost of choosing violence as a way of life.</p>
+  <p>The first film is flawless. The second is its equal in different ways, structurally bolder, emotionally colder, more interested in what the first film's victories actually cost. The third reaches for the right themes and cannot quite hold them. But the distance between the third film and the first two says less about failure than about how high the bar was set.</p>
+</section>
+
+<div class="films-stack">
+
+  <!-- PART I -->
+  <div class="film-entry">
+    <div class="film-score-col reveal">
+      <div class="film-part">Part I</div>
+      <div class="film-title">The Godfather</div>
+      <div class="film-score-number">10<span>.0</span></div>
+      <div class="film-score-denom">Out of ten</div>
+      <div class="film-verdict">The standard by which all American crime films are measured, and most of them fall short.</div>
+    </div>
+    <div class="film-review reveal">
+      <div class="film-meta">1972 &nbsp;·&nbsp; dir. Francis Ford Coppola &nbsp;·&nbsp; 175 min</div>
+      <p>The film is about succession, power, and the specific American myth of the immigrant family. Coppola shoots the Corleone world with an intimacy that makes the violence more disturbing, not less. The violence is domestic, familial, handled with the same quiet efficiency as business decisions. Marlon Brando's Don Corleone is not the character most people remember; he dies before the film's third act, and his real function is to establish what Michael is moving toward. The performance is all restraint and physical specificity, a man who communicates authority without raising his voice, and that restraint makes the world around him feel more dangerous by contrast.</p>
+      <p>Al Pacino's Michael is the film's actual subject: a man who returns from the war with the specific intention of staying out of the family business and is gradually, then completely, absorbed into it. Coppola and Pacino resist making this a tragedy of weakness. Michael does not drift or get pushed. He chooses, at each stage, with clear eyes. The baptism sequence, Michael becoming godfather while his enemies are killed on his orders, is the film's thesis delivered in images: this is not a fall. This is an arrival.</p>
+      <p>Gordon Willis' cinematography gives the Corleone world a darkness that feels earned, rooms that seem to absorb light, faces that emerge from shadow as if the shadow is always trying to reclaim them. The film is 175 minutes and uses every minute. Nothing in it is decorative.</p>
+    </div>
+  </div>
+
+  <!-- PART II -->
+  <div class="film-entry">
+    <div class="film-score-col reveal">
+      <div class="film-part">Part II</div>
+      <div class="film-title">The Godfather Part II</div>
+      <div class="film-score-number">9<span>.8</span></div>
+      <div class="film-score-denom">Out of ten</div>
+      <div class="film-verdict">The rare sequel that deepens rather than repeats, by asking what the first film cost.</div>
+    </div>
+    <div class="film-review reveal">
+      <div class="film-meta">1974 &nbsp;·&nbsp; dir. Francis Ford Coppola &nbsp;·&nbsp; 202 min</div>
+      <p>Coppola splits the film between Michael's present, consolidating and defending power in 1950s Nevada and Cuba, and Vito's past, the young Corleone building what Michael now runs. The parallel structure is the film's argument: Vito built the empire with a specific code, rooted in loyalty and a particular idea of family obligation. Michael maintains it by hollowing that code out entirely, until the word "family" in his mouth means nothing except leverage.</p>
+      <p>Robert De Niro playing young Vito in the Sicily and Little Italy sequences communicates a complete character through restraint and physical detail. It is a performance in a different language than Brando's, quieter and more watchful, and the two performances rhyme without repeating. Pacino's Michael has fully become what Part I prepared: cold, certain, and alone in ways he cannot admit. The Senate hearing sequence, the Cuba sequence, the scene where he tells Kay what he has done, the final image of Michael sitting in the compound with nothing left around him, all of it serves the film's central point. Power maintained by these methods leaves you in a room with no one you love anymore.</p>
+      <p>The film is longer than Part I and earns the length differently. Less propulsive, more meditative. It trusts the audience to sit with the weight of what it is showing.</p>
+    </div>
+  </div>
+
+  <!-- PART III -->
+  <div class="film-entry">
+    <div class="film-score-col reveal">
+      <div class="film-part">Part III</div>
+      <div class="film-title">The Godfather Part III</div>
+      <div class="film-score-number">7<span>.0</span></div>
+      <div class="film-score-denom">Out of ten</div>
+      <div class="film-verdict">A film that reaches for the right themes and can't quite hold them, undone most visibly by one piece of casting.</div>
+    </div>
+    <div class="film-review reveal">
+      <div class="film-meta">1990 &nbsp;·&nbsp; dir. Francis Ford Coppola &nbsp;·&nbsp; 162 min</div>
+      <p>Sofia Coppola's casting as Mary has been discussed for 30 years and the discussion is fair. The performance does not carry what the role requires, and the role is the film's emotional center, which means the structural damage is real. Mary's relationship with Vincent and her relationship with Michael are both load-bearing. When neither lands with the weight the script needs, the film lists. It is worth saying that some of the criticism directed at Sofia Coppola crossed from honest assessment into cruelty, and the film's other failures should not be placed entirely at her feet. The script itself has problems. The Vatican intrigue subplot gives the film themes worth having, the Church as a criminal enterprise parallel to the Corleone family, but the execution is labored in ways that feel like a draft that needed more time.</p>
+      <p>Andy Garcia as Vincent Corleone is the film's best thing: charismatic, dangerous, and specific in a way that suggests the kind of film this could have been with different choices around it. Michael's arc toward redemption is the correct direction. The earlier films never gave him a clean exit, and this one tries to give him something like conscience. The helicopter assassination sequence is directed with real skill. The final scene, Michael screaming alone on the steps in Sicily, is one of Pacino's best moments across all three films.</p>
+      <p>The film is not a failure. It is a disappointment, and the distinction matters only because of what came before it.</p>
+    </div>
+  </div>
+
+</div>
+
+<div class="divider reveal"><hr></div>
+
+<section class="quote-section reveal">
+  <div class="quote-text">"Leave the gun. Take the cannoli."</div>
+  <div class="quote-attr">Peter Clemenza — The Godfather</div>
+</section>
+
+<section class="rewatch-section">
+  <div class="rewatch-label reveal">Rewatch verdict</div>
+  <div class="reveal"><span class="rewatch-stamp">PARTS I AND II</span></div>
+  <div class="rewatch-note reveal">Watch them as one film. They're designed to be.</div>
+</section>
+
+<footer>
+  <a href="index.html" class="footer-back">← Back to all cuts</a>
+</footer>
+
+<script>
+  window.addEventListener('scroll', () => {
+    const el = document.documentElement;
+    const total = el.scrollHeight - el.clientHeight;
+    document.getElementById('progress').style.width = (total > 0 ? el.scrollTop / total * 100 : 0) + '%';
+    document.getElementById('navScore').classList.toggle('visible', el.scrollTop > window.innerHeight * 0.6);
+  }, { passive:true });
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold:0.1 });
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+</script>
+</body>
+</html>

@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Velvet Underground & Nico - Album Autopsy</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0d0b06;
+    --bg2: #131007;
+    --bg3: #1a1509;
+    --accent: #c9a227;
+    --accent2: #e0bb38;
+    --gold: #f0d88a;
+    --text: #f4edd8;
+    --muted: #7a6a40;
+    --border: rgba(201,162,39,0.1);
+    --font-display: 'Bebas Neue', sans-serif;
+    --font-serif: 'Playfair Display', serif;
+    --font-body: 'DM Sans', sans-serif;
+  }
+  html { scroll-behavior: smooth; }
+  body { background: var(--bg); color: var(--text); font-family: var(--font-body); font-weight: 300; line-height: 1.7; overflow-x: hidden; }
+  body::before { content:''; position:fixed; inset:0; background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.055'/%3E%3C/svg%3E"); pointer-events:none; z-index:9999; opacity:0.5; }
+  .progress-bar { position:fixed; top:0; left:0; height:2px; background:linear-gradient(90deg, var(--accent), var(--gold)); z-index:200; width:0%; transition: width 0.1s linear; }
+  nav { position:fixed; top:0; left:0; right:0; padding:1.1rem 2.5rem; display:flex; justify-content:space-between; align-items:center; z-index:100; background:linear-gradient(to bottom, rgba(13,11,6,0.95), transparent); }
+  .nav-back { font-family:var(--font-display); letter-spacing:0.25em; font-size:0.7rem; color:var(--muted); text-decoration:none; transition:color 0.2s; }
+  .nav-back:hover { color:var(--accent); }
+  .nav-score { font-family:var(--font-display); font-size:1.1rem; color:var(--accent); opacity:0; transition:opacity 0.4s; }
+  .nav-score.visible { opacity:1; }
+  .hero { min-height:100vh; display:flex; flex-direction:column; justify-content:center; align-items:center; position:relative; overflow:hidden; padding:4rem 2rem; text-align:center; }
+  .hero-bg { position:absolute; inset:0; background: radial-gradient(ellipse 60% 50% at 50% 40%, rgba(201,162,39,0.1) 0%, transparent 65%), var(--bg); z-index:0; }
+  .hero-rings { position:absolute; inset:0; z-index:0; overflow:hidden; }
+  .hero-rings::before { content:''; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:900px; height:900px; border-radius:50%; background: radial-gradient(circle at center, transparent 38%, rgba(201,162,39,0.03) 38.5%, transparent 39%), radial-gradient(circle at center, transparent 50%, rgba(201,162,39,0.02) 50.5%, transparent 51%), radial-gradient(circle at center, transparent 62%, rgba(201,162,39,0.015) 62.5%, transparent 63%); }
+  .hero-content { position:relative; z-index:1; }
+  .autopsy-label { font-family:var(--font-display); letter-spacing:0.4em; font-size:0.72rem; color:var(--accent); text-transform:uppercase; margin-bottom:1.8rem; opacity:0; animation:fadeUp 0.8s ease 0.2s forwards; }
+  .hero-artist { font-family:var(--font-display); font-size:clamp(2.5rem,10vw,9rem); line-height:0.88; letter-spacing:-0.02em; color:var(--text); opacity:0; animation:fadeUp 0.8s ease 0.4s forwards; }
+  .hero-album { font-family:var(--font-serif); font-style:italic; font-size:clamp(1.2rem,4vw,3.2rem); color:var(--gold); margin-top:0.6rem; opacity:0; animation:fadeUp 0.8s ease 0.6s forwards; line-height:1.25; }
+  .hero-meta { font-family:var(--font-display); letter-spacing:0.3em; font-size:0.85rem; color:var(--muted); margin-top:1.5rem; opacity:0; animation:fadeUp 0.8s ease 0.8s forwards; }
+  .hero-rule { width:1px; height:70px; background:linear-gradient(to bottom, var(--accent), transparent); margin:3rem auto 0; opacity:0; animation:fadeUp 0.8s ease 1s forwards; }
+  .scroll-hint { font-size:0.68rem; letter-spacing:0.35em; color:var(--muted); text-transform:uppercase; margin-top:0.8rem; opacity:0; animation:fadeUp 0.8s ease 1.2s forwards; }
+  .verdict-bar { background:linear-gradient(90deg, var(--accent), #9a7a1a); padding:1.1rem 2rem; text-align:center; font-size:0.92rem; color:rgba(0,0,0,0.9); font-weight:500; line-height:1.5; }
+  .score-section { background:var(--bg2); border-top:1px solid var(--border); border-bottom:1px solid var(--border); }
+  .score-inner { max-width:920px; margin:0 auto; padding:6rem 2rem; display:grid; grid-template-columns:1fr 1.5fr; gap:5rem; align-items:center; }
+  @media(max-width:640px){.score-inner{grid-template-columns:1fr;gap:2.5rem;}}
+  .score-display { text-align:center; }
+  .score-number { font-family:var(--font-display); font-size:clamp(5.5rem,16vw,11rem); line-height:1; color:var(--text); }
+  .score-number span { color:var(--accent); }
+  .score-label { font-family:var(--font-display); letter-spacing:0.35em; font-size:0.75rem; color:var(--muted); margin-top:0.4rem; }
+  .score-verdict { font-family:var(--font-serif); font-style:italic; font-size:1.3rem; line-height:1.55; margin-bottom:1.5rem; color:var(--text); }
+  .score-defense { font-size:0.88rem; color:var(--muted); line-height:1.85; }
+  .section { max-width:920px; margin:0 auto; padding:6rem 2rem; }
+  .section-label { font-family:var(--font-display); letter-spacing:0.4em; font-size:0.68rem; color:var(--accent); text-transform:uppercase; margin-bottom:1.4rem; }
+  .section-title { font-family:var(--font-serif); font-size:clamp(1.8rem,4.5vw,3.2rem); font-weight:900; line-height:1.1; margin-bottom:2.5rem; }
+  .section-title em { font-style:italic; color:var(--gold); }
+  .pill { padding:0.35rem 0.9rem; border:1px solid var(--border); border-radius:2px; font-size:0.7rem; letter-spacing:0.15em; text-transform:uppercase; font-family:var(--font-display); color:var(--text); background:transparent; transition:all 0.2s; cursor:default; }
+  .pill:hover, .pill.active { border-color:var(--accent); color:var(--accent); background:rgba(201,162,39,0.08); }
+  .theme-pills { display:flex; flex-wrap:wrap; gap:0.45rem; margin:0 0 3rem; }
+  .themes-section { background:var(--bg2); border-top:1px solid var(--border); }
+  .themes-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:1.5px; background:var(--border); border:1px solid var(--border); }
+  .theme-card { background:var(--bg2); padding:2.2rem 1.8rem; transition:background 0.2s; cursor:default; position:relative; overflow:hidden; }
+  .theme-card::before { content:''; position:absolute; top:0; left:0; width:3px; height:0; background:var(--accent); transition:height 0.3s; }
+  .theme-card:hover::before { height:100%; }
+  .theme-card:hover { background:var(--bg3); }
+  .theme-card-icon { font-size:1.8rem; margin-bottom:0.9rem; display:block; }
+  .theme-card-title { font-family:var(--font-serif); font-size:1rem; font-weight:700; margin-bottom:0.6rem; }
+  .theme-card-text { font-size:0.82rem; color:var(--muted); line-height:1.75; }
+  .egg-section { background:var(--bg3); border-top:1px solid var(--border); border-bottom:1px solid var(--border); }
+  .egg-inner { max-width:920px; margin:0 auto; padding:5rem 2rem; }
+  .egg-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:1px; background:var(--border); border:1px solid var(--border); margin-top:2.5rem; }
+  .egg-card { background:var(--bg3); padding:2rem 1.6rem; position:relative; }
+  .egg-card::after { content:'🥚'; position:absolute; top:1.2rem; right:1.4rem; font-size:1rem; opacity:0.4; }
+  .egg-num { font-family:var(--font-display); font-size:2.5rem; line-height:1; color:rgba(201,162,39,0.18); margin-bottom:0.6rem; }
+  .egg-title { font-family:var(--font-serif); font-size:0.95rem; font-weight:700; margin-bottom:0.5rem; }
+  .egg-text { font-size:0.8rem; color:var(--muted); line-height:1.75; }
+  .quote-section { padding:7rem 2rem; text-align:center; position:relative; overflow:hidden; }
+  .quote-bg { position:absolute; inset:0; background:radial-gradient(ellipse 55% 55% at 50% 50%, rgba(201,162,39,0.06) 0%, transparent 70%); }
+  .quote-mark { font-family:var(--font-serif); font-size:7rem; line-height:0; vertical-align:-1.8rem; color:rgba(201,162,39,0.18); margin-right:0.05em; }
+  .quote-text { font-family:var(--font-serif); font-style:italic; font-size:clamp(1.4rem,3.5vw,2.5rem); line-height:1.35; max-width:680px; margin:0 auto; position:relative; z-index:1; }
+  .quote-attr { margin-top:2rem; font-size:0.72rem; letter-spacing:0.3em; text-transform:uppercase; color:var(--muted); font-family:var(--font-display); position:relative; z-index:1; }
+  .tracks-section { background:var(--bg); border-top:1px solid var(--border); }
+  .tracks-inner { max-width:920px; margin:0 auto; padding:6rem 2rem; }
+  .track-item { border-bottom:1px solid var(--border); overflow:hidden; cursor:pointer; transition:background 0.15s; }
+  .track-item:first-of-type { border-top:1px solid var(--border); }
+  .track-item:hover { background:rgba(201,162,39,0.025); }
+  .track-header { display:grid; grid-template-columns:3rem 1fr auto; align-items:center; gap:1.2rem; padding:1.1rem 0; }
+  .track-num { font-family:var(--font-display); font-size:0.75rem; color:var(--muted); letter-spacing:0.1em; }
+  .track-name { font-family:var(--font-serif); font-size:1rem; font-weight:700; }
+  .track-right { display:flex; align-items:center; gap:1.2rem; }
+  .track-score-bar { width:70px; height:3px; background:rgba(255,255,255,0.06); border-radius:2px; overflow:hidden; }
+  .track-score-fill { height:100%; background:linear-gradient(90deg, var(--accent), var(--gold)); transform-origin:left; transform:scaleX(0); transition:transform 0.8s ease; border-radius:2px; }
+  .track-score-num { font-family:var(--font-display); font-size:0.95rem; color:var(--muted); min-width:2.2rem; text-align:right; }
+  .track-expand-icon { font-size:0.55rem; color:var(--muted); transition:transform 0.3s; }
+  .track-item.open .track-expand-icon { transform:rotate(180deg); }
+  .track-body { max-height:0; overflow:hidden; transition:max-height 0.38s ease; }
+  .track-body-inner { padding:0 0 1.4rem 0; margin-left:4.2rem; color:var(--muted); font-size:0.87rem; line-height:1.8; border-left:2px solid var(--accent); padding-left:1.4rem; }
+  .chart-section { background:var(--bg3); border-top:1px solid var(--border); border-bottom:1px solid var(--border); }
+  .chart-inner { max-width:920px; margin:0 auto; padding:6rem 2rem; }
+  .chart-bars { display:flex; flex-direction:column; gap:0.85rem; margin-top:3rem; }
+  .bar-row { display:grid; grid-template-columns:170px 1fr 2.8rem; align-items:center; gap:1rem; }
+  @media(max-width:500px){.bar-row{grid-template-columns:90px 1fr 2.5rem;}}
+  .bar-label { font-size:0.78rem; color:var(--muted); text-align:right; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .bar-track { height:5px; background:rgba(255,255,255,0.05); border-radius:3px; overflow:hidden; }
+  .bar-fill { height:100%; background:linear-gradient(90deg, var(--accent), var(--gold)); transform-origin:left; transform:scaleX(0); transition:transform 0.85s ease; border-radius:3px; }
+  .bar-val { font-family:var(--font-display); font-size:0.88rem; color:var(--text); }
+  .footnote-section { padding:5rem 2rem; text-align:center; border-top:1px solid var(--border); background:var(--bg2); }
+  .footnote-text { font-family:var(--font-serif); font-style:italic; font-size:1rem; color:var(--muted); line-height:1.85; max-width:640px; margin:0 auto; }
+  footer { padding:3.5rem 2rem; text-align:center; border-top:1px solid var(--border); }
+  .footer-sig { font-family:var(--font-serif); font-style:italic; font-size:0.88rem; color:var(--muted); }
+  .footer-brand { font-family:var(--font-display); letter-spacing:0.4em; font-size:0.68rem; color:rgba(255,255,255,0.1); margin-top:1.8rem; }
+  .divider { width:36px; height:1px; background:var(--accent); margin:1.8rem auto; }
+  .back-link { display:inline-block; margin-top:2rem; font-family:var(--font-display); letter-spacing:0.25em; font-size:0.72rem; color:var(--accent); text-decoration:none; border:1px solid var(--accent); padding:0.6rem 1.4rem; transition:all 0.2s; }
+  .back-link:hover { background:var(--accent); color:#000; }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(28px)} to{opacity:1;transform:translateY(0)} }
+  .reveal { opacity:0; transform:translateY(38px); transition:opacity 0.7s ease, transform 0.7s ease; }
+  .reveal.visible { opacity:1; transform:translateY(0); }
+</style>
+</head>
+<body>
+<div class="progress-bar" id="progress"></div>
+<nav>
+  <a href="index.html" class="nav-back">← All Autopsies</a>
+  <div class="nav-score" id="navScore">9.8 / 10</div>
+</nav>
+
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-rings"></div>
+  <div class="hero-content">
+    <div class="autopsy-label">Album Autopsy · 039</div>
+    <div class="hero-artist">The Velvet Underground</div>
+    <div class="hero-album">The Velvet Underground & Nico</div>
+    <div class="hero-meta">Verve Records · 1967</div>
+    <div class="hero-rule"></div>
+    <div class="scroll-hint">Scroll to dissect</div>
+  </div>
+</section>
+
+<div class="verdict-bar" style="color:rgba(0,0,0,0.85)">The least commercially successful major debut in rock history. Andy Warhol's name on the sleeve kept radio stations away. Thirty thousand copies in the first year. Everyone who bought one started a band.</div>
+
+<section class="score-section">
+  <div class="score-inner">
+    <div class="score-display reveal">
+      <div class="score-number" id="scoreCounter">0<span>.0</span></div>
+      <div class="score-label">Overall Score</div>
+    </div>
+    <div class="reveal">
+      <div class="score-verdict">"Lou Reed wrote about heroin and sadomasochism with the bored precision of someone describing a Tuesday. That turned out to be the most revolutionary approach to rock songwriting anyone had tried."</div>
+      <div class="score-defense">9.8 because "European Son" is eight minutes of noise that earns its runtime exactly once and then only barely. Everything else is unrepeatable - a record that sounded like nothing before it and has never been successfully imitated since. The banana cover, the viola, Nico's German remove, Lou's refusal to moralize: all of it coheres into something that changed what songs were allowed to be about. The 0.2 deduction is for that eight minutes. The rest gets a 10.</div>
+    </div>
+  </div>
+</section>
+
+<div class="themes-section">
+  <div class="section">
+    <div class="section-label reveal">Central Thesis</div>
+    <div class="section-title reveal">What <em>This Album Is Really About</em></div>
+    <div class="theme-pills reveal">
+      <span class="pill active">Transgression as Dailiness</span>
+      <span class="pill">Nico as Alien Presence</span>
+      <span class="pill">Noise as Content</span>
+      <span class="pill">The Factory as Document</span>
+    </div>
+    <div class="themes-grid reveal">
+      <div class="theme-card">
+        <span class="theme-card-icon">💉</span>
+        <div class="theme-card-title">Transgression as Dailiness</div>
+        <div class="theme-card-text">Lou Reed writes about heroin, sadomasochism, and sex work the way other songwriters write about heartbreak - with the specific, bored patience of someone who has been there. "I'm Waiting for the Man" is not a cautionary tale. It's a man waiting for his dealer in Harlem, impatient, ordinary. The album never tells you how to feel about what it describes. That was the radical move.</div>
+      </div>
+      <div class="theme-card">
+        <span class="theme-card-icon">🧊</span>
+        <div class="theme-card-title">Nico as Alien Presence</div>
+        <div class="theme-card-text">Her German contralto is cold where Lou is warm, distant where the band is frantic. "All Tomorrow's Parties" needs her remove - a warmer voice would ruin it. "Femme Fatale" was written by Lou for Nico, and the distance between author and performer is part of the song. She is not of this record and she is essential to it simultaneously.</div>
+      </div>
+      <div class="theme-card">
+        <span class="theme-card-icon">🎻</span>
+        <div class="theme-card-title">Noise as Content</div>
+        <div class="theme-card-text">John Cale's viola on "Venus in Furs" is doing something that should not be possible in a pop song. The feedback on "Heroin" builds and then collapses - the tempo itself accelerates and decelerates with the drug's own rhythm. These are not accidents or production choices. They are arguments. The noise means something.</div>
+      </div>
+      <div class="theme-card">
+        <span class="theme-card-icon">🏭</span>
+        <div class="theme-card-title">The Factory as Document</div>
+        <div class="theme-card-text">Andy Warhol's Factory on East 47th Street was a real place with real people doing real damage to themselves and producing real art. This album is the document of that world - not romanticized, not cautionary, not editorialized. Lou Reed maps it with the precision of someone who was inside and paying attention.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<section class="quote-section">
+  <div class="quote-bg"></div>
+  <div class="quote-text reveal"><span class="quote-mark">"</span>I have made the big decision, I'm gonna try to nullify my life.</div>
+  <div class="quote-attr reveal">Lou Reed · Heroin · 1967</div>
+</section>
+
+<section class="egg-section">
+  <div class="egg-inner">
+    <div class="section-label reveal">Rare Frequencies</div>
+    <div class="section-title reveal">Things You <em>Didn't Know</em></div>
+    <div class="egg-grid reveal">
+      <div class="egg-card">
+        <div class="egg-num">01</div>
+        <div class="egg-title">The Peel-Off Banana</div>
+        <div class="egg-text">The original 1967 pressing featured a peel-off banana sticker. Underneath: a flesh-colored banana. Andy Warhol wanted every copy to be slightly different depending on how much the buyer peeled. Later pressings just printed the pink banana. The sticker is now worth more than the record.</div>
+      </div>
+      <div class="egg-card">
+        <div class="egg-num">02</div>
+        <div class="egg-title">The Eno Claim</div>
+        <div class="egg-text">Brian Eno has said - possibly apocryphally - "The first Velvet Underground album only sold 30,000 copies, but everyone who bought one of those 30,000 copies started a band." The actual first-year sales figure is disputed. The point is not. Every post-punk, art-rock, and noise-pop lineage runs through this record.</div>
+      </div>
+      <div class="egg-card">
+        <div class="egg-num">03</div>
+        <div class="egg-title">The Tempo of Heroin</div>
+        <div class="egg-text">Sterling Morrison's guitar and Maureen Tucker's drumming on "Heroin" deliberately accelerate as the song builds - mimicking the drug's rush - then decelerate as it wears off. The tempo manipulation was intentional. The band rehearsed it as a structural argument. Most listeners felt it without knowing why.</div>
+      </div>
+      <div class="egg-card">
+        <div class="egg-num">04</div>
+        <div class="egg-title">Tom Wilson's Hands-Off Approach</div>
+        <div class="egg-text">Producer Tom Wilson had just finished Bob Dylan's Bringing It All Back Home and Highway 61 Revisited. He reportedly had little idea what to do with what the Velvet Underground brought him, and largely left them alone. The primitive, live-room sound - which sounds deliberate - was partly just the band finishing before he could interfere.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="tracks-section">
+  <div class="tracks-inner">
+    <div class="section-label reveal">Track by Track</div>
+    <div class="section-title reveal">The <em>Dissection</em></div>
+    <div id="trackList" class="reveal">
+
+      <div class="track-item">
+        <div class="track-header"><span class="track-num">01</span><span class="track-name">Sunday Morning</span><div class="track-right"><div class="track-score-bar"><div class="track-score-fill" data-score="9.5"></div></div><span class="track-score-num">9.5</span><span class="track-expand-icon">▼</span></div></div>
+        <div class="track-body"><div class="track-body-inner">The gentlest entry point and a deliberate lie. Celeste, light drums, Lou Reed's softest register. It sounds like a Sunday morning. It is the album's most carefully constructed misdirection - after this, nothing is gentle. Originally given to Nico; Reed decided to sing it himself. The right call.</div></div>
+      </div>
+
+      <div class="track-item">
+        <div class="track-header"><span class="track-num">02</span><span class="track-name">I'm Waiting for the Man</span><div class="track-right"><div class="track-score-bar"><div class="track-score-fill" data-score="9.4"></div></div><span class="track-score-num">9.4</span><span class="track-expand-icon">▼</span></div></div>
+        <div class="track-body"><div class="track-body-inner">Lou Reed buying heroin at 125th and Lexington, narrated with the impatience of someone who is late for an appointment. He has twenty-six dollars in his hand. He's uptown. He's the only white man on the block. The song doesn't make this scandalous. It makes it boring. That's the revolution.</div></div>
+      </div>
+
+      <div class="track-item">
+        <div class="track-header"><span class="track-num">04</span><span class="track-name">Venus in Furs</span><div class="track-right"><div class="track-score-bar"><div class="track-score-fill" data-score="9.7"></div></div><span class="track-score-num">9.7</span><span class="track-expand-icon">▼</span></div></div>
+        <div class="track-body"><div class="track-body-inner">Leopold von Sacher-Masoch's 1870 novella adapted into a pop song. The concept of masochism - named after the author - rendered as a droning, cycling thing that sounds exactly like what the song is describing. John Cale's viola is doing something that defies category. The song doesn't climax. It circles. That's correct.</div></div>
+      </div>
+
+      <div class="track-item">
+        <div class="track-header"><span class="track-num">06</span><span class="track-name">All Tomorrow's Parties</span><div class="track-right"><div class="track-score-bar"><div class="track-score-fill" data-score="9.6"></div></div><span class="track-score-num">9.6</span><span class="track-expand-icon">▼</span></div></div>
+        <div class="track-body"><div class="track-body-inner">Nico above a piano figure that repeats until it means something different than when it started. The song is about a woman who has nothing to wear to all the parties she'll attend tomorrow. It is also about entropy. It is also about the Factory. All three readings are correct and Nico's voice makes them all feel inevitable.</div></div>
+      </div>
+
+      <div class="track-item">
+        <div class="track-header"><span class="track-num">07</span><span class="track-name">Heroin</span><div class="track-right"><div class="track-score-bar"><div class="track-score-fill" data-score="9.9"></div></div><span class="track-score-num">9.9</span><span class="track-expand-icon">▼</span></div></div>
+        <div class="track-body"><div class="track-body-inner">The album's centerpiece. The tempo accelerates and collapses like the drug itself. Lou Reed is not pro-heroin. He is not anti-heroin. He is describing what it feels like to want something that will destroy you, with total precision and zero editorializing. The BBC banned it. The ban confirmed the song was doing something real.</div></div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<section class="chart-section">
+  <div class="chart-inner">
+    <div class="section-label reveal">Score Breakdown</div>
+    <div class="section-title reveal">Every Track, <em>Ranked</em></div>
+    <div class="chart-bars reveal" id="chartBars">
+      <div class="bar-row"><div class="bar-label">Heroin</div><div class="bar-track"><div class="bar-fill" data-score="9.9"></div></div><div class="bar-val">9.9</div></div>
+      <div class="bar-row"><div class="bar-label">Venus in Furs</div><div class="bar-track"><div class="bar-fill" data-score="9.7"></div></div><div class="bar-val">9.7</div></div>
+      <div class="bar-row"><div class="bar-label">All Tomorrow's Parties</div><div class="bar-track"><div class="bar-fill" data-score="9.6"></div></div><div class="bar-val">9.6</div></div>
+      <div class="bar-row"><div class="bar-label">Sunday Morning</div><div class="bar-track"><div class="bar-fill" data-score="9.5"></div></div><div class="bar-val">9.5</div></div>
+      <div class="bar-row"><div class="bar-label">I'm Waiting for the Man</div><div class="bar-track"><div class="bar-fill" data-score="9.4"></div></div><div class="bar-val">9.4</div></div>
+      <div class="bar-row"><div class="bar-label">Femme Fatale</div><div class="bar-track"><div class="bar-fill" data-score="9.2"></div></div><div class="bar-val">9.2</div></div>
+      <div class="bar-row"><div class="bar-label">I'll Be Your Mirror</div><div class="bar-track"><div class="bar-fill" data-score="9.0"></div></div><div class="bar-val">9.0</div></div>
+      <div class="bar-row"><div class="bar-label">There She Goes Again</div><div class="bar-track"><div class="bar-fill" data-score="8.7"></div></div><div class="bar-val">8.7</div></div>
+      <div class="bar-row"><div class="bar-label">Run Run Run</div><div class="bar-track"><div class="bar-fill" data-score="8.3"></div></div><div class="bar-val">8.3</div></div>
+      <div class="bar-row"><div class="bar-label">Black Angel's Death Song</div><div class="bar-track"><div class="bar-fill" data-score="8.0"></div></div><div class="bar-val">8.0</div></div>
+      <div class="bar-row"><div class="bar-label">European Son</div><div class="bar-track"><div class="bar-fill" data-score="7.2"></div></div><div class="bar-val">7.2</div></div>
+    </div>
+  </div>
+</section>
+
+<div class="footnote-section">
+  <div class="section-label reveal" style="text-align:center;">Footnote</div>
+  <div class="footnote-text reveal">The album sold poorly on release. Radio stations wouldn't touch it. Critics were confused. Andy Warhol's involvement convinced the art world it was a stunt. Then twenty years passed and everyone who had been in a band in the 70s and 80s cited it as the reason. It is now on every canonical list that exists. None of that retroactive consecration would have surprised Lou Reed, who was right about the album from the beginning and knew it.</div>
+</div>
+
+<footer>
+  <div class="footer-sig reveal">Album Autopsy - A structured dissection of records that matter.</div>
+  <div class="divider"></div>
+  <a href="index.html" class="back-link reveal">← Back to All Autopsies</a>
+  <div class="footer-brand">@MyParentsDidntLeaveForThis</div>
+</footer>
+
+<script>
+  window.addEventListener('scroll', () => {
+    const p = (window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100;
+    document.getElementById('progress').style.width = p + '%';
+  });
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (!e.isIntersecting) return;
+      e.target.classList.add('visible');
+      if (e.target.id === 'scoreCounter') { animateScore(0, 9.8, 1600); document.getElementById('navScore').classList.add('visible'); }
+    });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+  if(document.getElementById('scoreCounter')) observer.observe(document.getElementById('scoreCounter'));
+  const tlObs = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (!e.isIntersecting) return; e.target.querySelectorAll('.track-score-fill').forEach((f,i) => { setTimeout(() => { f.style.transform = `scaleX(${parseFloat(f.dataset.score)/10})`; }, i * 55); }); tlObs.unobserve(e.target); });
+  }, { threshold: 0.08 });
+  const tl = document.getElementById('trackList'); if(tl) tlObs.observe(tl);
+  const chObs = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (!e.isIntersecting) return; e.target.querySelectorAll('.bar-fill').forEach((f,i) => { setTimeout(() => { const s = parseFloat(f.dataset.score); f.style.transform = `scaleX(${Math.max(0,(s-6)/4)})`; }, i * 70); }); chObs.unobserve(e.target); });
+  }, { threshold: 0.08 });
+  const cb = document.getElementById('chartBars'); if(cb) chObs.observe(cb);
+  function animateScore(from, to, duration) {
+    const el = document.getElementById('scoreCounter'); if(!el) return;
+    const start = performance.now();
+    (function tick(now) { const p = Math.min((now - start) / duration, 1); const ease = 1 - Math.pow(1 - p, 3); const val = from + (to - from) * ease; const int = Math.floor(val); const dec = Math.round((val - int) * 10); el.innerHTML = int + '<span>.' + dec + '</span>'; if(p < 1) requestAnimationFrame(tick); })(start);
+  }
+  document.querySelectorAll('.track-item').forEach(item => {
+    item.querySelector('.track-header').addEventListener('click', () => { const body = item.querySelector('.track-body'); const open = item.classList.toggle('open'); body.style.maxHeight = open ? body.scrollHeight + 'px' : '0'; });
+  });
+  document.querySelectorAll('.pill').forEach(pill => {
+    pill.addEventListener('click', () => { document.querySelectorAll('.pill').forEach(p => p.classList.remove('active')); pill.classList.add('active'); });
+  });
+</script>
+</body>
+</html>

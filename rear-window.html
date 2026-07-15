@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rear Window - Final Cut</title>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Space+Grotesk:wght@300;400;500&family=IBM+Plex+Mono:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+  :root {
+    --bg:#0a0908; --bg2:#100f0c;
+    --accent:#6a8aaf;
+    --accent-glow:rgba(106,138,175,0.15);
+    --text:#e9e4d8; --muted:#76705f;
+    --border:rgba(255,255,255,0.06);
+    --font-display:'Anton',sans-serif;
+    --font-body:'Space Grotesk',sans-serif;
+    --font-mono:'IBM Plex Mono',monospace;
+  }
+  html { scroll-behavior:smooth; }
+  body { background:var(--bg); color:var(--text); font-family:var(--font-body); font-weight:300; line-height:1.75; overflow-x:hidden; }
+
+  .progress-bar { position:fixed; top:0; left:0; height:2px; background:var(--accent); z-index:200; width:0%; transition:width 0.1s linear; }
+
+  nav { position:fixed; top:0; left:0; right:0; padding:1.1rem 2.2rem; display:flex; justify-content:space-between; align-items:center; z-index:100; background:linear-gradient(to bottom, rgba(10,9,8,0.9) 0%, transparent 100%); }
+  .nav-back { font-family:var(--font-mono); letter-spacing:0.25em; font-size:0.64rem; text-transform:uppercase; color:rgba(255,255,255,0.45); text-decoration:none; transition:color 0.2s; }
+  .nav-back:hover { color:var(--accent); }
+  .nav-score { font-family:var(--font-display); font-size:1.05rem; color:var(--accent); opacity:0; transition:opacity 0.4s; }
+  .nav-score.visible { opacity:1; }
+
+  .hero { position:relative; height:100vh; min-height:560px; overflow:hidden; display:flex; align-items:flex-end; }
+  .hero-img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:center; }
+  .hero-fallback { position:absolute; inset:0; background:radial-gradient(ellipse 80% 60% at 50% 40%, var(--accent-glow), var(--bg) 70%); }
+  .hero-overlay { position:absolute; inset:0; background:linear-gradient(to top, rgba(10,9,8,0.96) 0%, rgba(10,9,8,0.45) 45%, rgba(10,9,8,0.1) 100%); }
+  .hero-content { position:relative; z-index:1; width:100%; padding:0 2.4rem 3.5rem; }
+  .cut-label { font-family:var(--font-mono); letter-spacing:0.4em; font-size:0.62rem; color:var(--accent); text-transform:uppercase; margin-bottom:1rem; opacity:0; animation:fadeUp 0.7s ease 0.2s forwards; }
+  .hero-title { font-family:var(--font-display); font-size:clamp(3rem,11vw,9rem); line-height:0.9; text-transform:uppercase; color:var(--text); opacity:0; animation:fadeUp 0.7s ease 0.4s forwards; max-width:900px; }
+  .hero-credits { font-family:var(--font-mono); font-size:0.78rem; color:rgba(255,255,255,0.38); letter-spacing:0.2em; text-transform:uppercase; margin-top:1.1rem; opacity:0; animation:fadeUp 0.7s ease 0.6s forwards; }
+
+  .review-section { max-width:1020px; margin:0 auto; padding:6rem 2.4rem; display:grid; grid-template-columns:180px 1fr; gap:5rem; align-items:start; }
+  @media(max-width:700px){ .review-section { grid-template-columns:1fr; gap:2.5rem; padding:4rem 1.6rem; } }
+  .score-col { position:sticky; top:5rem; }
+  .score-number { font-family:var(--font-display); font-size:clamp(4rem,10vw,7.5rem); line-height:1; color:var(--text); }
+  .score-number span { color:var(--accent); }
+  .score-denom { font-family:var(--font-mono); font-size:0.62rem; letter-spacing:0.3em; text-transform:uppercase; color:var(--muted); margin-top:0.3rem; }
+  .score-verdict { font-family:var(--font-mono); font-style:italic; font-size:0.82rem; color:var(--accent); line-height:1.6; margin-top:1.2rem; padding-top:1.2rem; border-top:1px solid var(--border); }
+  @media(max-width:700px){ .score-col { position:static; display:flex; align-items:baseline; gap:1.2rem; flex-wrap:wrap; } .score-verdict { border-top:none; margin-top:0; padding-top:0; } }
+
+  .review-text p { font-size:0.97rem; color:var(--text); line-height:1.85; margin-bottom:1.5rem; }
+  .review-text p:last-child { margin-bottom:0; }
+
+  .divider { max-width:1020px; margin:0 auto; padding:0 2.4rem; }
+  .divider hr { border:none; border-top:1px solid var(--border); }
+
+  .quote-section { padding:6rem 2.4rem; text-align:center; }
+  .quote-text { font-family:var(--font-mono); font-style:italic; font-size:clamp(1.1rem,2.8vw,1.75rem); line-height:1.5; max-width:680px; margin:0 auto; color:var(--text); }
+  .quote-attr { font-family:var(--font-mono); letter-spacing:0.3em; font-size:0.6rem; text-transform:uppercase; color:var(--muted); margin-top:1.4rem; }
+
+  .rewatch-section { background:var(--bg2); border-top:1px solid var(--border); border-bottom:1px solid var(--border); padding:5rem 2.4rem; text-align:center; }
+  .rewatch-label { font-family:var(--font-mono); letter-spacing:0.4em; font-size:0.62rem; text-transform:uppercase; color:var(--muted); margin-bottom:1.8rem; }
+  .rewatch-stamp { display:inline-block; font-family:var(--font-display); font-size:clamp(1.5rem,3.5vw,2.6rem); text-transform:uppercase; color:var(--accent); border:2px solid var(--accent); padding:0.5rem 2rem; transform:rotate(-1.5deg); letter-spacing:0.04em; }
+  .rewatch-note { font-size:0.88rem; color:var(--muted); max-width:520px; margin:1.8rem auto 0; line-height:1.85; font-family:var(--font-mono); font-style:italic; }
+
+  footer { padding:3.5rem 2.4rem; text-align:center; }
+  .footer-back { font-family:var(--font-mono); letter-spacing:0.3em; font-size:0.62rem; text-transform:uppercase; color:var(--muted); text-decoration:none; transition:color 0.2s; }
+  .footer-back:hover { color:var(--accent); }
+
+  @keyframes fadeUp { from{opacity:0;transform:translateY(22px)} to{opacity:1;transform:translateY(0)} }
+  .reveal { opacity:0; transform:translateY(30px); transition:opacity 0.65s ease, transform 0.65s ease; }
+  .reveal.visible { opacity:1; transform:translateY(0); }
+</style>
+</head>
+<body>
+<div class="progress-bar" id="progress"></div>
+
+<nav>
+  <a href="index.html" class="nav-back">← All Cuts</a>
+  <div class="nav-score" id="navScore">9.5</div>
+</nav>
+
+<section class="hero">
+  <img src="img/rear-window.jpg" alt="Rear Window" class="hero-img" onerror="this.style.opacity=0">
+  <div class="hero-fallback"></div>
+  <div class="hero-overlay"></div>
+  <div class="hero-content">
+    <div class="cut-label">Final Cut No. 31</div>
+    <h1 class="hero-title">Rear Window</h1>
+    <div class="hero-credits">dir. Alfred Hitchcock &nbsp;·&nbsp; 1954 &nbsp;·&nbsp; Thriller / Mystery &nbsp;·&nbsp; 112 min</div>
+  </div>
+</section>
+
+<section class="review-section">
+  <div class="score-col reveal">
+    <div class="score-number">9<span>.5</span></div>
+    <div class="score-denom">Out of ten</div>
+    <div class="score-verdict">Hitchcock made every viewer a voyeur and then made them feel guilty about it.</div>
+  </div>
+  <div class="review-text reveal">
+    <p>The film takes place almost entirely in one apartment and the courtyard visible from its window, and Hitchcock uses that constraint as a formal thesis. We watch what we can see, not necessarily what's real, and we interpret what we watch through what we want to be true. Jeff's immobility is both plot mechanism and metaphor: a man who has spent his career photographing the world rather than inhabiting it, now forced to sit still and watch other people live. The camera almost never leaves his point of view. What Hitchcock understands is that this restriction isn't a limitation. It's the whole argument.</p>
+    <p>Grace Kelly as Lisa is doing something the film occasionally undersells in its own murder-plot momentum. She is the more capable character in nearly every scene — she notices more, risks more, acts when Jeff can only watch — and the film is quietly aware of that. The mystery plot is expertly constructed but it functions more as a delivery system for the film's actual subject: the ethical and emotional weight of watching other people's lives without their knowledge or consent. Jeff's neighbors are not props. The newlyweds, the couple with the dog, the composer working on a song across the courtyard, Miss Lonelyhearts eating alone — the film cares about each of them, and the courtyard becomes a complete world, a cross-section of loneliness and longing that is more honest than anything Jeff photographs professionally.</p>
+    <p>On a first watch you track the murder. On a second watch you stop tracking the murder and start watching the apartments as a portrait of urban solitude in which Jeff is not an observer but a participant who won't admit it. The film's final image knows exactly what it's doing. So did Hitchcock.</p>
+  </div>
+</section>
+
+<div class="divider reveal"><hr></div>
+
+<section class="quote-section reveal">
+  <div class="quote-text">"We've become a race of Peeping Toms."</div>
+  <div class="quote-attr">Stella — Rear Window</div>
+</section>
+
+<section class="rewatch-section">
+  <div class="rewatch-label reveal">Rewatch verdict</div>
+  <div class="reveal"><span class="rewatch-stamp">REWATCH IT</span></div>
+  <div class="rewatch-note reveal">On repeat you stop watching the murder plot and start watching the apartment windows as a complete portrait of loneliness.</div>
+</section>
+
+<footer>
+  <a href="index.html" class="footer-back">← Back to all cuts</a>
+</footer>
+
+<script>
+  window.addEventListener('scroll', () => {
+    const el = document.documentElement;
+    const total = el.scrollHeight - el.clientHeight;
+    document.getElementById('progress').style.width = (total > 0 ? el.scrollTop / total * 100 : 0) + '%';
+    document.getElementById('navScore').classList.toggle('visible', el.scrollTop > window.innerHeight * 0.6);
+  }, { passive:true });
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold:0.1 });
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+</script>
+</body>
+</html>

@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Unreal Unearth - Album Autopsy</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #080408;
+    --bg2: #0d070d;
+    --bg3: #130a13;
+    --accent: #8b2d3a;
+    --accent2: #a83548;
+    --gold: #c06878;
+    --text: #f0e4e8;
+    --muted: #6a3a44;
+    --border: rgba(139,45,58,0.1);
+    --font-display: 'Bebas Neue', sans-serif;
+    --font-serif: 'Playfair Display', serif;
+    --font-body: 'DM Sans', sans-serif;
+  }
+  html { scroll-behavior: smooth; }
+  body { background: var(--bg); color: var(--text); font-family: var(--font-body); font-weight: 300; line-height: 1.7; overflow-x: hidden; }
+  body::before { content:''; position:fixed; inset:0; background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.055'/%3E%3C/svg%3E"); pointer-events:none; z-index:9999; opacity:0.5; }
+  .progress-bar { position:fixed; top:0; left:0; height:2px; background:linear-gradient(90deg, var(--accent), var(--gold)); z-index:200; width:0%; transition: width 0.1s linear; }
+  nav { position:fixed; top:0; left:0; right:0; padding:1.1rem 2.5rem; display:flex; justify-content:space-between; align-items:center; z-index:100; background:linear-gradient(to bottom, rgba(8,4,8,0.95), transparent); }
+  .nav-back { font-family:var(--font-display); letter-spacing:0.25em; font-size:0.7rem; color:var(--muted); text-decoration:none; transition:color 0.2s; }
+  .nav-back:hover { color:var(--accent); }
+  .nav-score { font-family:var(--font-display); font-size:1.1rem; color:var(--accent); opacity:0; transition:opacity 0.4s; }
+  .nav-score.visible { opacity:1; }
+  .hero { min-height:100vh; display:flex; flex-direction:column; justify-content:center; align-items:center; position:relative; overflow:hidden; padding:4rem 2rem; text-align:center; }
+  .hero-bg { position:absolute; inset:0; background: radial-gradient(ellipse 60% 50% at 50% 40%, rgba(139,45,58,0.14) 0%, transparent 65%), radial-gradient(ellipse 35% 35% at 20% 70%, rgba(168,53,72,0.06) 0%, transparent 55%), var(--bg); z-index:0; }
+  .hero-rings { position:absolute; inset:0; z-index:0; overflow:hidden; }
+  .hero-rings::before { content:''; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:900px; height:900px; border-radius:50%; background: radial-gradient(circle at center, transparent 38%, rgba(139,45,58,0.04) 38.5%, transparent 39%), radial-gradient(circle at center, transparent 48%, rgba(139,45,58,0.03) 48.5%, transparent 49%), radial-gradient(circle at center, transparent 58%, rgba(139,45,58,0.02) 58.5%, transparent 59%), radial-gradient(circle at center, transparent 68%, rgba(139,45,58,0.015) 68.5%, transparent 69%); }
+  .hero-content { position:relative; z-index:1; }
+  .autopsy-label { font-family:var(--font-display); letter-spacing:0.4em; font-size:0.72rem; color:var(--accent); text-transform:uppercase; margin-bottom:1.8rem; opacity:0; animation:fadeUp 0.8s ease 0.2s forwards; }
+  .hero-artist { font-family:var(--font-display); font-size:clamp(4rem,16vw,14rem); line-height:0.88; letter-spacing:-0.02em; color:var(--text); opacity:0; animation:fadeUp 0.8s ease 0.4s forwards; }
+  .hero-album { font-family:var(--font-serif); font-style:italic; font-size:clamp(1.2rem,4vw,3.2rem); color:var(--gold); margin-top:0.6rem; opacity:0; animation:fadeUp 0.8s ease 0.6s forwards; line-height:1.25; }
+  .hero-meta { font-family:var(--font-display); letter-spacing:0.3em; font-size:0.85rem; color:var(--muted); margin-top:1.5rem; opacity:0; animation:fadeUp 0.8s ease 0.8s forwards; }
+  .hero-rule { width:1px; height:70px; background:linear-gradient(to bottom, var(--accent), transparent); margin:3rem auto 0; opacity:0; animation:fadeUp 0.8s ease 1s forwards; }
+  .scroll-hint { font-size:0.68rem; letter-spacing:0.35em; color:var(--muted); text-transform:uppercase; margin-top:0.8rem; opacity:0; animation:fadeUp 0.8s ease 1.2s forwards; }
+  .verdict-bar { background:linear-gradient(90deg, var(--accent), #520d1a); padding:1.1rem 2rem; text-align:center; font-size:0.92rem; color:rgba(255,255,255,0.9); font-weight:400; line-height:1.5; }
+  .score-section { background:var(--bg2); border-top:1px solid var(--border); border-bottom:1px solid var(--border); }
+  .score-inner { max-width:920px; margin:0 auto; padding:6rem 2rem; display:grid; grid-template-columns:1fr 1.5fr; gap:5rem; align-items:center; }
+  @media(max-width:640px){.score-inner{grid-template-columns:1fr;gap:2.5rem;}}
+  .score-display { text-align:center; }
+  .score-number { font-family:var(--font-display); font-size:clamp(5.5rem,16vw,11rem); line-height:1; color:var(--text); }
+  .score-number span { color:var(--accent); }
+  .score-label { font-family:var(--font-display); letter-spacing:0.35em; font-size:0.75rem; color:var(--muted); margin-top:0.4rem; }
+  .score-verdict { font-family:var(--font-serif); font-style:italic; font-size:1.3rem; line-height:1.55; margin-bottom:1.5rem; color:var(--text); }
+  .score-defense { font-size:0.88rem; color:var(--muted); line-height:1.85; }
+  .section { max-width:920px; margin:0 auto; padding:6rem 2rem; }
+  .section-label { font-family:var(--font-display); letter-spacing:0.4em; font-size:0.68rem; color:var(--accent); text-transform:uppercase; margin-bottom:1.4rem; }
+  .section-title { font-family:var(--font-serif); font-size:clamp(1.8rem,4.5vw,3.2rem); font-weight:900; line-height:1.1; margin-bottom:2.5rem; }
+  .section-title em { font-style:italic; color:var(--gold); }
+  .pill { padding:0.35rem 0.9rem; border:1px solid var(--border); border-radius:2px; font-size:0.7rem; letter-spacing:0.15em; text-transform:uppercase; font-family:var(--font-display); color:var(--text); background:transparent; transition:all 0.2s; cursor:default; }
+  .pill:hover, .pill.active { border-color:var(--accent); color:var(--accent); background:rgba(139,45,58,0.08); }
+  .theme-pills { display:flex; flex-wrap:wrap; gap:0.45rem; margin:0 0 3rem; }
+  .themes-section { background:var(--bg2); border-top:1px solid var(--border); }
+  .themes-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:1.5px; background:var(--border); border:1px solid var(--border); }
+  .theme-card { background:var(--bg2); padding:2.2rem 1.8rem; transition:background 0.2s; cursor:default; position:relative; overflow:hidden; }
+  .theme-card::before { content:''; position:absolute; top:0; left:0; width:3px; height:0; background:var(--accent); transition:height 0.3s; }
+  .theme-card:hover::before { height:100%; }
+  .theme-card:hover { background:var(--bg3); }
+  .theme-card-icon { font-size:1.8rem; margin-bottom:0.9rem; display:block; }
+  .theme-card-title { font-family:var(--font-serif); font-size:1rem; font-weight:700; margin-bottom:0.6rem; }
+  .theme-card-text { font-size:0.82rem; color:var(--muted); line-height:1.75; }
+  .egg-section { background:var(--bg3); border-top:1px solid var(--border); border-bottom:1px solid var(--border); }
+  .egg-inner { max-width:920px; margin:0 auto; padding:5rem 2rem; }
+  .egg-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:1px; background:var(--border); border:1px solid var(--border); margin-top:2.5rem; }
+  .egg-card { background:var(--bg3); padding:2rem 1.6rem; position:relative; }
+  .egg-card::after { content:'🥚'; position:absolute; top:1.2rem; right:1.4rem; font-size:1rem; opacity:0.4; }
+  .egg-num { font-family:var(--font-display); font-size:2.5rem; line-height:1; color:rgba(139,45,58,0.18); margin-bottom:0.6rem; }
+  .egg-title { font-family:var(--font-serif); font-size:0.95rem; font-weight:700; margin-bottom:0.5rem; }
+  .egg-text { font-size:0.8rem; color:var(--muted); line-height:1.75; }
+  .quote-section { padding:7rem 2rem; text-align:center; position:relative; overflow:hidden; }
+  .quote-bg { position:absolute; inset:0; background:radial-gradient(ellipse 55% 55% at 50% 50%, rgba(139,45,58,0.07) 0%, transparent 70%); }
+  .quote-mark { font-family:var(--font-serif); font-size:7rem; line-height:0; vertical-align:-1.8rem; color:rgba(139,45,58,0.18); margin-right:0.05em; }
+  .quote-text { font-family:var(--font-serif); font-style:italic; font-size:clamp(1.4rem,3.5vw,2.5rem); line-height:1.35; max-width:680px; margin:0 auto; position:relative; z-index:1; }
+  .quote-attr { margin-top:2rem; font-size:0.72rem; letter-spacing:0.3em; text-transform:uppercase; color:var(--muted); font-family:var(--font-display); position:relative; z-index:1; }
+  .tracks-section { background:var(--bg); border-top:1px solid var(--border); }
+  .tracks-inner { max-width:920px; margin:0 auto; padding:6rem 2rem; }
+  .track-item { border-bottom:1px solid var(--border); overflow:hidden; cursor:pointer; transition:background 0.15s; }
+  .track-item:first-of-type { border-top:1px solid var(--border); }
+  .track-item:hover { background:rgba(139,45,58,0.025); }
+  .track-header { display:grid; grid-template-columns:3rem 1fr auto; align-items:center; gap:1.2rem; padding:1.1rem 0; }
+  .track-num { font-family:var(--font-display); font-size:0.75rem; color:var(--muted); letter-spacing:0.1em; }
+  .track-name { font-family:var(--font-serif); font-size:1rem; font-weight:700; }
+  .track-right { display:flex; align-items:center; gap:1.2rem; }
+  .track-score-bar { width:70px; height:3px; background:rgba(255,255,255,0.06); border-radius:2px; overflow:hidden; }
+  .track-score-fill { height:100%; background:linear-gradient(90deg, var(--accent), var(--gold)); transform-origin:left; transform:scaleX(0); transition:transform 0.8s ease; border-radius:2px; }
+  .track-score-num { font-family:var(--font-display); font-size:0.95rem; color:var(--muted); min-width:2.2rem; text-align:right; }
+  .track-expand-icon { font-size:0.55rem; color:var(--muted); transition:transform 0.3s; }
+  .track-item.open .track-expand-icon { transform:rotate(180deg); }
+  .track-body { max-height:0; overflow:hidden; transition:max-height 0.38s ease; }
+  .track-body-inner { padding:0 0 1.4rem 0; margin-left:4.2rem; color:var(--muted); font-size:0.87rem; line-height:1.8; border-left:2px solid var(--accent); padding-left:1.4rem; }
+  .chart-section { background:var(--bg3); border-top:1px solid var(--border); border-bottom:1px solid var(--border); }
+  .chart-inner { max-width:920px; margin:0 auto; padding:6rem 2rem; }
+  .chart-bars { display:flex; flex-direction:column; gap:0.85rem; margin-top:3rem; }
+  .bar-row { display:grid; grid-template-columns:170px 1fr 2.8rem; align-items:center; gap:1rem; }
+  @media(max-width:500px){.bar-row{grid-template-columns:90px 1fr 2.5rem;}}
+  .bar-label { font-size:0.78rem; color:var(--muted); text-align:right; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .bar-track { height:5px; background:rgba(255,255,255,0.05); border-radius:3px; overflow:hidden; }
+  .bar-fill { height:100%; background:linear-gradient(90deg, var(--accent), var(--gold)); transform-origin:left; transform:scaleX(0); transition:transform 0.85s ease; border-radius:3px; }
+  .bar-val { font-family:var(--font-display); font-size:0.88rem; color:var(--text); }
+  .footnote-section { padding:5rem 2rem; text-align:center; border-top:1px solid var(--border); background:var(--bg2); }
+  .footnote-text { font-family:var(--font-serif); font-style:italic; font-size:1rem; color:var(--muted); line-height:1.85; max-width:640px; margin:0 auto; }
+  footer { padding:3.5rem 2rem; text-align:center; border-top:1px solid var(--border); }
+  .footer-sig { font-family:var(--font-serif); font-style:italic; font-size:0.88rem; color:var(--muted); }
+  .footer-brand { font-family:var(--font-display); letter-spacing:0.4em; font-size:0.68rem; color:rgba(255,255,255,0.1); margin-top:1.8rem; }
+  .divider { width:36px; height:1px; background:var(--accent); margin:1.8rem auto; }
+  .back-link { display:inline-block; margin-top:2rem; font-family:var(--font-display); letter-spacing:0.25em; font-size:0.72rem; color:var(--accent); text-decoration:none; border:1px solid var(--accent); padding:0.6rem 1.4rem; transition:all 0.2s; }
+  .back-link:hover { background:var(--accent); color:#fff; }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(28px)} to{opacity:1;transform:translateY(0)} }
+  .reveal { opacity:0; transform:translateY(38px); transition:opacity 0.7s ease, transform 0.7s ease; }
+  .reveal.visible { opacity:1; transform:translateY(0); }
+</style>
+</head>
+<body>
+<div class="progress-bar" id="progress"></div>
+<nav>
+  <a href="index.html" class="nav-back">← All Autopsies</a>
+  <div class="nav-score" id="navScore">8.4 / 10</div>
+</nav>
+
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-rings"></div>
+  <div class="hero-content">
+    <div class="autopsy-label">Album Autopsy · 043</div>
+    <div class="hero-artist">Hozier</div>
+    <div class="hero-album">Unreal Unearth</div>
+    <div class="hero-meta">Island Records · 2023</div>
+    <div class="hero-rule"></div>
+    <div class="scroll-hint">Scroll to dissect</div>
+  </div>
+</section>
+
+<div class="verdict-bar">Dante goes to hell and back. Hozier gives that descent a blues guitar and sixteen tracks. The Inferno structure is not a gimmick - it gives the album a logic that holds its sprawl together. Without it, this is a very good record that goes on too long. With it, it earns every minute.</div>
+
+<section class="score-section">
+  <div class="score-inner">
+    <div class="score-display reveal">
+      <div class="score-number" id="scoreCounter">0<span>.0</span></div>
+      <div class="score-label">Overall Score</div>
+    </div>
+    <div class="reveal">
+      <div class="score-verdict">"Francesca is the song that will outlast this album. Paolo and Francesca, condemned to circle forever for their love - and the argument that this was worth it. Hozier means every word of it."</div>
+      <div class="score-defense">8.4 because the back half from "All Things End" through "First Light" is the strongest sustained sequence of his career, and "Francesca" alone justifies the record. The deduction is for "Who We Are" and "Anything But" - competent, well-produced, and less necessary than everything around them. At 16 tracks and over an hour, the concept tests its structural integrity in two places. It holds everywhere else. The Dante framework succeeds because Hozier understands it as more than a mood board - there's a genuine argument being made track by track.</div>
+    </div>
+  </div>
+</section>
+
+<div class="themes-section">
+  <div class="section">
+    <div class="section-label reveal">Central Thesis</div>
+    <div class="section-title reveal">What <em>This Album Is Really About</em></div>
+    <div class="theme-pills reveal">
+      <span class="pill active">Descent and Return</span>
+      <span class="pill">Love Against Hell</span>
+      <span class="pill">Irish Identity</span>
+      <span class="pill">Climate Grief</span>
+    </div>
+    <div class="themes-grid reveal">
+      <div class="theme-card">
+        <span class="theme-card-icon">🌀</span>
+        <div class="theme-card-title">Descent and Return</div>
+        <div class="theme-card-text">The album maps nine emotional and thematic circles corresponding to Dante's nine circles of hell. It descends through grief, political fury, and ecological dread before returning - in "First Light" - to something like hope. Hozier spent over a year studying the Inferno before writing. The structure isn't applied; it's built in. The oldest story there is: you go down to come back up.</div>
+      </div>
+      <div class="theme-card">
+        <span class="theme-card-icon">❤️‍🔥</span>
+        <div class="theme-card-title">Love Against Hell</div>
+        <div class="theme-card-text">Francesca and Paolo are condemned for loving. The album's argument - made most explicitly in "Francesca" - is that being condemned for love is still preferable to not having loved. This is a romantic position stated with genuine conviction, not irony. Hozier means it. The condemned soul in Dante's second circle is not being punished for loving wrong. She is being punished for loving at all. He thinks this is worth it.</div>
+      </div>
+      <div class="theme-card">
+        <span class="theme-card-icon">🍀</span>
+        <div class="theme-card-title">Irish Identity</div>
+        <div class="theme-card-text">"Butchered Tongue" takes on the suppression of the Irish language directly. He sings in Irish (Gaeilge) for the first time in his career. "To Someone From a Warm Climate" also includes Irish-language sections. The choice is explicitly political - the Irish language was systematically suppressed for centuries; reclaiming it in a major-label album is an act with historical weight. He doesn't explain the Irish sections. He doesn't need to.</div>
+      </div>
+      <div class="theme-card">
+        <span class="theme-card-icon">🌍</span>
+        <div class="theme-card-title">Climate Grief</div>
+        <div class="theme-card-text">"Eat Your Young" is the most politically direct thing Hozier has made - generational debt, late capitalism, consumption of the future by the present. Dante would recognize the circle. The album frames ecological devastation as a form of damnation: not metaphorically but structurally. We have made a hell. We are living in it. The descent is not fictional.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<section class="quote-section">
+  <div class="quote-bg"></div>
+  <div class="quote-text reveal"><span class="quote-mark">"</span>My love was given, my love was taken, I was not wasted, I was not forsaken.</div>
+  <div class="quote-attr reveal">Hozier · Francesca · 2023</div>
+</section>
+
+<section class="egg-section">
+  <div class="egg-inner">
+    <div class="section-label reveal">Rare Frequencies</div>
+    <div class="section-title reveal">Things You <em>Didn't Know</em></div>
+    <div class="egg-grid reveal">
+      <div class="egg-card">
+        <div class="egg-num">01</div>
+        <div class="egg-title">Francesca da Rimini</div>
+        <div class="egg-text">Francesca appears in Canto V of Inferno - the second circle, reserved for the lustful. She and Paolo Malatesta fell in love while reading a book about Lancelot and Guinevere. They were caught by her husband (Paolo's brother) and killed. In Dante's hell, they circle together forever in a windstorm, unable to stop. Hozier's Francesca argues this was worth it. Dante's Francesca is too busy weeping to agree.</div>
+      </div>
+      <div class="egg-card">
+        <div class="egg-num">02</div>
+        <div class="egg-title">Irish in the Studio</div>
+        <div class="egg-text">Hozier worked with Irish-language consultants to ensure the Gaeilge sections in "Butchered Tongue" and "To Someone From a Warm Climate" were accurate. The Irish language was banned in many official contexts under British rule; its suppression was policy. Writing and recording in Irish on a major-label album with global distribution is a political act disguised as a musical one. Both things are true simultaneously.</div>
+      </div>
+      <div class="egg-card">
+        <div class="egg-num">03</div>
+        <div class="egg-title">De Selby</div>
+        <div class="egg-text">The De Selby who opens the album (Parts 1 and 2) is a character from Flann O'Brien's Irish comic novel The Third Policeman - a fictional philosopher whose theories about time, light, and reality are all deeply wrong and elaborately reasoned. Using a Flann O'Brien character as the album's doorway is a specifically Irish literary move. O'Brien died in 1966. He would have hated the guitar sounds. He might have liked the concept.</div>
+      </div>
+      <div class="egg-card">
+        <div class="egg-num">04</div>
+        <div class="egg-title">The Psychopomp</div>
+        <div class="egg-text">A psychopomp is the guide of souls between the world of the living and the dead - the figure who navigates the transition. In Dante, this role is Virgil, who guides Dante through Hell. In mythology, it's Hermes, Charon, Anubis. "Abstract (Psychopomp)" places this figure at the album's transition point - the moment the descent turns toward return. In the album's logic, love is the psychopomp. It's the thing that leads you back out.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="tracks-section">
+  <div class="tracks-inner">
+    <div class="section-label reveal">Track by Track</div>
+    <div class="section-title reveal">The <em>Dissection</em></div>
+    <div id="trackList" class="reveal">
+
+      <div class="track-item">
+        <div class="track-header"><span class="track-num">02</span><span class="track-name">De Selby (Part 2)</span><div class="track-right"><div class="track-score-bar"><div class="track-score-fill" data-score="9.0"></div></div><span class="track-score-num">9.0</span><span class="track-expand-icon">▼</span></div></div>
+        <div class="track-body"><div class="track-body-inner">The album finds its voice here. The De Selby sequence - Part 1 setting the approach, Part 2 arriving - builds from acoustic to full band with Hozier's voice at its most controlled. The Flann O'Brien reference is the album telling you what kind of thing it is before it tells you what it's about. Very Irish move. Very effective.</div></div>
+      </div>
+
+      <div class="track-item">
+        <div class="track-header"><span class="track-num">04</span><span class="track-name">Francesca</span><div class="track-right"><div class="track-score-bar"><div class="track-score-fill" data-score="9.5"></div></div><span class="track-score-num">9.5</span><span class="track-expand-icon">▼</span></div></div>
+        <div class="track-body"><div class="track-body-inner">The album's centerpiece and its best song. Paolo and Francesca, condemned to circle forever in Dante's second circle of hell, and the argument that this is better than not having loved. "My love was given, my love was taken, I was not wasted, I was not forsaken." He means every word of that. The production gives the sentiment room to breathe without drowning it. This is the song that outlasts the album.</div></div>
+      </div>
+
+      <div class="track-item">
+        <div class="track-header"><span class="track-num">06</span><span class="track-name">Eat Your Young</span><div class="track-right"><div class="track-score-bar"><div class="track-score-fill" data-score="9.2"></div></div><span class="track-score-num">9.2</span><span class="track-expand-icon">▼</span></div></div>
+        <div class="track-body"><div class="track-body-inner">The most immediately gripping track and the most directly political. The groove is borrowed from nowhere and sounds like itself. Generational debt, consumption, the economic logic that treats the future as an asset to be liquidated. Hozier is furious in the specific, pointed way that blues music has always been furious - not performatively, just accurately.</div></div>
+      </div>
+
+      <div class="track-item">
+        <div class="track-header"><span class="track-num">14</span><span class="track-name">Abstract (Psychopomp)</span><div class="track-right"><div class="track-score-bar"><div class="track-score-fill" data-score="8.8"></div></div><span class="track-score-num">8.8</span><span class="track-expand-icon">▼</span></div></div>
+        <div class="track-body"><div class="track-body-inner">The transition track - where the descent turns toward return. The psychopomp guides souls between worlds. In the album's structure, this is Virgil's moment: the guide who has been with you through everything, now pointing toward the exit. The production opens up here in a way that signals something changing. The hell section is ending. The light is coming.</div></div>
+      </div>
+
+      <div class="track-item">
+        <div class="track-header"><span class="track-num">16</span><span class="track-name">First Light</span><div class="track-right"><div class="track-score-bar"><div class="track-score-fill" data-score="9.1"></div></div><span class="track-score-num">9.1</span><span class="track-expand-icon">▼</span></div></div>
+        <div class="track-body"><div class="track-body-inner">The arrival. The album closes where Dante's journey closes - with light, after the dark. It doesn't claim everything is fine. It claims that the journey was real and the return is possible. The album earns this ending because it didn't skip the middle. You have to go through the circles to get to "First Light." It means something because of everything before it.</div></div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<section class="chart-section">
+  <div class="chart-inner">
+    <div class="section-label reveal">Score Breakdown</div>
+    <div class="section-title reveal">Every Track, <em>Ranked</em></div>
+    <div class="chart-bars reveal" id="chartBars">
+      <div class="bar-row"><div class="bar-label">Francesca</div><div class="bar-track"><div class="bar-fill" data-score="9.5"></div></div><div class="bar-val">9.5</div></div>
+      <div class="bar-row"><div class="bar-label">Eat Your Young</div><div class="bar-track"><div class="bar-fill" data-score="9.2"></div></div><div class="bar-val">9.2</div></div>
+      <div class="bar-row"><div class="bar-label">First Light</div><div class="bar-track"><div class="bar-fill" data-score="9.1"></div></div><div class="bar-val">9.1</div></div>
+      <div class="bar-row"><div class="bar-label">De Selby (Part 2)</div><div class="bar-track"><div class="bar-fill" data-score="9.0"></div></div><div class="bar-val">9.0</div></div>
+      <div class="bar-row"><div class="bar-label">Abstract (Psychopomp)</div><div class="bar-track"><div class="bar-fill" data-score="8.8"></div></div><div class="bar-val">8.8</div></div>
+      <div class="bar-row"><div class="bar-label">I, Carrion (Icarian)</div><div class="bar-track"><div class="bar-fill" data-score="8.7"></div></div><div class="bar-val">8.7</div></div>
+      <div class="bar-row"><div class="bar-label">Butchered Tongue</div><div class="bar-track"><div class="bar-fill" data-score="8.6"></div></div><div class="bar-val">8.6</div></div>
+      <div class="bar-row"><div class="bar-label">All Things End</div><div class="bar-track"><div class="bar-fill" data-score="8.5"></div></div><div class="bar-val">8.5</div></div>
+      <div class="bar-row"><div class="bar-label">Son of Nyx</div><div class="bar-track"><div class="bar-fill" data-score="8.4"></div></div><div class="bar-val">8.4</div></div>
+      <div class="bar-row"><div class="bar-label">De Selby (Part 1)</div><div class="bar-track"><div class="bar-fill" data-score="8.3"></div></div><div class="bar-val">8.3</div></div>
+      <div class="bar-row"><div class="bar-label">First Time</div><div class="bar-track"><div class="bar-fill" data-score="8.2"></div></div><div class="bar-val">8.2</div></div>
+      <div class="bar-row"><div class="bar-label">Damage Gets Done</div><div class="bar-track"><div class="bar-fill" data-score="8.1"></div></div><div class="bar-val">8.1</div></div>
+      <div class="bar-row"><div class="bar-label">To Someone From...</div><div class="bar-track"><div class="bar-fill" data-score="8.0"></div></div><div class="bar-val">8.0</div></div>
+      <div class="bar-row"><div class="bar-label">Unknown / Nth</div><div class="bar-track"><div class="bar-fill" data-score="7.9"></div></div><div class="bar-val">7.9</div></div>
+      <div class="bar-row"><div class="bar-label">Who We Are</div><div class="bar-track"><div class="bar-fill" data-score="7.5"></div></div><div class="bar-val">7.5</div></div>
+      <div class="bar-row"><div class="bar-label">Anything But</div><div class="bar-track"><div class="bar-fill" data-score="7.3"></div></div><div class="bar-val">7.3</div></div>
+    </div>
+  </div>
+</section>
+
+<div class="footnote-section">
+  <div class="section-label reveal" style="text-align:center;">Footnote</div>
+  <div class="footnote-text reveal">Hozier spent over a year studying Dante's Inferno before writing this album. That shows in the architecture - he understood the Inferno not as a horror story but as a love story. Dante goes to hell because Beatrice sent Virgil to guide him. The whole descent is motivated by love. The whole return is too. Hozier understood this and built an album around the same logic. When he gets to "First Light," you believe it because you went through the dark with him.</div>
+</div>
+
+<footer>
+  <div class="footer-sig reveal">Album Autopsy - A structured dissection of records that matter.</div>
+  <div class="divider"></div>
+  <a href="index.html" class="back-link reveal">← Back to All Autopsies</a>
+  <div class="footer-brand">@MyParentsDidntLeaveForThis</div>
+</footer>
+
+<script>
+  window.addEventListener('scroll', () => {
+    const p = (window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100;
+    document.getElementById('progress').style.width = p + '%';
+  });
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (!e.isIntersecting) return;
+      e.target.classList.add('visible');
+      if (e.target.id === 'scoreCounter') { animateScore(0, 8.4, 1600); document.getElementById('navScore').classList.add('visible'); }
+    });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+  if(document.getElementById('scoreCounter')) observer.observe(document.getElementById('scoreCounter'));
+  const tlObs = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (!e.isIntersecting) return; e.target.querySelectorAll('.track-score-fill').forEach((f,i) => { setTimeout(() => { f.style.transform = `scaleX(${parseFloat(f.dataset.score)/10})`; }, i * 55); }); tlObs.unobserve(e.target); });
+  }, { threshold: 0.08 });
+  const tl = document.getElementById('trackList'); if(tl) tlObs.observe(tl);
+  const chObs = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (!e.isIntersecting) return; e.target.querySelectorAll('.bar-fill').forEach((f,i) => { setTimeout(() => { const s = parseFloat(f.dataset.score); f.style.transform = `scaleX(${Math.max(0,(s-6)/4)})`; }, i * 70); }); chObs.unobserve(e.target); });
+  }, { threshold: 0.08 });
+  const cb = document.getElementById('chartBars'); if(cb) chObs.observe(cb);
+  function animateScore(from, to, duration) {
+    const el = document.getElementById('scoreCounter'); if(!el) return;
+    const start = performance.now();
+    (function tick(now) { const p = Math.min((now - start) / duration, 1); const ease = 1 - Math.pow(1 - p, 3); const val = from + (to - from) * ease; const int = Math.floor(val); const dec = Math.round((val - int) * 10); el.innerHTML = int + '<span>.' + dec + '</span>'; if(p < 1) requestAnimationFrame(tick); })(start);
+  }
+  document.querySelectorAll('.track-item').forEach(item => {
+    item.querySelector('.track-header').addEventListener('click', () => { const body = item.querySelector('.track-body'); const open = item.classList.toggle('open'); body.style.maxHeight = open ? body.scrollHeight + 'px' : '0'; });
+  });
+  document.querySelectorAll('.pill').forEach(pill => {
+    pill.addEventListener('click', () => { document.querySelectorAll('.pill').forEach(p => p.classList.remove('active')); pill.classList.add('active'); });
+  });
+</script>
+</body>
+</html>

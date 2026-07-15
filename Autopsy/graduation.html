@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Album Autopsy · Graduation – Kanye West</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --accent: #2f9bd6;
+      --accent-light: #57b8e8;
+      --accent-dim: rgba(47,155,214,0.15);
+      --bg: #050a0d;
+      --surface: #0c161c;
+      --surface2: #12212a;
+      --text: #eef6fa;
+      --muted: #6f93a5;
+      --border: rgba(47,155,214,0.2);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; font-weight: 300; line-height: 1.7; }
+    .progress-bar { position: fixed; top: 0; left: 0; height: 3px; background: var(--accent); width: 0%; z-index: 1000; transition: width 0.1s linear; }
+    nav { position: fixed; top: 0; left: 0; right: 0; z-index: 999; display: flex; justify-content: space-between; align-items: center; padding: 1rem 2rem; background: rgba(5,10,13,0.85); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); }
+    .nav-back { color: var(--muted); text-decoration: none; font-size: 0.85rem; letter-spacing: 0.05em; transition: color 0.2s; }
+    .nav-back:hover { color: var(--accent-light); }
+    .nav-score { font-family: 'Bebas Neue', sans-serif; font-size: 1.4rem; color: var(--accent); letter-spacing: 0.08em; }
+    .hero { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; padding: 8rem 2rem 4rem; max-width: 900px; margin: 0 auto; }
+    .autopsy-label { font-size: 0.75rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); margin-bottom: 1.5rem; }
+    .hero-artist { font-family: 'Bebas Neue', sans-serif; font-size: clamp(3rem,10vw,7rem); line-height: 0.9; color: var(--accent-light); letter-spacing: 0.03em; }
+    .hero-album { font-family: 'Playfair Display', serif; font-size: clamp(2rem,6vw,4.5rem); font-style: italic; color: var(--text); margin-top: 0.3rem; }
+    .hero-meta { margin-top: 1.5rem; color: var(--muted); font-size: 0.85rem; letter-spacing: 0.12em; text-transform: uppercase; }
+    .verdict-bar { background: var(--accent); color: #fff; padding: 1.2rem 2rem; font-family: 'Bebas Neue', sans-serif; font-size: clamp(1.1rem,3vw,1.6rem); letter-spacing: 0.12em; text-align: center; }
+    .score-section { max-width: 900px; margin: 5rem auto; padding: 0 2rem; display: grid; grid-template-columns: auto 1fr; gap: 3rem; align-items: start; }
+    .score-number { font-family: 'Bebas Neue', sans-serif; font-size: clamp(5rem,15vw,10rem); line-height: 1; color: var(--accent); }
+    .score-number span { font-size: 0.5em; color: var(--muted); }
+    .score-verdict { font-family: 'Playfair Display', serif; font-size: 1.3rem; color: var(--text); margin-bottom: 1rem; }
+    .score-defense { color: var(--muted); font-size: 0.95rem; line-height: 1.8; }
+    .themes-section { max-width: 900px; margin: 4rem auto; padding: 0 2rem; }
+    .section-label { font-size: 0.7rem; letter-spacing: 0.25em; text-transform: uppercase; color: var(--muted); margin-bottom: 2rem; border-bottom: 1px solid var(--border); padding-bottom: 0.75rem; }
+    .themes-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px,1fr)); gap: 1.5rem; }
+    .theme-card { background: var(--surface); border: 1px solid var(--border); border-top: 3px solid var(--accent); padding: 1.5rem; opacity: 0; transform: translateY(20px); transition: opacity 0.5s, transform 0.5s; }
+    .theme-card.visible { opacity: 1; transform: none; }
+    .theme-icon { font-size: 1.5rem; margin-bottom: 0.75rem; }
+    .theme-title { font-family: 'Playfair Display', serif; font-size: 1rem; color: var(--text); margin-bottom: 0.5rem; }
+    .theme-body { font-size: 0.85rem; color: var(--muted); line-height: 1.7; }
+    .quote-section { background: var(--surface); border-left: 4px solid var(--accent); margin: 4rem 0; padding: 3rem 2rem; text-align: center; }
+    .quote-text { font-family: 'Playfair Display', serif; font-size: clamp(1.2rem,3vw,1.8rem); font-style: italic; color: var(--text); max-width: 700px; margin: 0 auto 1rem; }
+    .quote-attr { font-size: 0.8rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); }
+    .egg-section { max-width: 900px; margin: 4rem auto; padding: 0 2rem; }
+    .egg-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px,1fr)); gap: 1.5rem; }
+    .egg-card { background: var(--surface); border: 1px solid var(--border); padding: 1.5rem; position: relative; overflow: hidden; opacity: 0; transform: translateY(20px); transition: opacity 0.5s, transform 0.5s; }
+    .egg-card.visible { opacity: 1; transform: none; }
+    .egg-card::before { content: '🥚'; position: absolute; top: 0.75rem; right: 1rem; font-size: 1.2rem; opacity: 0.4; }
+    .egg-label { font-size: 0.7rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent-light); margin-bottom: 0.5rem; }
+    .egg-title { font-family: 'Playfair Display', serif; font-size: 1rem; color: var(--text); margin-bottom: 0.5rem; }
+    .egg-body { font-size: 0.85rem; color: var(--muted); line-height: 1.7; }
+    .tracks-section { max-width: 900px; margin: 4rem auto; padding: 0 2rem; }
+    .track-item { border-bottom: 1px solid var(--border); }
+    .track-header { display: flex; justify-content: space-between; align-items: center; padding: 1.2rem 0; cursor: pointer; gap: 1rem; }
+    .track-header:hover .track-name { color: var(--accent-light); }
+    .track-name { font-family: 'Playfair Display', serif; font-size: 1rem; color: var(--text); transition: color 0.2s; }
+    .track-score-badge { font-family: 'Bebas Neue', sans-serif; font-size: 1.1rem; color: var(--accent); letter-spacing: 0.05em; flex-shrink: 0; }
+    .track-body { max-height: 0; overflow: hidden; transition: max-height 0.4s ease; }
+    .track-body-inner { padding: 0 0 1.2rem; font-size: 0.9rem; color: var(--muted); line-height: 1.8; }
+    .track-item.open .track-body { max-height: 300px; }
+    .chart-section { max-width: 900px; margin: 4rem auto; padding: 0 2rem; }
+    .chart-bars { display: flex; flex-direction: column; gap: 1rem; }
+    .bar-row { display: grid; grid-template-columns: 180px 1fr 3rem; align-items: center; gap: 1rem; }
+    .bar-label { font-size: 0.8rem; color: var(--muted); text-align: right; }
+    .bar-track { height: 8px; background: var(--surface2); border-radius: 4px; overflow: hidden; }
+    .bar-fill { height: 100%; background: var(--accent); border-radius: 4px; transform-origin: left; transform: scaleX(0); transition: transform 1s cubic-bezier(0.4,0,0.2,1); }
+    .bar-val { font-family: 'Bebas Neue', sans-serif; font-size: 0.95rem; color: var(--accent); }
+    .footnote-section { max-width: 900px; margin: 4rem auto; padding: 2rem; background: var(--surface); border: 1px solid var(--border); font-size: 0.85rem; color: var(--muted); line-height: 1.8; font-style: italic; }
+    footer { text-align: center; padding: 3rem 2rem; border-top: 1px solid var(--border); margin-top: 4rem; }
+    .back-link { color: var(--muted); text-decoration: none; font-size: 0.85rem; letter-spacing: 0.1em; transition: color 0.2s; }
+    .back-link:hover { color: var(--accent-light); }
+  </style>
+</head>
+<body>
+<div class="progress-bar" id="progress"></div>
+<nav>
+  <a href="index.html" class="nav-back">← All Autopsies</a>
+  <div class="nav-score" id="navScore">9.2 / 10</div>
+</nav>
+<section class="hero">
+  <div class="autopsy-label">Album Autopsy · 070</div>
+  <div class="hero-artist">Kanye West</div>
+  <div class="hero-album">Graduation</div>
+  <div class="hero-meta">Roc-A-Fella · Def Jam · 2007 · Hip-Hop / Pop-Rap</div>
+</section>
+<div class="verdict-bar">The producer who built his name on soul samples decided he wanted to fill stadiums instead - and rebuilt his whole sound to do it</div>
+<section class="score-section">
+  <div class="score-number" id="scoreCounter">0<span>.0</span></div>
+  <div>
+    <div class="score-verdict">Kanye spent a year opening stadiums for U2 and the Rolling Stones, came home, and decided rap could hold that much space too. He tore out the chipmunk soul, brought in synthesizers and Daft Punk, cut the skits, and made thirteen songs built to be heard by fifty thousand people at once. Then he went and beat 50 Cent with it.</div>
+    <div class="score-defense">Graduation is the sound of an artist rejecting the thing that made him famous while he was still famous for it. The College Dropout and Late Registration were built from soul samples pitched into something warm and familiar. Graduation buries those same instincts under layered synths, Euro-disco basslines, and a Daft Punk hook, because West decided the genre needed a record that could compete with arena rock on its own terms. The gamble mostly pays off. "Stronger," "Flashing Lights," and "Can't Tell Me Nothing" are as good as anything he ever made, and the album's ambivalence about fame, wanting it, resenting it, being changed by it, gives the bigger songs real weight instead of empty triumph. Where it loses half a point is "Drunk and Hot Girls" and "Good Night," two tracks that sound like a producer testing ideas rather than finishing them. It came out September 11, 2007, the same day as 50 Cent's Curtis, in a release-date standoff both labels turned into a referendum on where hip-hop was headed. Graduation sold 957,000 copies in a week. Curtis sold 691,000. The gangsta-rap era didn't end that day, but everyone agreed something had shifted.</div>
+  </div>
+</section>
+<div class="themes-section">
+  <div class="section-label">Recurring Themes</div>
+  <div class="themes-grid">
+    <div class="theme-card">
+      <div class="theme-icon">🎤</div>
+      <div class="theme-title">Built for Stadiums, Not Speakers</div>
+      <div class="theme-body">West spent 2006 opening for U2 and the Rolling Stones and watched Bono command fifty thousand people with a handful of words. He came home wanting to write rap that worked the same way: fewer syllables, louder hooks, songs meant to be shouted back by a crowd instead of studied on headphones.</div>
+    </div>
+    <div class="theme-card">
+      <div class="theme-icon">🎛️</div>
+      <div class="theme-title">A Producer Abandons His Own Signature</div>
+      <div class="theme-body">Chipmunk soul made him famous. Graduation buries it under synthesizers, house beats, and Euro-disco rhythm, because West decided the sound that built his career was also the thing boxing him in. Reinventing your own formula while it's still working is the harder trick.</div>
+    </div>
+    <div class="theme-card">
+      <div class="theme-icon">💸</div>
+      <div class="theme-title">Fame Without a Clean Feeling About It</div>
+      <div class="theme-body">"Can't Tell Me Nothing" and "Flashing Lights" both circle the same idea: the money and attention arrived, and neither fixed anything underneath. The album is confident on the surface and uneasy right below it, which is the more honest way to write about getting everything you asked for.</div>
+    </div>
+    <div class="theme-card">
+      <div class="theme-icon">🌆</div>
+      <div class="theme-title">Chicago as the Person You Left</div>
+      <div class="theme-body">"Homecoming" turns the city into an ex-girlfriend named Windy, the guilt of leaving her for the dream, the awareness he can't come back the same person who left. It's the one moment on the album where the stadium ambition drops and something smaller and truer comes through.</div>
+    </div>
+  </div>
+</div>
+<section class="quote-section">
+  <div class="quote-text">"N-now that, that don't kill me, can only make me stronger."</div>
+  <div class="quote-attr">Stronger</div>
+</section>
+<section class="egg-section">
+  <div class="section-label">Easter Eggs &amp; Annotations</div>
+  <div class="egg-grid">
+    <div class="egg-card">
+      <div class="egg-label">The Title Dispute</div>
+      <div class="egg-title">Chris Brown Gave Up the Name</div>
+      <div class="egg-body">Chris Brown planned to call his second album Graduation, set for release the same year. When he found out Kanye had claimed the title for his third album, Brown backed off and renamed his record Exclusive instead. Nobody remembers Brown's version of this story because his album isn't the one people are still writing about.</div>
+    </div>
+    <div class="egg-card">
+      <div class="egg-label">The Obsession</div>
+      <div class="egg-title">Seventy-Five Mixes of One Song</div>
+      <div class="egg-body">West mixed "Stronger" with eight different audio engineers and eleven mix engineers around the world, recording over fifty versions because he couldn't get the kick drum right. He eventually brought in Timbaland to redo the drum programming after deciding his own version still wasn't hitting as hard as Timbaland's "The Way I Are."</div>
+    </div>
+    <div class="egg-card">
+      <div class="egg-label">The Long Way Back</div>
+      <div class="egg-title">Homecoming Started as a Demo in 2001</div>
+      <div class="egg-body">"Homecoming" began as "Home (Windy)," a track with John Legend on the hook that leaked before The College Dropout even came out. Years later, Kanye and Chris Martin jammed together at Abbey Road Studios by coincidence, Martin rewrote the lyrics, and the song got a second life six years after its first draft.</div>
+    </div>
+    <div class="egg-card">
+      <div class="egg-label">The Standoff</div>
+      <div class="egg-title">50 Cent Said He'd Quit If He Lost</div>
+      <div class="egg-body">Before release, 50 Cent told SOHH he'd retire as a solo artist if Curtis sold less than Graduation. He walked it back once his contract with Interscope made that promise inconvenient. Graduation still outsold Curtis by 266,000 copies in week one, and 50 Cent, to his credit, congratulated Kanye publicly anyway.</div>
+    </div>
+  </div>
+</section>
+<section class="tracks-section">
+  <div class="section-label">Track-by-Track</div>
+  <div class="track-item">
+    <div class="track-header"><div class="track-name">Stronger</div><div class="track-score-badge" data-score="9.8">9.8</div></div>
+    <div class="track-body"><div class="track-body-inner">Built on Daft Punk's "Harder, Better, Faster, Stronger," this is the moment Graduation announces its whole thesis: rap can sound like this, this big, this electronic, and still be rap. Kanye rewrote it dozens of times chasing a kick drum that felt right. The obsession shows. It's the most physically satisfying song he'd made to that point.</div></div>
+  </div>
+  <div class="track-item">
+    <div class="track-header"><div class="track-name">Flashing Lights</div><div class="track-score-badge" data-score="9.7">9.7</div></div>
+    <div class="track-body"><div class="track-body-inner">Rising strings, a Connie Mitchell hook, and Dwele's chorus turn a song about a relationship curdling under fame into something operatic. West called it the coolest song on the album and pulled it as the fourth single instead of "I Wonder." He was right both times. It's the best pure production on the record.</div></div>
+  </div>
+  <div class="track-item">
+    <div class="track-header"><div class="track-name">Can't Tell Me Nothing</div><div class="track-score-badge" data-score="9.5">9.5</div></div>
+    <div class="track-body"><div class="track-body-inner">The lead single and the album's most direct statement of the theme: money doesn't quiet anything, it just gives the noise better acoustics. The hook is a shrug. The verses are a confession. West named the free mixtape after this song months before the album dropped, which tells you how much weight he put on it.</div></div>
+  </div>
+  <div class="track-item">
+    <div class="track-header"><div class="track-name">Homecoming</div><div class="track-score-badge" data-score="9.0">9.0</div></div>
+    <div class="track-body"><div class="track-body-inner">Chris Martin's piano and hook turn Chicago into an ex he can't stop writing about. The extended Windy City metaphor could read as gimmicky in worse hands. Here it lands because West sounds genuinely guilty rather than clever, which is rarer on this album than the stadium songs let on.</div></div>
+  </div>
+  <div class="track-item">
+    <div class="track-header"><div class="track-name">Big Brother</div><div class="track-score-badge" data-score="9.1">9.1</div></div>
+    <div class="track-body"><div class="track-body-inner">The only track on the album Kanye didn't produce himself, and the most emotionally naked thing here. A direct letter to Jay-Z about admiration curdling into resentment and back again. Jay-Z reportedly got emotional hearing it for the first time. Within a few years, the sibling rivalry described in the lyrics stopped being a metaphor.</div></div>
+  </div>
+</section>
+<section class="chart-section">
+  <div class="section-label">Score Chart</div>
+  <div class="chart-bars">
+    <div class="bar-row"><div class="bar-label">Stronger</div><div class="bar-track"><div class="bar-fill" data-score="9.8"></div></div><div class="bar-val">9.8</div></div>
+    <div class="bar-row"><div class="bar-label">Flashing Lights</div><div class="bar-track"><div class="bar-fill" data-score="9.7"></div></div><div class="bar-val">9.7</div></div>
+    <div class="bar-row"><div class="bar-label">Can't Tell Me Nothing</div><div class="bar-track"><div class="bar-fill" data-score="9.5"></div></div><div class="bar-val">9.5</div></div>
+    <div class="bar-row"><div class="bar-label">Big Brother</div><div class="bar-track"><div class="bar-fill" data-score="9.1"></div></div><div class="bar-val">9.1</div></div>
+    <div class="bar-row"><div class="bar-label">Homecoming</div><div class="bar-track"><div class="bar-fill" data-score="9.0"></div></div><div class="bar-val">9.0</div></div>
+    <div class="bar-row"><div class="bar-label">I Wonder</div><div class="bar-track"><div class="bar-fill" data-score="8.9"></div></div><div class="bar-val">8.9</div></div>
+    <div class="bar-row"><div class="bar-label">Barry Bonds</div><div class="bar-track"><div class="bar-fill" data-score="8.8"></div></div><div class="bar-val">8.8</div></div>
+    <div class="bar-row"><div class="bar-label">Good Life</div><div class="bar-track"><div class="bar-fill" data-score="8.6"></div></div><div class="bar-val">8.6</div></div>
+    <div class="bar-row"><div class="bar-label">Champion</div><div class="bar-track"><div class="bar-fill" data-score="8.3"></div></div><div class="bar-val">8.3</div></div>
+    <div class="bar-row"><div class="bar-label">Good Morning</div><div class="bar-track"><div class="bar-fill" data-score="8.0"></div></div><div class="bar-val">8.0</div></div>
+  </div>
+</section>
+<div class="footnote-section">
+  Less than two months after Graduation came out, Kanye's mother Donda West died from complications following surgery. His engagement to Alexis Phifer ended around the same time. Neither had happened yet when this album was recorded, but listen again and the melancholy underneath the confidence starts to sound less like a mood and more like a warning. The stadium ambition here is real and the record earns it. It's also the last album where Kanye sounds like he still believes success will fix the thing that's actually wrong. 808s & Heartbreak, the record he made right after, is what happens when he stops believing that.
+</div>
+<footer><a href="index.html" class="back-link">← Back to All Autopsies</a></footer>
+<script>
+  window.addEventListener('scroll', () => {
+    const d = document.documentElement;
+    document.getElementById('progress').style.width = (d.scrollTop / (d.scrollHeight - d.clientHeight)) * 100 + '%';
+  });
+  function animateScore(from, to, duration) {
+    const el = document.getElementById('scoreCounter');
+    const start = performance.now();
+    function step(now) {
+      const t = Math.min((now - start) / duration, 1);
+      const ease = 1 - Math.pow(1 - t, 3);
+      const val = from + (to - from) * ease;
+      el.innerHTML = Math.floor(val) + '<span>.' + Math.round((val - Math.floor(val)) * 10) + '</span>';
+      if (t < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (!e.isIntersecting) return;
+      const el = e.target;
+      if (el.id === 'scoreCounter') { animateScore(0, 9.2, 1600); io.unobserve(el); }
+      if (el.classList.contains('theme-card') || el.classList.contains('egg-card')) { el.classList.add('visible'); io.unobserve(el); }
+      if (el.classList.contains('bar-fill')) { el.style.transform = 'scaleX(' + Math.max(0, (parseFloat(el.dataset.score) - 6) / 4) + ')'; io.unobserve(el); }
+    });
+  }, { threshold: 0.15 });
+  io.observe(document.getElementById('scoreCounter'));
+  document.querySelectorAll('.theme-card, .egg-card, .bar-fill').forEach(el => io.observe(el));
+  document.querySelectorAll('.track-header').forEach(h => h.addEventListener('click', () => h.closest('.track-item').classList.toggle('open')));
+</script>
+</body>
+</html>

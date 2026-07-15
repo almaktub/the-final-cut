@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Thriller - Album Autopsy</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #060408;
+    --bg2: #0a060e;
+    --bg3: #0f0814;
+    --accent: #c2410c;
+    --accent2: #ea580c;
+    --gold: #fbbf24;
+    --text: #f5f0f8;
+    --muted: #7a6080;
+    --border: rgba(194,65,12,0.12);
+    --font-display: 'Bebas Neue', sans-serif;
+    --font-serif: 'Playfair Display', serif;
+    --font-body: 'DM Sans', sans-serif;
+  }
+  html { scroll-behavior: smooth; }
+  body { background: var(--bg); color: var(--text); font-family: var(--font-body); font-weight: 300; line-height: 1.7; overflow-x: hidden; }
+  body::before { content:''; position:fixed; inset:0; background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.055'/%3E%3C/svg%3E"); pointer-events:none; z-index:9999; opacity:0.5; }
+  .progress-bar { position:fixed; top:0; left:0; height:2px; background:linear-gradient(90deg, var(--accent), var(--gold)); z-index:200; width:0%; transition: width 0.1s linear; }
+  nav { position:fixed; top:0; left:0; right:0; padding:1.1rem 2.5rem; display:flex; justify-content:space-between; align-items:center; z-index:100; background:linear-gradient(to bottom, rgba(6,4,8,0.95), transparent); }
+  .nav-back { font-family:var(--font-display); letter-spacing:0.25em; font-size:0.7rem; color:var(--muted); text-decoration:none; transition:color 0.2s; }
+  .nav-back:hover { color:var(--accent); }
+  .nav-score { font-family:var(--font-display); font-size:1.1rem; color:var(--accent); opacity:0; transition:opacity 0.4s; }
+  .nav-score.visible { opacity:1; }
+
+  .hero { min-height:100vh; display:flex; flex-direction:column; justify-content:center; align-items:center; position:relative; overflow:hidden; padding:4rem 2rem; text-align:center; }
+  .hero-bg { position:absolute; inset:0; background:
+    radial-gradient(ellipse 60% 50% at 50% 40%, rgba(194,65,12,0.12) 0%, transparent 65%),
+    radial-gradient(ellipse 30% 30% at 75% 60%, rgba(251,191,36,0.04) 0%, transparent 55%),
+    var(--bg); z-index:0; }
+  .hero-content { position:relative; z-index:1; }
+  .autopsy-label { font-family:var(--font-display); letter-spacing:0.4em; font-size:0.72rem; color:var(--accent); text-transform:uppercase; margin-bottom:1.8rem; opacity:0; animation:fadeUp 0.8s ease 0.2s forwards; }
+  .hero-artist { font-family:var(--font-display); font-size:clamp(4rem,18vw,15rem); line-height:0.88; letter-spacing:-0.02em; color:var(--text); opacity:0; animation:fadeUp 0.8s ease 0.4s forwards; }
+  .hero-album { font-family:var(--font-serif); font-style:italic; font-size:clamp(1.2rem,4vw,3.2rem); color:var(--gold); margin-top:0.6rem; opacity:0; animation:fadeUp 0.8s ease 0.6s forwards; line-height:1.25; }
+  .hero-meta { font-family:var(--font-display); letter-spacing:0.3em; font-size:0.85rem; color:var(--muted); margin-top:1.5rem; opacity:0; animation:fadeUp 0.8s ease 0.8s forwards; }
+  .hero-rule { width:1px; height:70px; background:linear-gradient(to bottom, var(--accent), transparent); margin:3rem auto 0; opacity:0; animation:fadeUp 0.8s ease 1s forwards; }
+  .scroll-hint { font-size:0.68rem; letter-spacing:0.35em; color:var(--muted); text-transform:uppercase; margin-top:0.8rem; opacity:0; animation:fadeUp 0.8s ease 1.2s forwards; }
+  .verdict-bar { background:linear-gradient(90deg, #7c1d06, #450d03); padding:1.1rem 2rem; text-align:center; font-size:0.92rem; color:rgba(255,255,255,0.9); font-weight:400; line-height:1.5; }
+
+  .score-section { background:var(--bg2); border-top:1px solid var(--border); border-bottom:1px solid var(--border); }
+  .score-inner { max-width:920px; margin:0 auto; padding:6rem 2rem; display:grid; grid-template-columns:1fr 1.5fr; gap:5rem; align-items:center; }
+  @media(max-width:640px){.score-inner{grid-template-columns:1fr;gap:2.5rem;}}
+  .score-display { text-align:center; }
+  .score-number { font-family:var(--font-display); font-size:clamp(5.5rem,16vw,11rem); line-height:1; color:var(--text); }
+  .score-number span { color:var(--accent); }
+  .score-label { font-family:var(--font-display); letter-spacing:0.35em; font-size:0.75rem; color:var(--muted); margin-top:0.4rem; }
+  .score-verdict { font-family:var(--font-serif); font-style:italic; font-size:1.3rem; line-height:1.55; margin-bottom:1.5rem; color:var(--text); }
+  .score-defense { font-size:0.88rem; color:var(--muted); line-height:1.85; }
+
+  .section { max-width:920px; margin:0 auto; padding:6rem 2rem; }
+  .section-label { font-family:var(--font-display); letter-spacing:0.4em; font-size:0.68rem; color:var(--accent); text-transform:uppercase; margin-bottom:1.4rem; }
+  .section-title { font-family:var(--font-serif); font-size:clamp(1.8rem,4.5vw,3.2rem); font-weight:900; line-height:1.1; margin-bottom:2.5rem; }
+  .section-title em { font-style:italic; color:var(--gold); }
+
+  .pill { padding:0.35rem 0.9rem; border:1px solid var(--border); border-radius:2px; font-size:0.7rem; letter-spacing:0.15em; text-transform:uppercase; font-family:var(--font-display); color:var(--text); background:transparent; transition:all 0.2s; cursor:default; }
+  .pill:hover, .pill.active { border-color:var(--accent); color:var(--accent); background:rgba(194,65,12,0.08); }
+  .theme-pills { display:flex; flex-wrap:wrap; gap:0.45rem; margin:0 0 3rem; }
+  .themes-section { background:var(--bg2); border-top:1px solid var(--border); }
+  .themes-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:1.5px; background:var(--border); border:1px solid var(--border); }
+  .theme-card { background:var(--bg2); padding:2.2rem 1.8rem; transition:background 0.2s; cursor:default; position:relative; overflow:hidden; }
+  .theme-card::before { content:''; position:absolute; top:0; left:0; width:3px; height:0; background:var(--accent); transition:height 0.3s; }
+  .theme-card:hover::before { height:100%; }
+  .theme-card:hover { background:var(--bg3); }
+  .theme-card-icon { font-size:1.8rem; margin-bottom:0.9rem; display:block; }
+  .theme-card-title { font-family:var(--font-serif); font-size:1rem; font-weight:700; margin-bottom:0.6rem; }
+  .theme-card-text { font-size:0.82rem; color:var(--muted); line-height:1.75; }
+
+  .egg-section { background:var(--bg3); border-top:1px solid var(--border); border-bottom:1px solid var(--border); }
+  .egg-inner { max-width:920px; margin:0 auto; padding:5rem 2rem; }
+  .egg-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:1px; background:var(--border); border:1px solid var(--border); margin-top:2.5rem; }
+  .egg-card { background:var(--bg3); padding:2rem 1.6rem; position:relative; }
+  .egg-card::after { content:'🥚'; position:absolute; top:1.2rem; right:1.4rem; font-size:1rem; opacity:0.4; }
+  .egg-num { font-family:var(--font-display); font-size:2.5rem; line-height:1; color:rgba(194,65,12,0.2); margin-bottom:0.6rem; }
+  .egg-title { font-family:var(--font-serif); font-size:0.95rem; font-weight:700; margin-bottom:0.5rem; }
+  .egg-text { font-size:0.8rem; color:var(--muted); line-height:1.75; }
+
+  .quote-section { padding:7rem 2rem; text-align:center; position:relative; overflow:hidden; }
+  .quote-bg { position:absolute; inset:0; background:radial-gradient(ellipse 55% 55% at 50% 50%, rgba(194,65,12,0.07) 0%, transparent 70%); }
+  .quote-mark { font-family:var(--font-serif); font-size:7rem; line-height:0; vertical-align:-1.8rem; color:rgba(194,65,12,0.18); margin-right:0.05em; }
+  .quote-text { font-family:var(--font-serif); font-style:italic; font-size:clamp(1.4rem,3.5vw,2.5rem); line-height:1.35; max-width:680px; margin:0 auto; position:relative; z-index:1; }
+  .quote-attr { margin-top:2rem; font-size:0.72rem; letter-spacing:0.3em; text-transform:uppercase; color:var(--muted); font-family:var(--font-display); position:relative; z-index:1; }
+
+  .tracks-section { background:var(--bg); border-top:1px solid var(--border); }
+  .tracks-inner { max-width:920px; margin:0 auto; padding:6rem 2rem; }
+  .track-item { border-bottom:1px solid var(--border); overflow:hidden; cursor:pointer; transition:background 0.15s; }
+  .track-item:first-of-type { border-top:1px solid var(--border); }
+  .track-item:hover { background:rgba(194,65,12,0.025); }
+  .track-header { display:grid; grid-template-columns:3rem 1fr auto; align-items:center; gap:1.2rem; padding:1.1rem 0; }
+  .track-num { font-family:var(--font-display); font-size:0.75rem; color:var(--muted); letter-spacing:0.1em; }
+  .track-name { font-family:var(--font-serif); font-size:1rem; font-weight:700; }
+  .track-right { display:flex; align-items:center; gap:1.2rem; }
+  .track-score-bar { width:70px; height:3px; background:rgba(255,255,255,0.06); border-radius:2px; overflow:hidden; }
+  .track-score-fill { height:100%; background:linear-gradient(90deg, var(--accent), var(--gold)); transform-origin:left; transform:scaleX(0); transition:transform 0.8s ease; border-radius:2px; }
+  .track-score-num { font-family:var(--font-display); font-size:0.95rem; color:var(--muted); min-width:2.2rem; text-align:right; }
+  .track-expand-icon { font-size:0.55rem; color:var(--muted); transition:transform 0.3s; }
+  .track-item.open .track-expand-icon { transform:rotate(180deg); }
+  .track-body { max-height:0; overflow:hidden; transition:max-height 0.38s ease; }
+  .track-body-inner { padding:0 0 1.4rem 0; margin-left:4.2rem; color:var(--muted); font-size:0.87rem; line-height:1.8; border-left:2px solid var(--accent); padding-left:1.4rem; }
+
+  .chart-section { background:var(--bg3); border-top:1px solid var(--border); border-bottom:1px solid var(--border); }
+  .chart-inner { max-width:920px; margin:0 auto; padding:6rem 2rem; }
+  .chart-bars { display:flex; flex-direction:column; gap:0.85rem; margin-top:3rem; }
+  .bar-row { display:grid; grid-template-columns:180px 1fr 2.8rem; align-items:center; gap:1rem; }
+  @media(max-width:500px){.bar-row{grid-template-columns:90px 1fr 2.5rem;}}
+  .bar-label { font-size:0.78rem; color:var(--muted); text-align:right; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .bar-track { height:5px; background:rgba(255,255,255,0.05); border-radius:3px; overflow:hidden; }
+  .bar-fill { height:100%; background:linear-gradient(90deg, var(--accent), var(--gold)); transform-origin:left; transform:scaleX(0); transition:transform 0.85s ease; border-radius:3px; }
+  .bar-val { font-family:var(--font-display); font-size:0.88rem; color:var(--text); }
+
+  .footnote-section { padding:5rem 2rem; text-align:center; border-top:1px solid var(--border); background:var(--bg2); }
+  .footnote-text { font-family:var(--font-serif); font-style:italic; font-size:1rem; color:var(--muted); line-height:1.85; max-width:640px; margin:0 auto; }
+  footer { padding:3.5rem 2rem; text-align:center; border-top:1px solid var(--border); }
+  .footer-sig { font-family:var(--font-serif); font-style:italic; font-size:0.88rem; color:var(--muted); }
+  .footer-brand { font-family:var(--font-display); letter-spacing:0.4em; font-size:0.68rem; color:rgba(255,255,255,0.1); margin-top:1.8rem; }
+  .divider { width:36px; height:1px; background:var(--accent); margin:1.8rem auto; }
+  .back-link { display:inline-block; margin-top:2rem; font-family:var(--font-display); letter-spacing:0.25em; font-size:0.72rem; color:var(--accent); text-decoration:none; border:1px solid var(--accent); padding:0.6rem 1.4rem; transition:all 0.2s; }
+  .back-link:hover { background:var(--accent); color:#fff; }
+
+  @keyframes fadeUp { from{opacity:0;transform:translateY(28px)} to{opacity:1;transform:translateY(0)} }
+  .reveal { opacity:0; transform:translateY(38px); transition:opacity 0.7s ease, transform 0.7s ease; }
+  .reveal.visible { opacity:1; transform:translateY(0); }
+</style>
+</head>
+<body>
+<div class="progress-bar" id="progress"></div>
+<nav>
+  <a href="index.html" class="nav-back">← All Autopsies</a>
+  <div class="nav-score" id="navScore">9.5 / 10</div>
+</nav>
+
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-content">
+    <div class="autopsy-label">Album Autopsy · 020</div>
+    <div class="hero-artist">Michael Jackson</div>
+    <div class="hero-album">Thriller</div>
+    <div class="hero-meta">Epic Records · 1982</div>
+    <div class="hero-rule"></div>
+    <div class="scroll-hint">Scroll to dissect</div>
+  </div>
+</section>
+
+<div class="verdict-bar">Seven of nine tracks became top-10 singles. The best-selling album in history. Eddie Van Halen played the guitar solo on Beat It for free because he thought it would be fun. The most commercially successful record ever made is also genuinely one of the best.</div>
+
+<section class="score-section">
+  <div class="score-inner">
+    <div class="score-display reveal">
+      <div class="score-number" id="scoreCounter">0<span>.0</span></div>
+      <div class="score-label">Overall Score</div>
+    </div>
+    <div class="reveal">
+      <div class="score-verdict">"The album that broke MTV's color line, redefined what a music video could be, and produced seven top-10 hits without ever feeling like a collection. Michael Jackson at 24. Quincy Jones at his peak. The result was inevitable and unrepeatable."</div>
+      <div class="score-defense">9.5 because Thriller is the rare phenomenon that is both the most commercially successful record in history and artistically coherent. The production - Quincy Jones at the apex of his craft - is so meticulous that every track occupies its own sonic space while the album breathes as a whole. The two-point deduction is honest: Baby Be Mine is fine but anonymous, and The Girl Is Mine, while a charming oddity, is the sound of two geniuses doing something well beneath their ability. Everything else is irreproachable. Billie Jean alone is a 10. The question isn't whether Thriller is great - it's whether anything this commercially dominant can be taken seriously as art. The answer is yes, emphatically, and the fact that we have to ask says something unfortunate about critical snobbery.</div>
+    </div>
+  </div>
+</section>
+
+<div class="themes-section">
+  <div class="section">
+    <div class="section-label reveal">Central Thesis</div>
+    <div class="section-title reveal">What <em>This Album Is Really About</em></div>
+    <div class="theme-pills reveal">
+      <span class="pill active">The Split Self</span>
+      <span class="pill">Fame as Predator</span>
+      <span class="pill">Desire and Its Consequences</span>
+      <span class="pill">The Horror of Being Watched</span>
+    </div>
+    <div class="themes-grid reveal">
+      <div class="theme-card">
+        <span class="theme-card-icon">🪞</span>
+        <div class="theme-card-title">The Split Self</div>
+        <div class="theme-card-text">Thriller is obsessed with doubles and imposters. Billie Jean's narrator denies paternity while the song structurally proves his guilt. Wanna Be Startin' Somethin' opens with accusations of being a liar. The album is partly Michael Jackson examining what it means to be Michael Jackson - a person so famous that even he cannot be sure who he is. The horror theme is not decoration. It's autobiography.</div>
+      </div>
+      <div class="theme-card">
+        <span class="theme-card-icon">👁️</span>
+        <div class="theme-card-title">Fame as Predator</div>
+        <div class="theme-card-text">By 1982, Jackson had been performing professionally for seventeen years. He had never had a normal childhood. The paranoia in Billie Jean - "the kid is not my son" - is not just about paternity. It's about a man who cannot have a relationship that isn't instantly weaponized by proximity to his fame. The album documents what it feels like to be the most watched person on Earth and not be able to trust a single person you meet.</div>
+      </div>
+      <div class="theme-card">
+        <span class="theme-card-icon">🔥</span>
+        <div class="theme-card-title">Desire and Its Consequences</div>
+        <div class="theme-card-text">Beat It is ostensibly about gang violence, but it's really about the cost of proving yourself. P.Y.T. is one of the most joyful tracks on the record and also carries a slight undercurrent of performance - desire as something that must be demonstrated as much as felt. Even Human Nature, the album's most tender moment, is about longing for something you can't quite name. Jackson was deeply lonely making this record. It sounds like it.</div>
+      </div>
+      <div class="theme-card">
+        <span class="theme-card-icon">🧟</span>
+        <div class="theme-card-title">The Horror of Being Watched</div>
+        <div class="theme-card-text">The Thriller video - fourteen minutes, directed by John Landis, budgeted at $500k, the most expensive music video ever made at the time - literalized what the album was doing obliquely. Michael Jackson turns into a monster while his date watches, helpless. Then he turns back. Then he winks. The horror is not the zombies. It's that you can't tell the difference between the performance and the person inside it. Jackson understood this. He put it in the video.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<section class="quote-section">
+  <div class="quote-bg"></div>
+  <div class="quote-text reveal"><span class="quote-mark">"</span>Billie Jean is not my lover. She's just a girl who claims that I am the one.</div>
+  <div class="quote-attr reveal">Michael Jackson · Billie Jean · 1982</div>
+</section>
+
+<section class="egg-section">
+  <div class="egg-inner">
+    <div class="section-label reveal">Rare Frequencies</div>
+    <div class="section-title reveal">Things You <em>Didn't Know</em></div>
+    <div class="egg-grid reveal">
+      <div class="egg-card">
+        <div class="egg-num">01</div>
+        <div class="egg-title">MTV and the Color Line</div>
+        <div class="egg-text">When Epic Records submitted Billie Jean to MTV in early 1983, the channel initially refused to air it - their stated policy was to focus on "rock" music, which in practice meant not playing Black artists. Epic president Walter Yetnikoff threatened to pull all Epic artists from MTV and go public with the reason. MTV capitulated. Billie Jean aired. Within weeks, MTV's ratings surged. The channel's unofficial segregation ended because Michael Jackson was too commercially powerful to exclude. He didn't do it by protesting. He did it by being undeniable.</div>
+      </div>
+      <div class="egg-card">
+        <div class="egg-num">02</div>
+        <div class="egg-title">Eddie Van Halen Played for Free</div>
+        <div class="egg-text">Quincy Jones called Eddie Van Halen and asked if he'd play the guitar solo on Beat It. Van Halen showed up, recorded the solo in one afternoon, and refused payment - he said he did it "as a favor" because he thought the song was interesting and wanted to see if it could be done. He didn't tell his band beforehand. When Van Halen heard the finished record, guitarist Dave Lee Roth reportedly said it was the worst career move Eddie had ever made. Beat It won two Grammys. The solo is now one of the most recognized guitar moments in pop history.</div>
+      </div>
+      <div class="egg-card">
+        <div class="egg-num">03</div>
+        <div class="egg-title">Billie Jean's Bassline</div>
+        <div class="egg-text">Quincy Jones initially didn't want to include Billie Jean on the album. He told Jackson it was too personal and the chorus hook didn't work structurally. Jackson insisted. The song was mixed 91 times - Jackson felt the bass and kick drum needed to be louder than any pop record had ever had them. Engineer Bruce Swedien spent weeks on the mix alone. The opening four bars of bass - Louis Johnson's isolated groove - is now one of the most recognizable sounds in popular music. Jones has since called it one of his favorite records he ever worked on.</div>
+      </div>
+      <div class="egg-card">
+        <div class="egg-num">04</div>
+        <div class="egg-title">The Beatles Catalog</div>
+        <div class="egg-text">Paul McCartney collaborated with Jackson on The Girl Is Mine and advised him on music publishing as an investment. Jackson took the advice seriously. In 1985, he paid $47.5 million for ATV Music Publishing - which included the rights to most of the Beatles' catalog. McCartney discovered this and never truly forgave Jackson. McCartney had tried to buy the catalog himself and been outbid. Jackson had learned what publishing was worth from the man whose publishing he then bought. The irony has been discussed in every music business class since.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="tracks-section">
+  <div class="tracks-inner">
+    <div class="section-label reveal">Track by Track</div>
+    <div class="section-title reveal">The <em>Dissection</em></div>
+    <div id="trackList" class="reveal">
+
+      <div class="track-item">
+        <div class="track-header"><span class="track-num">01</span><span class="track-name">Wanna Be Startin' Somethin'</span><div class="track-right"><div class="track-score-bar"><div class="track-score-fill" data-score="9.5"></div></div><span class="track-score-num">9.5</span><span class="track-expand-icon">▼</span></div></div>
+        <div class="track-body"><div class="track-body-inner">Six minutes and thirty-one seconds of escalating paranoia. Jackson wrote it in 1979, before Off the Wall, and held it because it felt too aggressive. By Thriller it made perfect sense as an opener - a man already at war with the people around him before the first track ends. The outro - "mama-se, mama-sa, ma-ma-ko-ssa" - is lifted from a Cameroonian hit by Manu Dibango, who later sued. Jackson settled. The outro remains one of the most euphoric moments on the album.</div></div>
+      </div>
+
+      <div class="track-item">
+        <div class="track-header"><span class="track-num">02</span><span class="track-name">Baby Be Mine</span><div class="track-right"><div class="track-score-bar"><div class="track-score-fill" data-score="8.2"></div></div><span class="track-score-num">8.2</span><span class="track-expand-icon">▼</span></div></div>
+        <div class="track-body"><div class="track-body-inner">Written by Rod Temperton, who also wrote Thriller and Rock With You. The weakest track on the album - not bad, just anonymous. It sounds like any number of polished early-80s pop records. On Thriller, anonymous is remarkable because the bar is set so impossibly high. It passes without leaving a mark, which is the worst thing that can happen to a song on a record this good.</div></div>
+      </div>
+
+      <div class="track-item">
+        <div class="track-header"><span class="track-num">03</span><span class="track-name">The Girl Is Mine</span><div class="track-right"><div class="track-score-bar"><div class="track-score-fill" data-score="7.8"></div></div><span class="track-score-num">7.8</span><span class="track-expand-icon">▼</span></div></div>
+        <div class="track-body"><div class="track-body-inner">Jackson and McCartney bickering over a woman in song. A deliberate radio concession - Quincy Jones needed a light track that would show range. It works as exactly that: a charming, well-constructed nothing. McCartney's spoken section in the bridge is the most McCartney thing Paul McCartney has ever done. Two of the greatest musicians of the 20th century doing something well beneath their ability on purpose. The lowest score on this record is still a technically excellent pop song.</div></div>
+      </div>
+
+      <div class="track-item">
+        <div class="track-header"><span class="track-num">04</span><span class="track-name">Thriller</span><div class="track-right"><div class="track-score-bar"><div class="track-score-fill" data-score="9.8"></div></div><span class="track-score-num">9.8</span><span class="track-expand-icon">▼</span></div></div>
+        <div class="track-body"><div class="track-body-inner">Rod Temperton wrote it as "Starlight" before Jackson changed the title to Thriller. Vincent Price's spoken outro was recorded in one take - Price showed up, read the poem Temperton had written for him, and left. He was paid a flat fee and reportedly delighted by the whole thing. The track functions as a horror film in miniature: setup, rising tension, revelation, Price's laugh as the final punctuation. The 14-minute video turned it into the most watched music video of the pre-YouTube era.</div></div>
+      </div>
+
+      <div class="track-item">
+        <div class="track-header"><span class="track-num">05</span><span class="track-name">Beat It</span><div class="track-right"><div class="track-score-bar"><div class="track-score-fill" data-score="9.6"></div></div><span class="track-score-num">9.6</span><span class="track-expand-icon">▼</span></div></div>
+        <div class="track-body"><div class="track-body-inner">Jackson wanted to write a rock song that Black kids would feel permission to love. He succeeded so completely that Eddie Van Halen played the solo for free and rock radio adopted it without hesitation. The guitar solo is 20 seconds. Van Halen improvised it in an afternoon and later said he didn't think much of it at the time. It became the most recognizable 20 seconds in 80s rock. Two Grammys, including Record of the Year.</div></div>
+      </div>
+
+      <div class="track-item">
+        <div class="track-header"><span class="track-num">06</span><span class="track-name">Billie Jean</span><div class="track-right"><div class="track-score-bar"><div class="track-score-fill" data-score="10.0"></div></div><span class="track-score-num">10.0</span><span class="track-expand-icon">▼</span></div></div>
+        <div class="track-body"><div class="track-body-inner">The greatest pop single ever recorded. The bass and kick drum in the intro were mixed 91 times before Jackson approved them. The song is about a real incident - a fan who wrote to Jackson claiming he had fathered her child. Jackson transformed personal paranoia into a four-minute narrative that simultaneously works as a denial, a confession, and a meditation on the impossibility of privacy when you are the most famous person alive. Quincy Jones didn't want to include it. He has publicly admitted this was the worst professional judgment he ever made.</div></div>
+      </div>
+
+      <div class="track-item">
+        <div class="track-header"><span class="track-num">07</span><span class="track-name">Human Nature</span><div class="track-right"><div class="track-score-bar"><div class="track-score-fill" data-score="9.3"></div></div><span class="track-score-num">9.3</span><span class="track-expand-icon">▼</span></div></div>
+        <div class="track-body"><div class="track-body-inner">Written by Steve Porcaro of Toto and John Bettis - Porcaro came up with the melody and main hook after overhearing his daughter's teacher describe her behavior at school. Quincy Jones heard it on a demo tape and immediately asked to use it. Jackson recorded it mostly in one take. It is the most emotionally transparent moment on the album - a famous man looking out at a city at night and not understanding why he can't be down there, anonymous, with everyone else.</div></div>
+      </div>
+
+      <div class="track-item">
+        <div class="track-header"><span class="track-num">08</span><span class="track-name">P.Y.T. (Pretty Young Thing)</span><div class="track-right"><div class="track-score-bar"><div class="track-score-fill" data-score="8.8"></div></div><span class="track-score-num">8.8</span><span class="track-expand-icon">▼</span></div></div>
+        <div class="track-body"><div class="track-body-inner">Written by James Ingram and Quincy Jones. Jackson initially resisted it and had written his own song for that slot - Jones preferred this one. The tension in the production between the synthetic percussion and the human choir vocals creates something that shouldn't work and does completely. Jackson sounds genuinely joyful here, which is rare on Thriller. After Billie Jean and Beat It, the album needed someone to exhale. P.Y.T. is that breath.</div></div>
+      </div>
+
+      <div class="track-item">
+        <div class="track-header"><span class="track-num">09</span><span class="track-name">The Lady in My Life</span><div class="track-right"><div class="track-score-bar"><div class="track-score-fill" data-score="8.5"></div></div><span class="track-score-num">8.5</span><span class="track-expand-icon">▼</span></div></div>
+        <div class="track-body"><div class="track-body-inner">Quincy Jones had Jackson record the final vocal for this track over and over, telling him he wasn't "begging enough." Jackson was uncomfortable pleading on record - he found it emotionally exposing. Jones reportedly turned off the lights in the vocal booth and told him to perform in the dark. The result is the most vocally intimate thing on the album. A quiet closer to a record that had spent nine tracks being as loud as possible about everything else.</div></div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<section class="chart-section">
+  <div class="chart-inner">
+    <div class="section-label reveal">Score Breakdown</div>
+    <div class="section-title reveal">Every Track, <em>Ranked</em></div>
+    <div class="chart-bars reveal" id="chartBars">
+      <div class="bar-row"><div class="bar-label">Billie Jean</div><div class="bar-track"><div class="bar-fill" data-score="10.0"></div></div><div class="bar-val">10.0</div></div>
+      <div class="bar-row"><div class="bar-label">Thriller</div><div class="bar-track"><div class="bar-fill" data-score="9.8"></div></div><div class="bar-val">9.8</div></div>
+      <div class="bar-row"><div class="bar-label">Beat It</div><div class="bar-track"><div class="bar-fill" data-score="9.6"></div></div><div class="bar-val">9.6</div></div>
+      <div class="bar-row"><div class="bar-label">Wanna Be Startin'</div><div class="bar-track"><div class="bar-fill" data-score="9.5"></div></div><div class="bar-val">9.5</div></div>
+      <div class="bar-row"><div class="bar-label">Human Nature</div><div class="bar-track"><div class="bar-fill" data-score="9.3"></div></div><div class="bar-val">9.3</div></div>
+      <div class="bar-row"><div class="bar-label">P.Y.T.</div><div class="bar-track"><div class="bar-fill" data-score="8.8"></div></div><div class="bar-val">8.8</div></div>
+      <div class="bar-row"><div class="bar-label">The Lady in My Life</div><div class="bar-track"><div class="bar-fill" data-score="8.5"></div></div><div class="bar-val">8.5</div></div>
+      <div class="bar-row"><div class="bar-label">Baby Be Mine</div><div class="bar-track"><div class="bar-fill" data-score="8.2"></div></div><div class="bar-val">8.2</div></div>
+      <div class="bar-row"><div class="bar-label">The Girl Is Mine</div><div class="bar-track"><div class="bar-fill" data-score="7.8"></div></div><div class="bar-val">7.8</div></div>
+    </div>
+  </div>
+</section>
+
+<div class="footnote-section">
+  <div class="section-label reveal" style="text-align:center;">Footnote</div>
+  <div class="footnote-text reveal">Thriller has sold between 66 and 70 million copies depending on which certification body you ask. It spent 37 weeks at number one on the Billboard 200. It won eight Grammy Awards in a single night - a record that stood until Beyoncé broke it in 2023. The production budget was $750,000, which at the time was considered irresponsible. The return on that investment is the best in the history of the music business. It is simultaneously the most commercially successful record ever made and proof that commercial success and artistic integrity are not mutually exclusive - they were just rarely in the same room at the same time.</div>
+</div>
+
+<footer>
+  <div class="footer-sig reveal">Album Autopsy - A structured dissection of records that matter.</div>
+  <div class="divider"></div>
+  <a href="index.html" class="back-link reveal">← Back to All Autopsies</a>
+  <div class="footer-brand">@MyParentsDidntLeaveForThis</div>
+</footer>
+
+<script>
+  window.addEventListener('scroll', () => {
+    const p = (window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100;
+    document.getElementById('progress').style.width = p + '%';
+  });
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (!e.isIntersecting) return;
+      e.target.classList.add('visible');
+      if (e.target.id === 'scoreCounter') { animateScore(0, 9.5, 1600); document.getElementById('navScore').classList.add('visible'); }
+    });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+  if(document.getElementById('scoreCounter')) observer.observe(document.getElementById('scoreCounter'));
+  const tlObs = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (!e.isIntersecting) return; e.target.querySelectorAll('.track-score-fill').forEach((f,i) => { setTimeout(() => { f.style.transform = `scaleX(${parseFloat(f.dataset.score)/10})`; }, i * 55); }); tlObs.unobserve(e.target); });
+  }, { threshold: 0.08 });
+  const tl = document.getElementById('trackList'); if(tl) tlObs.observe(tl);
+  const chObs = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (!e.isIntersecting) return; e.target.querySelectorAll('.bar-fill').forEach((f,i) => { setTimeout(() => { const s = parseFloat(f.dataset.score); f.style.transform = `scaleX(${Math.max(0,(s-6)/4)})`; }, i * 70); }); chObs.unobserve(e.target); });
+  }, { threshold: 0.08 });
+  const cb = document.getElementById('chartBars'); if(cb) chObs.observe(cb);
+  function animateScore(from, to, duration) {
+    const el = document.getElementById('scoreCounter'); if(!el) return;
+    const start = performance.now();
+    (function tick(now) { const p = Math.min((now - start) / duration, 1); const ease = 1 - Math.pow(1 - p, 3); const val = from + (to - from) * ease; const int = Math.floor(val); const dec = Math.round((val - int) * 10); el.innerHTML = int + '<span>.' + dec + '</span>'; if(p < 1) requestAnimationFrame(tick); })(start);
+  }
+  document.querySelectorAll('.track-item').forEach(item => {
+    item.querySelector('.track-header').addEventListener('click', () => { const body = item.querySelector('.track-body'); const open = item.classList.toggle('open'); body.style.maxHeight = open ? body.scrollHeight + 'px' : '0'; });
+  });
+  document.querySelectorAll('.pill').forEach(pill => {
+    pill.addEventListener('click', () => { document.querySelectorAll('.pill').forEach(p => p.classList.remove('active')); pill.classList.add('active'); });
+  });
+</script>
+</body>
+</html>

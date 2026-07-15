@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mr. Morale &amp; the Big Steppers - Album Autopsy</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #080809;
+    --bg2: #0e0e10;
+    --bg3: #131315;
+    --accent: #a05c3a;
+    --accent-dark: #7a4228;
+    --gold: #c9a84c;
+    --text: #eae6de;
+    --muted: #6e6a64;
+    --border: rgba(255,255,255,0.055);
+    --font-display: 'Bebas Neue', sans-serif;
+    --font-serif: 'Playfair Display', serif;
+    --font-body: 'DM Sans', sans-serif;
+  }
+  html { scroll-behavior: smooth; }
+  body { background: var(--bg); color: var(--text); font-family: var(--font-body); font-weight: 300; line-height: 1.7; overflow-x: hidden; }
+  body::before { content:''; position:fixed; inset:0; background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E"); pointer-events:none; z-index:9999; opacity:0.45; }
+  .progress-bar { position:fixed; top:0; left:0; height:2px; background:var(--accent); z-index:200; width:0%; transition: width 0.1s linear; }
+  nav { position:fixed; top:0; left:0; right:0; padding:1.1rem 2.5rem; display:flex; justify-content:space-between; align-items:center; z-index:100; background:linear-gradient(to bottom, rgba(8,8,9,0.92), transparent); }
+  .nav-back { font-family:var(--font-display); letter-spacing:0.25em; font-size:0.7rem; color:var(--muted); text-decoration:none; transition:color 0.2s; }
+  .nav-back:hover { color:var(--accent); }
+  .nav-score { font-family:var(--font-display); font-size:1.1rem; color:var(--accent); opacity:0; transition:opacity 0.4s; }
+  .nav-score.visible { opacity:1; }
+  .hero { min-height:100vh; display:flex; flex-direction:column; justify-content:center; align-items:center; position:relative; overflow:hidden; padding:4rem 2rem; text-align:center; }
+  .hero-bg { position:absolute; inset:0; background: radial-gradient(ellipse 80% 55% at 50% 45%, #a05c3a18 0%, transparent 68%), radial-gradient(ellipse 35% 35% at 15% 75%, #a05c3a09 0%, transparent 60%), var(--bg); z-index:0; }
+  .hero-lines { position:absolute; inset:0; background-image:repeating-linear-gradient(0deg, transparent, transparent 78px, rgba(255,255,255,0.011) 78px, rgba(255,255,255,0.011) 79px); z-index:0; }
+  .hero-content { position:relative; z-index:1; }
+  .autopsy-label { font-family:var(--font-display); letter-spacing:0.4em; font-size:0.72rem; color:var(--accent); text-transform:uppercase; margin-bottom:1.8rem; opacity:0; animation:fadeUp 0.8s ease 0.2s forwards; }
+  .hero-artist { font-family:var(--font-display); font-size:clamp(4rem,16vw,14rem); line-height:0.88; letter-spacing:-0.02em; color:var(--text); opacity:0; animation:fadeUp 0.8s ease 0.4s forwards; }
+  .hero-album { font-family:var(--font-serif); font-style:italic; font-size:clamp(1.2rem,4vw,3rem); color:var(--gold); margin-top:0.6rem; opacity:0; animation:fadeUp 0.8s ease 0.6s forwards; line-height:1.25; max-width:800px; }
+  .hero-meta { font-family:var(--font-display); letter-spacing:0.3em; font-size:0.85rem; color:var(--muted); margin-top:1.5rem; opacity:0; animation:fadeUp 0.8s ease 0.8s forwards; }
+  .hero-rule { width:1px; height:70px; background:linear-gradient(to bottom, var(--accent), transparent); margin:3rem auto 0; opacity:0; animation:fadeUp 0.8s ease 1s forwards; }
+  .scroll-hint { font-size:0.68rem; letter-spacing:0.35em; color:var(--muted); text-transform:uppercase; margin-top:0.8rem; opacity:0; animation:fadeUp 0.8s ease 1.2s forwards; }
+  .verdict-bar { background:var(--accent); padding:1.1rem 2rem; text-align:center; font-family:var(--font-body); font-size:0.92rem; color:rgba(0,0,0,0.85); font-weight:500; line-height:1.5; }
+  .score-section { background:var(--bg2); border-top:1px solid var(--border); border-bottom:1px solid var(--border); }
+  .score-inner { max-width:920px; margin:0 auto; padding:6rem 2rem; display:grid; grid-template-columns:1fr 1.5fr; gap:5rem; align-items:center; }
+  @media(max-width:640px){.score-inner{grid-template-columns:1fr;gap:2.5rem;}}
+  .score-display { text-align:center; }
+  .score-number { font-family:var(--font-display); font-size:clamp(5.5rem,16vw,11rem); line-height:1; color:var(--text); }
+  .score-number span { color:var(--accent); }
+  .score-label { font-family:var(--font-display); letter-spacing:0.35em; font-size:0.75rem; color:var(--muted); margin-top:0.4rem; }
+  .score-verdict { font-family:var(--font-serif); font-style:italic; font-size:1.3rem; line-height:1.55; margin-bottom:1.5rem; color:var(--text); }
+  .score-defense { font-size:0.88rem; color:var(--muted); line-height:1.85; }
+  .section { max-width:920px; margin:0 auto; padding:6rem 2rem; }
+  .section-label { font-family:var(--font-display); letter-spacing:0.4em; font-size:0.68rem; color:var(--accent); text-transform:uppercase; margin-bottom:1.4rem; }
+  .section-title { font-family:var(--font-serif); font-size:clamp(1.8rem,4.5vw,3.2rem); font-weight:900; line-height:1.1; margin-bottom:2.5rem; }
+  .section-title em { font-style:italic; color:var(--gold); }
+  .pill { padding:0.35rem 0.9rem; border:1px solid var(--border); border-radius:2px; font-size:0.7rem; letter-spacing:0.15em; text-transform:uppercase; font-family:var(--font-display); color:var(--text); background:transparent; transition:all 0.2s; cursor:default; }
+  .pill:hover, .pill.active { border-color:var(--accent); color:var(--accent); background:#a05c3a14; }
+  .theme-pills { display:flex; flex-wrap:wrap; gap:0.45rem; margin:0 0 3rem; }
+  .themes-section { background:var(--bg2); border-top:1px solid var(--border); }
+  .themes-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:1.5px; background:var(--border); border:1px solid var(--border); margin-top:0; }
+  .theme-card { background:var(--bg2); padding:2.2rem 1.8rem; transition:background 0.2s; cursor:default; position:relative; overflow:hidden; }
+  .theme-card::before { content:''; position:absolute; top:0; left:0; width:3px; height:0; background:var(--accent); transition:height 0.3s; }
+  .theme-card:hover::before { height:100%; }
+  .theme-card:hover { background:var(--bg3); }
+  .theme-card-icon { font-size:1.8rem; margin-bottom:0.9rem; display:block; }
+  .theme-card-title { font-family:var(--font-serif); font-size:1rem; font-weight:700; margin-bottom:0.6rem; }
+  .theme-card-text { font-size:0.82rem; color:var(--muted); line-height:1.75; }
+  .quote-section { padding:7rem 2rem; text-align:center; position:relative; overflow:hidden; }
+  .quote-bg { position:absolute; inset:0; background:radial-gradient(ellipse 55% 55% at 50% 50%, #a05c3a0a 0%, transparent 70%); }
+  .quote-mark { font-family:var(--font-serif); font-size:7rem; line-height:0; vertical-align:-1.8rem; color:#a05c3a25; margin-right:0.05em; }
+  .quote-text { font-family:var(--font-serif); font-style:italic; font-size:clamp(1.4rem,3.5vw,2.5rem); line-height:1.35; max-width:680px; margin:0 auto; position:relative; z-index:1; }
+  .quote-attr { margin-top:2rem; font-size:0.72rem; letter-spacing:0.3em; text-transform:uppercase; color:var(--muted); font-family:var(--font-display); position:relative; z-index:1; }
+  .tracks-section { background:var(--bg); border-top:1px solid var(--border); }
+  .tracks-inner { max-width:920px; margin:0 auto; padding:6rem 2rem; }
+  .track-item { border-bottom:1px solid var(--border); overflow:hidden; cursor:pointer; transition:background 0.15s; }
+  .track-item:first-of-type { border-top:1px solid var(--border); }
+  .track-item:hover { background:rgba(255,255,255,0.018); }
+  .track-header { display:grid; grid-template-columns:3rem 1fr auto; align-items:center; gap:1.2rem; padding:1.1rem 0; }
+  .track-num { font-family:var(--font-display); font-size:0.75rem; color:var(--muted); letter-spacing:0.1em; }
+  .track-name { font-family:var(--font-serif); font-size:1rem; font-weight:700; }
+  .track-right { display:flex; align-items:center; gap:1.2rem; }
+  .track-score-bar { width:70px; height:3px; background:rgba(255,255,255,0.08); border-radius:2px; overflow:hidden; }
+  .track-score-fill { height:100%; background:var(--accent); transform-origin:left; transform:scaleX(0); transition:transform 0.8s ease; border-radius:2px; }
+  .track-score-num { font-family:var(--font-display); font-size:0.95rem; color:var(--muted); min-width:2.2rem; text-align:right; }
+  .track-expand-icon { font-size:0.55rem; color:var(--muted); transition:transform 0.3s; }
+  .track-item.open .track-expand-icon { transform:rotate(180deg); }
+  .track-body { max-height:0; overflow:hidden; transition:max-height 0.38s ease; }
+  .track-body-inner { padding:0 0 1.4rem 0; margin-left:4.2rem; color:var(--muted); font-size:0.87rem; line-height:1.8; border-left:2px solid var(--accent); padding-left:1.4rem; }
+  .chart-section { background:var(--bg3); border-top:1px solid var(--border); border-bottom:1px solid var(--border); }
+  .chart-inner { max-width:920px; margin:0 auto; padding:6rem 2rem; }
+  .chart-bars { display:flex; flex-direction:column; gap:0.85rem; margin-top:3rem; }
+  .bar-row { display:grid; grid-template-columns:170px 1fr 2.8rem; align-items:center; gap:1rem; }
+  @media(max-width:500px){.bar-row{grid-template-columns:90px 1fr 2.5rem;}}
+  .bar-label { font-size:0.78rem; color:var(--muted); text-align:right; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .bar-track { height:5px; background:rgba(255,255,255,0.055); border-radius:3px; overflow:hidden; }
+  .bar-fill { height:100%; background:linear-gradient(90deg, var(--accent), var(--gold)); transform-origin:left; transform:scaleX(0); transition:transform 0.85s ease; border-radius:3px; }
+  .bar-val { font-family:var(--font-display); font-size:0.88rem; color:var(--text); }
+  .footnote-section { padding:5rem 2rem; text-align:center; border-top:1px solid var(--border); background:var(--bg2); }
+  .footnote-text { font-family:var(--font-serif); font-style:italic; font-size:1rem; color:var(--muted); line-height:1.85; max-width:640px; margin:0 auto; }
+  footer { padding:3.5rem 2rem; text-align:center; border-top:1px solid var(--border); }
+  .footer-sig { font-family:var(--font-serif); font-style:italic; font-size:0.88rem; color:var(--muted); }
+  .footer-brand { font-family:var(--font-display); letter-spacing:0.4em; font-size:0.68rem; color:rgba(255,255,255,0.12); margin-top:1.8rem; }
+  .divider { width:36px; height:1px; background:var(--accent); margin:1.8rem auto; }
+  .back-link { display:inline-block; margin-top:2rem; font-family:var(--font-display); letter-spacing:0.25em; font-size:0.72rem; color:var(--accent); text-decoration:none; border:1px solid var(--accent); padding:0.6rem 1.4rem; transition:all 0.2s; }
+  .back-link:hover { background:var(--accent); color:#000; }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(28px)} to{opacity:1;transform:translateY(0)} }
+  .reveal { opacity:0; transform:translateY(38px); transition:opacity 0.7s ease, transform 0.7s ease; }
+  .reveal.visible { opacity:1; transform:translateY(0); }
+</style>
+</head>
+<body>
+<div class="progress-bar" id="progress"></div>
+<nav>
+  <a href="index.html" class="nav-back">← All Autopsies</a>
+  <div class="nav-score" id="navScore">9.0 / 10</div>
+</nav>
+
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-lines"></div>
+  <div class="hero-content">
+    <div class="autopsy-label">Album Autopsy · 027</div>
+    <div class="hero-artist">Kendrick Lamar</div>
+    <div class="hero-album">Mr. Morale &amp; the Big Steppers</div>
+    <div class="hero-meta">pgLang · Aftermath · Interscope · 2022</div>
+    <div class="hero-rule"></div>
+    <div class="scroll-hint">Scroll to dissect</div>
+  </div>
+</section>
+
+<div class="verdict-bar">He came back after five years, made a therapy album, and asked whether honesty is supposed to make you feel better or just make you true. It doesn't feel good. That's the whole point.</div>
+
+<section class="score-section">
+  <div class="score-inner">
+    <div class="score-display reveal">
+      <div class="score-number" id="scoreCounter">0<span>.0</span></div>
+      <div class="score-label">Overall Score</div>
+    </div>
+    <div class="reveal">
+      <div class="score-verdict">"An album about the limits of self-knowledge. Not healing - just looking directly at the thing. Five years away and the return is uncomfortable on purpose."</div>
+      <div class="score-defense">9.0 because the double album format is honest about its own excess. The first disc barely has a weak moment. The second disc has two or three tracks working through an idea in real time rather than delivering one - and you can feel the difference. Mother I Sober is the most vulnerable thing Kendrick has ever recorded and it's on disc two, which is the correct choice: you have to earn that. Auntie Diaries is the most contested track in his catalog and the argument about it will outlast the album. Count Me Out is the best pure rap track on the record and received a third of the attention it deserved. Rich Spirit sounds like nothing else he's made before or since.</div>
+    </div>
+  </div>
+</section>
+
+<div class="themes-section">
+  <div class="section">
+    <div class="section-label reveal">Central Thesis</div>
+    <div class="section-title reveal">What <em>This Album Is Really About</em></div>
+    <div class="theme-pills reveal"><span class="pill active">Therapy as Incomplete Solution</span><span class="pill">The Savior Trap</span><span class="pill">Inherited Damage</span><span class="pill">Accountability Without Grace</span></div>
+    <div class="themes-grid reveal">
+    <div class="theme-card">
+      <span class="theme-card-icon">🛋️</span>
+      <div class="theme-card-title">Therapy as Incomplete Solution</div>
+      <div class="theme-card-text">Going to therapy isn't portrayed as resolution. It's portrayed as the beginning of an honesty that doesn't resolve into comfort. You look at the thing directly and then you still have to live with it. The album refuses the redemption arc.</div>
+    </div>
+    <div class="theme-card">
+      <span class="theme-card-icon">👑</span>
+      <div class="theme-card-title">The Savior Trap</div>
+      <div class="theme-card-text">Savior dismantles the prophet role explicitly. "I can't save you if I can't save myself." The first disc is the dismantling. The second disc is what happens after - what it costs to refuse the crown people built for you while you were away.</div>
+    </div>
+    <div class="theme-card">
+      <span class="theme-card-icon">🧬</span>
+      <div class="theme-card-title">Inherited Damage</div>
+      <div class="theme-card-text">The through-line is generational transmission - not the abstraction of it, but the specific mechanism. Father Time names it. Mother I Sober proves it. The damage doesn't start with you and it won't end with you just because you can see it now.</div>
+    </div>
+    <div class="theme-card">
+      <span class="theme-card-icon">⚖️</span>
+      <div class="theme-card-title">Accountability Without Grace</div>
+      <div class="theme-card-text">The album's central argument: accountability without grace is just punishment reassigned. Kendrick can name everything he's done wrong and still not be free of it. Mirror ends the album with "I choose me, I'm sorry" - which is resolution and rupture simultaneously.</div>
+    </div></div>
+  </div>
+</div>
+
+<section class="quote-section">
+  <div class="quote-bg"></div>
+  <div class="quote-text reveal"><span class="quote-mark">"</span>I choose me, I'm sorry.</div>
+  <div class="quote-attr reveal">Kendrick Lamar · Mr. Morale &amp; the Big Steppers · 2022</div>
+</section>
+
+<section class="tracks-section">
+  <div class="tracks-inner">
+    <div class="section-label reveal">Track by Track</div>
+    <div class="section-title reveal">The <em>Dissection</em></div>
+    <div id="trackList" class="reveal">
+    <div class="track-item">
+      <div class="track-header"><span class="track-num">01</span><span class="track-name">United in Grief</span><div class="track-right"><div class="track-score-bar"><div class="track-score-fill" data-score="9.5"></div></div><span class="track-score-num">9.5</span><span class="track-expand-icon">▼</span></div></div>
+      <div class="track-body"><div class="track-body-inner">The album opens with a count. 1855 hours of therapy. The grief isn't dramatized - it's quantified, which is more unsettling. The beat deconstructs itself halfway through and so does Kendrick.</div></div>
+    </div>
+    <div class="track-item">
+      <div class="track-header"><span class="track-num">02</span><span class="track-name">N95</span><div class="track-right"><div class="track-score-bar"><div class="track-score-fill" data-score="9.4"></div></div><span class="track-score-num">9.4</span><span class="track-expand-icon">▼</span></div></div>
+      <div class="track-body"><div class="track-body-inner">Take off the mask. Take off the persona. Take off the relevance performance. The album's most direct rejection of the game - delivered with so much energy it sounds like a party track, which is the joke.</div></div>
+    </div>
+    <div class="track-item">
+      <div class="track-header"><span class="track-num">03</span><span class="track-name">Worldwide Steppers</span><div class="track-right"><div class="track-score-bar"><div class="track-score-fill" data-score="8.8"></div></div><span class="track-score-num">8.8</span><span class="track-expand-icon">▼</span></div></div>
+      <div class="track-body"><div class="track-body-inner">The album's most uncomfortable honesty arrives third, embedded inside something that sounds like a flex. Blunt. He's not asking forgiveness here - he's naming things that don't get named.</div></div>
+    </div>
+    <div class="track-item">
+      <div class="track-header"><span class="track-num">04</span><span class="track-name">Die Hard (feat. Blxst &amp; Amanda Reifer)</span><div class="track-right"><div class="track-score-bar"><div class="track-score-fill" data-score="8.9"></div></div><span class="track-score-num">8.9</span><span class="track-expand-icon">▼</span></div></div>
+      <div class="track-body"><div class="track-body-inner">The most accessible track on disc one and none the worse for it. Blxst and Amanda Reifer add texture without diluting the album's temperature.</div></div>
+    </div>
+    <div class="track-item">
+      <div class="track-header"><span class="track-num">05</span><span class="track-name">Father Time (feat. Sampha)</span><div class="track-right"><div class="track-score-bar"><div class="track-score-fill" data-score="9.6"></div></div><span class="track-score-num">9.6</span><span class="track-expand-icon">▼</span></div></div>
+      <div class="track-body"><div class="track-body-inner">Sampha's presence is the correct choice - his voice is already carrying grief when he arrives. Kendrick's verse about his father is not cathartic. It's honest, which is harder. The best track on disc one.</div></div>
+    </div>
+    <div class="track-item">
+      <div class="track-header"><span class="track-num">06</span><span class="track-name">Rich Spirit</span><div class="track-right"><div class="track-score-bar"><div class="track-score-fill" data-score="9.1"></div></div><span class="track-score-num">9.1</span><span class="track-expand-icon">▼</span></div></div>
+      <div class="track-body"><div class="track-body-inner">Sounds like nothing else he's made. The production is minimal in a way his records rarely are. The quietude is the argument - stillness as self-preservation, not laziness.</div></div>
+    </div>
+    <div class="track-item">
+      <div class="track-header"><span class="track-num">07</span><span class="track-name">We Cry Together (feat. Taylour Paige)</span><div class="track-right"><div class="track-score-bar"><div class="track-score-fill" data-score="9.2"></div></div><span class="track-score-num">9.2</span><span class="track-expand-icon">▼</span></div></div>
+      <div class="track-body"><div class="track-body-inner">Seven minutes of a fight. Not a metaphor - an actual recorded argument between two people who are hurting each other. Taylour Paige is not a feature - she's a co-lead. Impossible to listen to casually and that's exactly the point.</div></div>
+    </div>
+    <div class="track-item">
+      <div class="track-header"><span class="track-num">08</span><span class="track-name">Purple Hearts (feat. Summer Walker &amp; Ghostemane)</span><div class="track-right"><div class="track-score-bar"><div class="track-score-fill" data-score="8.7"></div></div><span class="track-score-num">8.7</span><span class="track-expand-icon">▼</span></div></div>
+      <div class="track-body"><div class="track-body-inner">Disc one closes here. The war imagery is not decorative - the album has been staging an interior conflict and this is its ceasefire. Ghostemane's inclusion is the album's most surprising production choice and one of its best.</div></div>
+    </div>
+    <div class="track-item">
+      <div class="track-header"><span class="track-num">09</span><span class="track-name">Count Me Out</span><div class="track-right"><div class="track-score-bar"><div class="track-score-fill" data-score="9.3"></div></div><span class="track-score-num">9.3</span><span class="track-expand-icon">▼</span></div></div>
+      <div class="track-body"><div class="track-body-inner">The best pure rap track on the record. Disc two opens with something that sounds like old Kendrick - except old Kendrick didn't have this vocabulary. The track got a third of the attention it deserved.</div></div>
+    </div>
+    <div class="track-item">
+      <div class="track-header"><span class="track-num">10</span><span class="track-name">Silent Hill (feat. Kodak Black)</span><div class="track-right"><div class="track-score-bar"><div class="track-score-fill" data-score="8.5"></div></div><span class="track-score-num">8.5</span><span class="track-expand-icon">▼</span></div></div>
+      <div class="track-body"><div class="track-body-inner">Kodak Black is on the album deliberately - Kendrick is testing his own judgment about who deserves grace, knowing you'll test it too. The discomfort is intentional. You're supposed to argue about this.</div></div>
+    </div>
+    <div class="track-item">
+      <div class="track-header"><span class="track-num">11</span><span class="track-name">Savior (feat. Baby Keem &amp; Sam Dew)</span><div class="track-right"><div class="track-score-bar"><div class="track-score-fill" data-score="9.0"></div></div><span class="track-score-num">9.0</span><span class="track-expand-icon">▼</span></div></div>
+      <div class="track-body"><div class="track-body-inner">The explicit refusal of the prophet role. "They won't believe it till I'm gone." The irony is that the song is probably right - and the album proves it, because people are still calling him a prophet anyway.</div></div>
+    </div>
+    <div class="track-item">
+      <div class="track-header"><span class="track-num">12</span><span class="track-name">Auntie Diaries</span><div class="track-right"><div class="track-score-bar"><div class="track-score-fill" data-score="9.1"></div></div><span class="track-score-num">9.1</span><span class="track-expand-icon">▼</span></div></div>
+      <div class="track-body"><div class="track-body-inner">The most debated track in his catalog. Either the most careful or the most careless treatment of a trans family member in hip-hop - and the fact that the answer isn't settled is either the album's greatest achievement or its most significant evasion. Both arguments are serious.</div></div>
+    </div>
+    <div class="track-item">
+      <div class="track-header"><span class="track-num">13</span><span class="track-name">Mr. Morale (feat. Tanna Leone)</span><div class="track-right"><div class="track-score-bar"><div class="track-score-fill" data-score="8.8"></div></div><span class="track-score-num">8.8</span><span class="track-expand-icon">▼</span></div></div>
+      <div class="track-body"><div class="track-body-inner">The title track arrives penultimate and sounds like the weight of its position. Tanna Leone earns his placement. The album is almost over and Kendrick still hasn't resolved anything.</div></div>
+    </div>
+    <div class="track-item">
+      <div class="track-header"><span class="track-num">14</span><span class="track-name">Mother I Sober (feat. Beth Gibbons)</span><div class="track-right"><div class="track-score-bar"><div class="track-score-fill" data-score="9.7"></div></div><span class="track-score-num">9.7</span><span class="track-expand-icon">▼</span></div></div>
+      <div class="track-body"><div class="track-body-inner">Beth Gibbons sings. Kendrick talks to his mother about what was done to him as a child. This is the most exposed he has ever been on record - by a significant margin. The album ends here. Mirror is the epilogue.</div></div>
+    </div>
+    <div class="track-item">
+      <div class="track-header"><span class="track-num">15</span><span class="track-name">Mirror</span><div class="track-right"><div class="track-score-bar"><div class="track-score-fill" data-score="9.0"></div></div><span class="track-score-num">9.0</span><span class="track-expand-icon">▼</span></div></div>
+      <div class="track-body"><div class="track-body-inner">"I choose me, I'm sorry." Four words that resolve nothing and say everything. The album ends by choosing the self - which the album has also spent 75 minutes demonstrating is broken. That's not a contradiction. That's the whole argument.</div></div>
+    </div></div>
+  </div>
+</section>
+
+<section class="chart-section">
+  <div class="chart-inner">
+    <div class="section-label reveal">Score Breakdown</div>
+    <div class="section-title reveal">Every Track, <em>Ranked</em></div>
+    <div class="chart-bars reveal" id="chartBars">
+    <div class="bar-row"><div class="bar-label">Mother I Sober</div><div class="bar-track"><div class="bar-fill" data-score="9.7"></div></div><div class="bar-val">9.7</div></div>
+    <div class="bar-row"><div class="bar-label">Father Time</div><div class="bar-track"><div class="bar-fill" data-score="9.6"></div></div><div class="bar-val">9.6</div></div>
+    <div class="bar-row"><div class="bar-label">United in Grief</div><div class="bar-track"><div class="bar-fill" data-score="9.5"></div></div><div class="bar-val">9.5</div></div>
+    <div class="bar-row"><div class="bar-label">N95</div><div class="bar-track"><div class="bar-fill" data-score="9.4"></div></div><div class="bar-val">9.4</div></div>
+    <div class="bar-row"><div class="bar-label">Count Me Out</div><div class="bar-track"><div class="bar-fill" data-score="9.3"></div></div><div class="bar-val">9.3</div></div>
+    <div class="bar-row"><div class="bar-label">We Cry Together</div><div class="bar-track"><div class="bar-fill" data-score="9.2"></div></div><div class="bar-val">9.2</div></div>
+    <div class="bar-row"><div class="bar-label">Rich Spirit</div><div class="bar-track"><div class="bar-fill" data-score="9.1"></div></div><div class="bar-val">9.1</div></div>
+    <div class="bar-row"><div class="bar-label">Auntie Diaries</div><div class="bar-track"><div class="bar-fill" data-score="9.1"></div></div><div class="bar-val">9.1</div></div>
+    <div class="bar-row"><div class="bar-label">Savior</div><div class="bar-track"><div class="bar-fill" data-score="9.0"></div></div><div class="bar-val">9.0</div></div>
+    <div class="bar-row"><div class="bar-label">Mirror</div><div class="bar-track"><div class="bar-fill" data-score="9.0"></div></div><div class="bar-val">9.0</div></div>
+    <div class="bar-row"><div class="bar-label">Die Hard</div><div class="bar-track"><div class="bar-fill" data-score="8.9"></div></div><div class="bar-val">8.9</div></div>
+    <div class="bar-row"><div class="bar-label">Worldwide Steppers</div><div class="bar-track"><div class="bar-fill" data-score="8.8"></div></div><div class="bar-val">8.8</div></div>
+    <div class="bar-row"><div class="bar-label">Mr. Morale</div><div class="bar-track"><div class="bar-fill" data-score="8.8"></div></div><div class="bar-val">8.8</div></div>
+    <div class="bar-row"><div class="bar-label">Purple Hearts</div><div class="bar-track"><div class="bar-fill" data-score="8.7"></div></div><div class="bar-val">8.7</div></div>
+    <div class="bar-row"><div class="bar-label">Silent Hill</div><div class="bar-track"><div class="bar-fill" data-score="8.5"></div></div><div class="bar-val">8.5</div></div>
+    </div>
+  </div>
+</section>
+
+<div class="footnote-section">
+  <div class="section-label reveal" style="text-align:center;">Footnote</div>
+  <div class="footnote-text reveal">He was gone five years. The album has no singles, no radio rollout, no lead-up press cycle. It arrived. The cover is a crown of thorns and a child on his shoulders. He's telling you the cost of the role before you press play.</div>
+</div>
+
+<footer>
+  <div class="footer-sig reveal">Album Autopsy - A structured dissection of records that matter.</div>
+  <div class="divider"></div>
+  <a href="index.html" class="back-link reveal">← Back to All Autopsies</a>
+  <div class="footer-brand">@MyParentsDidntLeaveForThis</div>
+</footer>
+
+<script>
+  window.addEventListener('scroll', () => {
+    const p = (window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100;
+    document.getElementById('progress').style.width = p + '%';
+  });
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (!e.isIntersecting) return;
+      e.target.classList.add('visible');
+      if (e.target.id === 'scoreCounter') {
+        animateScore(0, 9.0, 1600);
+        document.getElementById('navScore').classList.add('visible');
+      }
+    });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+  if(document.getElementById('scoreCounter')) observer.observe(document.getElementById('scoreCounter'));
+  const tlObs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (!e.isIntersecting) return;
+      e.target.querySelectorAll('.track-score-fill').forEach((f,i) => {
+        setTimeout(() => { f.style.transform = `scaleX(${parseFloat(f.dataset.score)/10})`; }, i * 55);
+      });
+      tlObs.unobserve(e.target);
+    });
+  }, { threshold: 0.08 });
+  const tl = document.getElementById('trackList');
+  if(tl) tlObs.observe(tl);
+  const chObs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (!e.isIntersecting) return;
+      e.target.querySelectorAll('.bar-fill').forEach((f,i) => {
+        setTimeout(() => { const s = parseFloat(f.dataset.score); f.style.transform = `scaleX(${Math.max(0,(s-6)/4)})`; }, i * 70);
+      });
+      chObs.unobserve(e.target);
+    });
+  }, { threshold: 0.08 });
+  const cb = document.getElementById('chartBars');
+  if(cb) chObs.observe(cb);
+  function animateScore(from, to, duration) {
+    const el = document.getElementById('scoreCounter');
+    if(!el) return;
+    const start = performance.now();
+    (function tick(now) {
+      const p = Math.min((now - start) / duration, 1);
+      const ease = 1 - Math.pow(1 - p, 3);
+      const val = from + (to - from) * ease;
+      const int = Math.floor(val);
+      const dec = Math.round((val - int) * 10);
+      el.innerHTML = int + '<span>.' + dec + '</span>';
+      if(p < 1) requestAnimationFrame(tick);
+    })(start);
+  }
+  document.querySelectorAll('.track-item').forEach(item => {
+    item.querySelector('.track-header').addEventListener('click', () => {
+      const body = item.querySelector('.track-body');
+      const open = item.classList.toggle('open');
+      body.style.maxHeight = open ? body.scrollHeight + 'px' : '0';
+    });
+  });
+  document.querySelectorAll('.pill').forEach(pill => {
+    pill.addEventListener('click', () => {
+      document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+      pill.classList.add('active');
+    });
+  });
+</script>
+</body>
+</html>

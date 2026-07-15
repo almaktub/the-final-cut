@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SOS - Album Autopsy</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #080809; --bg2: #0e0e10; --bg3: #131315;
+    --accent: #2a5a9a; --accent-dark: #1a3a6a;
+    --gold: #c9a84c; --text: #eae6de; --muted: #6e6a64;
+    --border: rgba(255,255,255,0.055);
+    --font-display: 'Bebas Neue', sans-serif;
+    --font-serif: 'Playfair Display', serif;
+    --font-body: 'DM Sans', sans-serif;
+  }
+  html { scroll-behavior: smooth; }
+  body { background: var(--bg); color: var(--text); font-family: var(--font-body); font-weight: 300; line-height: 1.7; overflow-x: hidden; }
+  body::before { content:''; position:fixed; inset:0; background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E"); pointer-events:none; z-index:9999; opacity:0.45; }
+  .progress-bar { position:fixed; top:0; left:0; height:2px; background:var(--accent); z-index:200; width:0%; transition: width 0.1s linear; }
+  nav { position:fixed; top:0; left:0; right:0; padding:1.1rem 2.5rem; display:flex; justify-content:space-between; align-items:center; z-index:100; background:linear-gradient(to bottom, rgba(8,8,9,0.92), transparent); }
+  .nav-back { font-family:var(--font-display); letter-spacing:0.25em; font-size:0.7rem; color:var(--muted); text-decoration:none; transition:color 0.2s; }
+  .nav-back:hover { color:var(--accent); }
+  .nav-score { font-family:var(--font-display); font-size:1.1rem; color:var(--accent); opacity:0; transition:opacity 0.4s; }
+  .nav-score.visible { opacity:1; }
+  .hero { min-height:100vh; display:flex; flex-direction:column; justify-content:center; align-items:center; position:relative; overflow:hidden; padding:4rem 2rem; text-align:center; }
+  .hero-bg { position:absolute; inset:0; background: radial-gradient(ellipse 80% 55% at 50% 45%, #2a5a9a18 0%, transparent 68%), var(--bg); z-index:0; }
+  .hero-lines { position:absolute; inset:0; background-image:repeating-linear-gradient(0deg, transparent, transparent 78px, rgba(255,255,255,0.011) 78px, rgba(255,255,255,0.011) 79px); z-index:0; }
+  .hero-content { position:relative; z-index:1; }
+  .autopsy-label { font-family:var(--font-display); letter-spacing:0.4em; font-size:0.72rem; color:var(--accent); text-transform:uppercase; margin-bottom:1.8rem; opacity:0; animation:fadeUp 0.8s ease 0.2s forwards; }
+  .hero-artist { font-family:var(--font-display); font-size:clamp(4rem,16vw,14rem); line-height:0.88; letter-spacing:-0.02em; color:var(--text); opacity:0; animation:fadeUp 0.8s ease 0.4s forwards; }
+  .hero-album { font-family:var(--font-serif); font-style:italic; font-size:clamp(1.2rem,4vw,3rem); color:var(--gold); margin-top:0.6rem; opacity:0; animation:fadeUp 0.8s ease 0.6s forwards; line-height:1.25; }
+  .hero-meta { font-family:var(--font-display); letter-spacing:0.3em; font-size:0.85rem; color:var(--muted); margin-top:1.5rem; opacity:0; animation:fadeUp 0.8s ease 0.8s forwards; }
+  .hero-rule { width:1px; height:70px; background:linear-gradient(to bottom, var(--accent), transparent); margin:3rem auto 0; opacity:0; animation:fadeUp 0.8s ease 1s forwards; }
+  .scroll-hint { font-size:0.68rem; letter-spacing:0.35em; color:var(--muted); text-transform:uppercase; margin-top:0.8rem; opacity:0; animation:fadeUp 0.8s ease 1.2s forwards; }
+  .verdict-bar { background:var(--accent); padding:1.1rem 2rem; text-align:center; font-family:var(--font-body); font-size:0.92rem; color:rgba(255,255,255,0.95); font-weight:500; line-height:1.5; }
+  .score-section { background:var(--bg2); border-top:1px solid var(--border); border-bottom:1px solid var(--border); }
+  .score-inner { max-width:920px; margin:0 auto; padding:6rem 2rem; display:grid; grid-template-columns:1fr 1.5fr; gap:5rem; align-items:center; }
+  @media(max-width:640px){.score-inner{grid-template-columns:1fr;gap:2.5rem;}}
+  .score-display { text-align:center; }
+  .score-number { font-family:var(--font-display); font-size:clamp(5.5rem,16vw,11rem); line-height:1; color:var(--text); }
+  .score-number span { color:var(--accent); }
+  .score-label { font-family:var(--font-display); letter-spacing:0.35em; font-size:0.75rem; color:var(--muted); margin-top:0.4rem; }
+  .score-verdict { font-family:var(--font-serif); font-style:italic; font-size:1.3rem; line-height:1.55; margin-bottom:1.5rem; color:var(--text); }
+  .score-defense { font-size:0.88rem; color:var(--muted); line-height:1.85; }
+  .section { max-width:920px; margin:0 auto; padding:6rem 2rem; }
+  .section-label { font-family:var(--font-display); letter-spacing:0.4em; font-size:0.68rem; color:var(--accent); text-transform:uppercase; margin-bottom:1.4rem; }
+  .section-title { font-family:var(--font-serif); font-size:clamp(1.8rem,4.5vw,3.2rem); font-weight:900; line-height:1.1; margin-bottom:2.5rem; }
+  .section-title em { font-style:italic; color:var(--gold); }
+  .pill { padding:0.35rem 0.9rem; border:1px solid var(--border); border-radius:2px; font-size:0.7rem; letter-spacing:0.15em; text-transform:uppercase; font-family:var(--font-display); color:var(--text); background:transparent; transition:all 0.2s; cursor:default; }
+  .pill:hover, .pill.active { border-color:var(--accent); color:var(--accent); background:#2a5a9a14; }
+  .theme-pills { display:flex; flex-wrap:wrap; gap:0.45rem; margin:0 0 3rem; }
+  .themes-section { background:var(--bg2); border-top:1px solid var(--border); }
+  .themes-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:1.5px; background:var(--border); border:1px solid var(--border); }
+  .theme-card { background:var(--bg2); padding:2.2rem 1.8rem; transition:background 0.2s; cursor:default; position:relative; overflow:hidden; }
+  .theme-card::before { content:''; position:absolute; top:0; left:0; width:3px; height:0; background:var(--accent); transition:height 0.3s; }
+  .theme-card:hover::before { height:100%; }
+  .theme-card:hover { background:var(--bg3); }
+  .theme-card-icon { font-size:1.8rem; margin-bottom:0.9rem; display:block; }
+  .theme-card-title { font-family:var(--font-serif); font-size:1rem; font-weight:700; margin-bottom:0.6rem; }
+  .theme-card-text { font-size:0.82rem; color:var(--muted); line-height:1.75; }
+  .quote-section { padding:7rem 2rem; text-align:center; position:relative; overflow:hidden; }
+  .quote-bg { position:absolute; inset:0; background:radial-gradient(ellipse 55% 55% at 50% 50%, #2a5a9a0a 0%, transparent 70%); }
+  .quote-mark { font-family:var(--font-serif); font-size:7rem; line-height:0; vertical-align:-1.8rem; color:#2a5a9a35; margin-right:0.05em; }
+  .quote-text { font-family:var(--font-serif); font-style:italic; font-size:clamp(1.4rem,3.5vw,2.5rem); line-height:1.35; max-width:680px; margin:0 auto; position:relative; z-index:1; }
+  .quote-attr { margin-top:2rem; font-size:0.72rem; letter-spacing:0.3em; text-transform:uppercase; color:var(--muted); font-family:var(--font-display); position:relative; z-index:1; }
+  .tracks-section { background:var(--bg); border-top:1px solid var(--border); }
+  .tracks-inner { max-width:920px; margin:0 auto; padding:6rem 2rem; }
+  .track-item { border-bottom:1px solid var(--border); overflow:hidden; cursor:pointer; transition:background 0.15s; }
+  .track-item:first-of-type { border-top:1px solid var(--border); }
+  .track-item:hover { background:rgba(255,255,255,0.018); }
+  .track-header { display:grid; grid-template-columns:3rem 1fr auto; align-items:center; gap:1.2rem; padding:1.1rem 0; }
+  .track-num { font-family:var(--font-display); font-size:0.75rem; color:var(--muted); letter-spacing:0.1em; }
+  .track-name { font-family:var(--font-serif); font-size:1rem; font-weight:700; }
+  .track-right { display:flex; align-items:center; gap:1.2rem; }
+  .track-score-bar { width:70px; height:3px; background:rgba(255,255,255,0.08); border-radius:2px; overflow:hidden; }
+  .track-score-fill { height:100%; background:var(--accent); transform-origin:left; transform:scaleX(0); transition:transform 0.8s ease; border-radius:2px; }
+  .track-score-num { font-family:var(--font-display); font-size:0.95rem; color:var(--muted); min-width:2.2rem; text-align:right; }
+  .track-expand-icon { font-size:0.55rem; color:var(--muted); transition:transform 0.3s; }
+  .track-item.open .track-expand-icon { transform:rotate(180deg); }
+  .track-body { max-height:0; overflow:hidden; transition:max-height 0.38s ease; }
+  .track-body-inner { padding:0 0 1.4rem 0; margin-left:4.2rem; color:var(--muted); font-size:0.87rem; line-height:1.8; border-left:2px solid var(--accent); padding-left:1.4rem; }
+  .chart-section { background:var(--bg3); border-top:1px solid var(--border); border-bottom:1px solid var(--border); }
+  .chart-inner { max-width:920px; margin:0 auto; padding:6rem 2rem; }
+  .chart-bars { display:flex; flex-direction:column; gap:0.85rem; margin-top:3rem; }
+  .bar-row { display:grid; grid-template-columns:170px 1fr 2.8rem; align-items:center; gap:1rem; }
+  @media(max-width:500px){.bar-row{grid-template-columns:90px 1fr 2.5rem;}}
+  .bar-label { font-size:0.78rem; color:var(--muted); text-align:right; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .bar-track { height:5px; background:rgba(255,255,255,0.055); border-radius:3px; overflow:hidden; }
+  .bar-fill { height:100%; background:linear-gradient(90deg, var(--accent), var(--gold)); transform-origin:left; transform:scaleX(0); transition:transform 0.85s ease; border-radius:3px; }
+  .bar-val { font-family:var(--font-display); font-size:0.88rem; color:var(--text); }
+  .footnote-section { padding:5rem 2rem; text-align:center; border-top:1px solid var(--border); background:var(--bg2); }
+  .footnote-text { font-family:var(--font-serif); font-style:italic; font-size:1rem; color:var(--muted); line-height:1.85; max-width:640px; margin:0 auto; }
+  footer { padding:3.5rem 2rem; text-align:center; border-top:1px solid var(--border); }
+  .footer-sig { font-family:var(--font-serif); font-style:italic; font-size:0.88rem; color:var(--muted); }
+  .footer-brand { font-family:var(--font-display); letter-spacing:0.4em; font-size:0.68rem; color:rgba(255,255,255,0.12); margin-top:1.8rem; }
+  .divider { width:36px; height:1px; background:var(--accent); margin:1.8rem auto; }
+  .back-link { display:inline-block; margin-top:2rem; font-family:var(--font-display); letter-spacing:0.25em; font-size:0.72rem; color:var(--accent); text-decoration:none; border:1px solid var(--accent); padding:0.6rem 1.4rem; transition:all 0.2s; }
+  .back-link:hover { background:var(--accent); color:#fff; }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(28px)} to{opacity:1;transform:translateY(0)} }
+  .reveal { opacity:0; transform:translateY(38px); transition:opacity 0.7s ease, transform 0.7s ease; }
+  .reveal.visible { opacity:1; transform:translateY(0); }
+</style>
+</head>
+<body>
+<div class="progress-bar" id="progress"></div>
+<nav>
+  <a href="index.html" class="nav-back">← All Autopsies</a>
+  <div class="nav-score" id="navScore">8.4 / 10</div>
+</nav>
+
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-lines"></div>
+  <div class="hero-content">
+    <div class="autopsy-label">Album Autopsy · 067</div>
+    <div class="hero-artist">SZA</div>
+    <div class="hero-album">SOS</div>
+    <div class="hero-meta">TDE / RCA · 2022 · R&amp;B / Alt-R&amp;B · 60 min</div>
+    <div class="hero-rule"></div>
+    <div class="scroll-hint">Scroll to dissect</div>
+  </div>
+</section>
+
+<div class="verdict-bar">Sixty minutes of SZA being honest about wanting things she knows she shouldn't want, and refusing to make that honesty tidy.</div>
+
+<section class="score-section">
+  <div class="score-inner">
+    <div class="score-display reveal">
+      <div class="score-number" id="scoreCounter">0<span>.0</span></div>
+      <div class="score-label">Overall Score</div>
+    </div>
+    <div class="reveal">
+      <div class="score-verdict">"Sixty minutes of SZA being honest about wanting things she knows she shouldn't want, and refusing to make that honesty tidy."</div>
+      <div class="score-defense">8.4 because SOS contains at least six songs as good as anything on Ctrl, and is also twenty-three tracks long. The math is the problem. Kill Bill, Shirt, Good Days, I Hate U, Ghost in the Machine, Special - if you cut this to fourteen tracks it's a 9.2. As released it rewards the listener who stays and punishes the listener who can't. The best R&B album of 2022 by a distance, and the most frustrating to rate because the grade is an average of an album that keeps switching between extraordinary and merely decent. SZA is too talented for filler. SOS has some.</div>
+    </div>
+  </div>
+</section>
+
+<div class="themes-section">
+  <div class="section">
+    <div class="section-label reveal">Central Thesis</div>
+    <div class="section-title reveal">What <em>This Album Is Really About</em></div>
+    <div class="theme-pills reveal"><span class="pill active">Desire Without Resolution</span><span class="pill">Obsession as Survival</span><span class="pill">The Ex as Mirror</span><span class="pill">Rage Dressed as Pop</span></div>
+    <div class="themes-grid reveal">
+    <div class="theme-card">
+      <span class="theme-card-icon">🌊</span>
+      <div class="theme-card-title">Desire Without Resolution</div>
+      <div class="theme-card-text">SOS doesn't give you the part where she moves on. The album sits inside the wanting - the wanting to be loved back, to be right, to be the person she was before things went wrong. No resolution is offered because she doesn't have one. That's the whole record.</div>
+    </div>
+    <div class="theme-card">
+      <span class="theme-card-icon">🔪</span>
+      <div class="theme-card-title">Obsession as Survival</div>
+      <div class="theme-card-text">Kill Bill is the thesis statement: I love you so much I might kill you. It's a joke with real edges. The album returns to this territory repeatedly - obsession not as pathology but as the shape of someone who feels things at full volume and can't turn it down.</div>
+    </div>
+    <div class="theme-card">
+      <span class="theme-card-icon">🪟</span>
+      <div class="theme-card-title">The Ex as Mirror</div>
+      <div class="theme-card-text">The unnamed other person on most of these songs isn't really the subject - SZA is. The exes and situationships are surfaces she looks at herself in. What she finds is complicated enough that sixty minutes doesn't fully account for it.</div>
+    </div>
+    <div class="theme-card">
+      <span class="theme-card-icon">🎸</span>
+      <div class="theme-card-title">Rage Dressed as Pop</div>
+      <div class="theme-card-text">The production is broader than Ctrl - rock guitars, harder drums, genres SZA had no business sounding comfortable in. She sounds comfortable in all of them. The expansion isn't dilution. It's what happens when an artist decides the container was too small.</div>
+    </div></div>
+  </div>
+</div>
+
+<section class="quote-section">
+  <div class="quote-bg"></div>
+  <div class="quote-text reveal"><span class="quote-mark">"</span>I might kill my ex, not the best idea.</div>
+  <div class="quote-attr reveal">SZA · Kill Bill · 2022</div>
+</section>
+
+<section class="tracks-section">
+  <div class="tracks-inner">
+    <div class="section-label reveal">Track by Track</div>
+    <div class="section-title reveal">The <em>Dissection</em></div>
+    <div id="trackList" class="reveal">
+    <div class="track-item"><div class="track-header"><span class="track-num">01</span><span class="track-name">SOS</span><div class="track-right"><div class="track-score-bar"><div class="track-score-fill" data-score="8.5"></div></div><span class="track-score-num">8.5</span><span class="track-expand-icon">▼</span></div></div><div class="track-body"><div class="track-body-inner">A distress signal as album opener. The production has a rawness the rest of the album sometimes trades for polish. Sets the emotional register correctly: this is someone who needs help and is not entirely sure what kind.</div></div></div>
+    <div class="track-item"><div class="track-header"><span class="track-num">02</span><span class="track-name">Kill Bill</span><div class="track-right"><div class="track-score-bar"><div class="track-score-fill" data-score="9.4"></div></div><span class="track-score-num">9.4</span><span class="track-expand-icon">▼</span></div></div><div class="track-body"><div class="track-body-inner">The album's signature track for a reason. A love-as-murderous-obsession concept delivered with such lightness that the darkness sneaks up on you. The hook is instant. The implication is not funny at all. The gap between the two is where the song lives.</div></div></div>
+    <div class="track-item"><div class="track-header"><span class="track-num">03</span><span class="track-name">Seek &amp; Destroy</span><div class="track-right"><div class="track-score-bar"><div class="track-score-fill" data-score="8.3"></div></div><span class="track-score-num">8.3</span><span class="track-expand-icon">▼</span></div></div><div class="track-body"><div class="track-body-inner">The rock energy works here - SZA on a harder production mode she inhabits confidently. Not as sharp as what surrounds it but earns its placement as the momentum track after Kill Bill.</div></div></div>
+    <div class="track-item"><div class="track-header"><span class="track-num">04</span><span class="track-name">Low</span><div class="track-right"><div class="track-score-bar"><div class="track-score-fill" data-score="8.7"></div></div><span class="track-score-num">8.7</span><span class="track-expand-icon">▼</span></div></div><div class="track-body"><div class="track-body-inner">A vulnerability track that doesn't apologize for the vulnerability. The production creates space around her voice that makes the lyric about being at your lowest feel appropriately exposed.</div></div></div>
+    <div class="track-item"><div class="track-header"><span class="track-num">05</span><span class="track-name">Love Language</span><div class="track-right"><div class="track-score-bar"><div class="track-score-fill" data-score="8.2"></div></div><span class="track-score-num">8.2</span><span class="track-expand-icon">▼</span></div></div><div class="track-body"><div class="track-body-inner">Works as a mood piece. Not a standout - a connector between the album's stronger runs. The love languages concept is handled with more specificity than the premise usually gets.</div></div></div>
+    <div class="track-item"><div class="track-header"><span class="track-num">06</span><span class="track-name">Blind</span><div class="track-right"><div class="track-score-bar"><div class="track-score-fill" data-score="8.5"></div></div><span class="track-score-num">8.5</span><span class="track-expand-icon">▼</span></div></div><div class="track-body"><div class="track-body-inner">The production here is some of the album's most interesting - a stripped arrangement that trusts the vocal to carry the emotional weight, which it does.</div></div></div>
+    <div class="track-item"><div class="track-header"><span class="track-num">07</span><span class="track-name">Gone Girl</span><div class="track-right"><div class="track-score-bar"><div class="track-score-fill" data-score="8.4"></div></div><span class="track-score-num">8.4</span><span class="track-expand-icon">▼</span></div></div><div class="track-body"><div class="track-body-inner">The Gone Girl reference is exact: a woman who has disappeared into someone else's idea of her and is deciding whether to come back. Good track in the middle of an album that has too many good tracks to let any one of them be great.</div></div></div>
+    <div class="track-item"><div class="track-header"><span class="track-num">08</span><span class="track-name">Smoking on My Ex Pack</span><div class="track-right"><div class="track-score-bar"><div class="track-score-fill" data-score="8.0"></div></div><span class="track-score-num">8.0</span><span class="track-expand-icon">▼</span></div></div><div class="track-body"><div class="track-body-inner">A minor moment. The title is the most interesting thing on the track. Functions as filler in an album that can't afford much of it.</div></div></div>
+    <div class="track-item"><div class="track-header"><span class="track-num">09</span><span class="track-name">Nobody Gets Me</span><div class="track-right"><div class="track-score-bar"><div class="track-score-fill" data-score="8.6"></div></div><span class="track-score-num">8.6</span><span class="track-expand-icon">▼</span></div></div><div class="track-body"><div class="track-body-inner">One of the more melodically complete tracks on the record. The self-pity in the title is earned by the specificity of the lyric - she's not asking you to agree, just to listen. The distinction matters.</div></div></div>
+    <div class="track-item"><div class="track-header"><span class="track-num">10</span><span class="track-name">F2F</span><div class="track-right"><div class="track-score-bar"><div class="track-score-fill" data-score="8.1"></div></div><span class="track-score-num">8.1</span><span class="track-expand-icon">▼</span></div></div><div class="track-body"><div class="track-body-inner">Face to face. Physical presence as the only honest form of communication after everything digital has failed. A minor track that makes its point concisely.</div></div></div>
+    <div class="track-item"><div class="track-header"><span class="track-num">11</span><span class="track-name">Conceited</span><div class="track-right"><div class="track-score-bar"><div class="track-score-fill" data-score="8.2"></div></div><span class="track-score-num">8.2</span><span class="track-expand-icon">▼</span></div></div><div class="track-body"><div class="track-body-inner">Self-love as defense mechanism. The production is the track's best feature - the drums particularly. SZA reclaiming the conceited label with enough swagger that you believe her.</div></div></div>
+    <div class="track-item"><div class="track-header"><span class="track-num">12</span><span class="track-name">Special</span><div class="track-right"><div class="track-score-bar"><div class="track-score-fill" data-score="8.8"></div></div><span class="track-score-num">8.8</span><span class="track-expand-icon">▼</span></div></div><div class="track-body"><div class="track-body-inner">A quiet devastation. The specific ache of having been exactly what someone needed and still not being chosen. The vocal restraint makes it hit harder than anything louder around it would.</div></div></div>
+    <div class="track-item"><div class="track-header"><span class="track-num">13</span><span class="track-name">Notice Me</span><div class="track-right"><div class="track-score-bar"><div class="track-score-fill" data-score="8.0"></div></div><span class="track-score-num">8.0</span><span class="track-expand-icon">▼</span></div></div><div class="track-body"><div class="track-body-inner">The most nakedly simple lyric on the album - and it almost works because of it. Sometimes a direct statement of need lands harder than a literary one. This is in the almost column.</div></div></div>
+    <div class="track-item"><div class="track-header"><span class="track-num">14</span><span class="track-name">Shirt</span><div class="track-right"><div class="track-score-bar"><div class="track-score-fill" data-score="9.0"></div></div><span class="track-score-num">9.0</span><span class="track-expand-icon">▼</span></div></div><div class="track-body"><div class="track-body-inner">A standout late arrival in the tracklist. A sexual confidence track that's also a power reclamation - the shirt as object, as symbol, as thing she doesn't owe back. One of the more original production moments on the album and one of her best vocals.</div></div></div>
+    <div class="track-item"><div class="track-header"><span class="track-num">15</span><span class="track-name">Open Arms</span><div class="track-right"><div class="track-score-bar"><div class="track-score-fill" data-score="8.3"></div></div><span class="track-score-num">8.3</span><span class="track-expand-icon">▼</span></div></div><div class="track-body"><div class="track-body-inner">The Travis Scott collaboration works better than it should. He doesn't try to match her register and she doesn't condescend to his. A song about second-chance vulnerability with a production that sounds like the 3am it's describing.</div></div></div>
+    <div class="track-item"><div class="track-header"><span class="track-num">16</span><span class="track-name">I Hate U</span><div class="track-right"><div class="track-score-bar"><div class="track-score-fill" data-score="9.1"></div></div><span class="track-score-num">9.1</span><span class="track-expand-icon">▼</span></div></div><div class="track-body"><div class="track-body-inner">The pre-album single that proved SZA hadn't just replicated Ctrl. The chord progression is the emotional argument - resigned, circular, going somewhere it's been before. One of her most vocally assured performances. The title is the whole thing: she hates him and misses him and those are the same feeling.</div></div></div>
+    <div class="track-item"><div class="track-header"><span class="track-num">17</span><span class="track-name">Good Days</span><div class="track-right"><div class="track-score-bar"><div class="track-score-fill" data-score="8.9"></div></div><span class="track-score-num">8.9</span><span class="track-expand-icon">▼</span></div></div><div class="track-body"><div class="track-body-inner">The other pre-album single. A psychedelic R&B track about trying to be okay when you're not. The production floats in a way that captures dissociation more accurately than most songs that try. 'I'll wait for good days' is not optimistic - it's patient, which is different.</div></div></div>
+    <div class="track-item"><div class="track-header"><span class="track-num">18</span><span class="track-name">Forgiveless</span><div class="track-right"><div class="track-score-bar"><div class="track-score-fill" data-score="8.4"></div></div><span class="track-score-num">8.4</span><span class="track-expand-icon">▼</span></div></div><div class="track-body"><div class="track-body-inner">The Ol' Dirty Bastard sample is the best decision on the track. SZA refusing forgiveness as an act of self-preservation rather than pettiness. The energy is harder than most of the album and works for it.</div></div></div>
+    <div class="track-item"><div class="track-header"><span class="track-num">19</span><span class="track-name">Too Late</span><div class="track-right"><div class="track-score-bar"><div class="track-score-fill" data-score="8.1"></div></div><span class="track-score-num">8.1</span><span class="track-expand-icon">▼</span></div></div><div class="track-body"><div class="track-body-inner">A minor album track. Well executed, not essential. The tiredness of 'too late' as a concept shows at this point in a 23-track record.</div></div></div>
+    <div class="track-item"><div class="track-header"><span class="track-num">20</span><span class="track-name">Far</span><div class="track-right"><div class="track-score-bar"><div class="track-score-fill" data-score="8.5"></div></div><span class="track-score-num">8.5</span><span class="track-expand-icon">▼</span></div></div><div class="track-body"><div class="track-body-inner">Distance as protection. A late-album track that earns its quietness by arriving when the record has earned the right to go soft. Her vocal here is exceptional - measured in a way that makes the emotion register more precisely.</div></div></div>
+    <div class="track-item"><div class="track-header"><span class="track-num">21</span><span class="track-name">Wish You the Worst</span><div class="track-right"><div class="track-score-bar"><div class="track-score-fill" data-score="8.3"></div></div><span class="track-score-num">8.3</span><span class="track-expand-icon">▼</span></div></div><div class="track-body"><div class="track-body-inner">Not wishing them well. Not cursing them. Wishing them the worst in that specific register where meanness and honesty become indistinguishable. Gets at a real feeling most break-up songs avoid because it's less sympathetic than the singer.</div></div></div>
+    <div class="track-item"><div class="track-header"><span class="track-num">22</span><span class="track-name">Ghost in the Machine</span><div class="track-right"><div class="track-score-bar"><div class="track-score-fill" data-score="8.6"></div></div><span class="track-score-num">8.6</span><span class="track-expand-icon">▼</span></div></div><div class="track-body"><div class="track-body-inner">The Phoebe Bridgers collaboration is the album's most unexpected moment and one of its best. Two voices about absence and digital haunting finding a register neither could have built alone. A late-album standout that makes you wish the collaboration had its own EP.</div></div></div>
+    <div class="track-item"><div class="track-header"><span class="track-num">23</span><span class="track-name">Used</span><div class="track-right"><div class="track-score-bar"><div class="track-score-fill" data-score="8.0"></div></div><span class="track-score-num">8.0</span><span class="track-expand-icon">▼</span></div></div><div class="track-body"><div class="track-body-inner">An understated closer. Not a statement - more like the album getting off the phone while it still can. The quietest ending she could have chosen for sixty minutes of noise. The exhaustion in it is honest.</div></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="chart-section">
+  <div class="chart-inner">
+    <div class="section-label reveal">Score Breakdown</div>
+    <div class="section-title reveal">Every Track, <em>Ranked</em></div>
+    <div class="chart-bars reveal" id="chartBars">
+    <div class="bar-row"><div class="bar-label">Kill Bill</div><div class="bar-track"><div class="bar-fill" data-score="9.4"></div></div><div class="bar-val">9.4</div></div>
+    <div class="bar-row"><div class="bar-label">I Hate U</div><div class="bar-track"><div class="bar-fill" data-score="9.1"></div></div><div class="bar-val">9.1</div></div>
+    <div class="bar-row"><div class="bar-label">Shirt</div><div class="bar-track"><div class="bar-fill" data-score="9.0"></div></div><div class="bar-val">9.0</div></div>
+    <div class="bar-row"><div class="bar-label">Good Days</div><div class="bar-track"><div class="bar-fill" data-score="8.9"></div></div><div class="bar-val">8.9</div></div>
+    <div class="bar-row"><div class="bar-label">Special</div><div class="bar-track"><div class="bar-fill" data-score="8.8"></div></div><div class="bar-val">8.8</div></div>
+    <div class="bar-row"><div class="bar-label">Low</div><div class="bar-track"><div class="bar-fill" data-score="8.7"></div></div><div class="bar-val">8.7</div></div>
+    <div class="bar-row"><div class="bar-label">Nobody Gets Me</div><div class="bar-track"><div class="bar-fill" data-score="8.6"></div></div><div class="bar-val">8.6</div></div>
+    <div class="bar-row"><div class="bar-label">Ghost in the Machine</div><div class="bar-track"><div class="bar-fill" data-score="8.6"></div></div><div class="bar-val">8.6</div></div>
+    <div class="bar-row"><div class="bar-label">SOS</div><div class="bar-track"><div class="bar-fill" data-score="8.5"></div></div><div class="bar-val">8.5</div></div>
+    <div class="bar-row"><div class="bar-label">Blind</div><div class="bar-track"><div class="bar-fill" data-score="8.5"></div></div><div class="bar-val">8.5</div></div>
+    <div class="bar-row"><div class="bar-label">Far</div><div class="bar-track"><div class="bar-fill" data-score="8.5"></div></div><div class="bar-val">8.5</div></div>
+    <div class="bar-row"><div class="bar-label">Gone Girl</div><div class="bar-track"><div class="bar-fill" data-score="8.4"></div></div><div class="bar-val">8.4</div></div>
+    <div class="bar-row"><div class="bar-label">Forgiveless</div><div class="bar-track"><div class="bar-fill" data-score="8.4"></div></div><div class="bar-val">8.4</div></div>
+    <div class="bar-row"><div class="bar-label">Seek &amp; Destroy</div><div class="bar-track"><div class="bar-fill" data-score="8.3"></div></div><div class="bar-val">8.3</div></div>
+    <div class="bar-row"><div class="bar-label">Open Arms</div><div class="bar-track"><div class="bar-fill" data-score="8.3"></div></div><div class="bar-val">8.3</div></div>
+    <div class="bar-row"><div class="bar-label">Wish You the Worst</div><div class="bar-track"><div class="bar-fill" data-score="8.3"></div></div><div class="bar-val">8.3</div></div>
+    <div class="bar-row"><div class="bar-label">Love Language</div><div class="bar-track"><div class="bar-fill" data-score="8.2"></div></div><div class="bar-val">8.2</div></div>
+    <div class="bar-row"><div class="bar-label">Conceited</div><div class="bar-track"><div class="bar-fill" data-score="8.2"></div></div><div class="bar-val">8.2</div></div>
+    <div class="bar-row"><div class="bar-label">F2F</div><div class="bar-track"><div class="bar-fill" data-score="8.1"></div></div><div class="bar-val">8.1</div></div>
+    <div class="bar-row"><div class="bar-label">Too Late</div><div class="bar-track"><div class="bar-fill" data-score="8.1"></div></div><div class="bar-val">8.1</div></div>
+    <div class="bar-row"><div class="bar-label">Smoking on My Ex Pack</div><div class="bar-track"><div class="bar-fill" data-score="8.0"></div></div><div class="bar-val">8.0</div></div>
+    <div class="bar-row"><div class="bar-label">Notice Me</div><div class="bar-track"><div class="bar-fill" data-score="8.0"></div></div><div class="bar-val">8.0</div></div>
+    <div class="bar-row"><div class="bar-label">Used</div><div class="bar-track"><div class="bar-fill" data-score="8.0"></div></div><div class="bar-val">8.0</div></div>
+    </div>
+  </div>
+</section>
+
+<div class="footnote-section">
+  <div class="section-label reveal" style="text-align:center;">Footnote</div>
+  <div class="footnote-text reveal">SOS spent ten consecutive weeks at number one on the Billboard 200, the longest run by a female artist in the chart's history at that point. It was preceded by five years of no new studio material. The gap between Ctrl and SOS produced enormous commercial expectation, and SOS met it by refusing to be a safe album. Twenty-three tracks is not a commercial calculation. It's someone who had a lot to say and had been told to wait.</div>
+</div>
+
+<footer>
+  <div class="footer-sig reveal">Album Autopsy - A structured dissection of records that matter.</div>
+  <div class="divider"></div>
+  <a href="index.html" class="back-link reveal">← Back to All Autopsies</a>
+  <div class="footer-brand">@MyParentsDidntLeaveForThis</div>
+</footer>
+
+<script>
+  window.addEventListener('scroll', () => {
+    const p = (window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100;
+    document.getElementById('progress').style.width = p + '%';
+  });
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (!e.isIntersecting) return;
+      e.target.classList.add('visible');
+      if (e.target.id === 'scoreCounter') {
+        animateScore(0, 8.4, 1600);
+        document.getElementById('navScore').classList.add('visible');
+      }
+    });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+  if(document.getElementById('scoreCounter')) observer.observe(document.getElementById('scoreCounter'));
+  const tlObs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (!e.isIntersecting) return;
+      e.target.querySelectorAll('.track-score-fill').forEach((f,i) => {
+        setTimeout(() => { f.style.transform = `scaleX(${parseFloat(f.dataset.score)/10})`; }, i * 55);
+      });
+      tlObs.unobserve(e.target);
+    });
+  }, { threshold: 0.08 });
+  const tl = document.getElementById('trackList');
+  if(tl) tlObs.observe(tl);
+  const chObs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (!e.isIntersecting) return;
+      e.target.querySelectorAll('.bar-fill').forEach((f,i) => {
+        setTimeout(() => { const s = parseFloat(f.dataset.score); f.style.transform = `scaleX(${Math.max(0,(s-6)/4)})`; }, i * 70);
+      });
+      chObs.unobserve(e.target);
+    });
+  }, { threshold: 0.08 });
+  const cb = document.getElementById('chartBars');
+  if(cb) chObs.observe(cb);
+  function animateScore(from, to, duration) {
+    const el = document.getElementById('scoreCounter');
+    if(!el) return;
+    const start = performance.now();
+    (function tick(now) {
+      const p = Math.min((now - start) / duration, 1);
+      const ease = 1 - Math.pow(1 - p, 3);
+      const val = from + (to - from) * ease;
+      const int = Math.floor(val);
+      const dec = Math.round((val - int) * 10);
+      el.innerHTML = int + '<span>.' + dec + '</span>';
+      if(p < 1) requestAnimationFrame(tick);
+    })(start);
+  }
+  document.querySelectorAll('.track-item').forEach(item => {
+    item.querySelector('.track-header').addEventListener('click', () => {
+      const body = item.querySelector('.track-body');
+      const open = item.classList.toggle('open');
+      body.style.maxHeight = open ? body.scrollHeight + 'px' : '0';
+    });
+  });
+  document.querySelectorAll('.pill').forEach(pill => {
+    pill.addEventListener('click', () => {
+      document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+      pill.classList.add('active');
+    });
+  });
+</script>
+</body>
+</html>

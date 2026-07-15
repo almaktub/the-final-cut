@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>In Rainbows - Album Autopsy</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0a0508;
+    --bg2: #110a0e;
+    --bg3: #180d12;
+    --accent: #c0392b;
+    --accent2: #e74c3c;
+    --gold: #e8a090;
+    --text: #f0e8e4;
+    --muted: #7a6060;
+    --border: rgba(192,57,43,0.1);
+    --font-display: 'Bebas Neue', sans-serif;
+    --font-serif: 'Playfair Display', serif;
+    --font-body: 'DM Sans', sans-serif;
+  }
+  html { scroll-behavior: smooth; }
+  body { background: var(--bg); color: var(--text); font-family: var(--font-body); font-weight: 300; line-height: 1.7; overflow-x: hidden; }
+  /* deep blood-red grain */
+  body::before { content:''; position:fixed; inset:0; background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.055'/%3E%3C/svg%3E"); pointer-events:none; z-index:9999; opacity:0.5; }
+  .progress-bar { position:fixed; top:0; left:0; height:2px; background:linear-gradient(90deg, var(--accent), var(--gold)); z-index:200; width:0%; transition: width 0.1s linear; }
+  nav { position:fixed; top:0; left:0; right:0; padding:1.1rem 2.5rem; display:flex; justify-content:space-between; align-items:center; z-index:100; background:linear-gradient(to bottom, rgba(10,5,8,0.95), transparent); }
+  .nav-back { font-family:var(--font-display); letter-spacing:0.25em; font-size:0.7rem; color:var(--muted); text-decoration:none; transition:color 0.2s; }
+  .nav-back:hover { color:var(--accent); }
+  .nav-score { font-family:var(--font-display); font-size:1.1rem; color:var(--accent); opacity:0; transition:opacity 0.4s; }
+  .nav-score.visible { opacity:1; }
+
+  /* HERO - warm deep red, like the album art layers */
+  .hero { min-height:100vh; display:flex; flex-direction:column; justify-content:center; align-items:center; position:relative; overflow:hidden; padding:4rem 2rem; text-align:center; }
+  .hero-bg { position:absolute; inset:0; background:
+    radial-gradient(ellipse 60% 50% at 50% 40%, rgba(192,57,43,0.14) 0%, transparent 65%),
+    radial-gradient(ellipse 35% 35% at 20% 70%, rgba(231,76,60,0.06) 0%, transparent 55%),
+    radial-gradient(ellipse 30% 30% at 80% 20%, rgba(192,57,43,0.05) 0%, transparent 50%),
+    var(--bg); z-index:0; }
+  /* concentric ring motif from cover art */
+  .hero-rings { position:absolute; inset:0; z-index:0; overflow:hidden; }
+  .hero-rings::before {
+    content:'';
+    position:absolute; top:50%; left:50%;
+    transform:translate(-50%,-50%);
+    width:900px; height:900px;
+    border-radius:50%;
+    background:
+      radial-gradient(circle at center, transparent 38%, rgba(192,57,43,0.04) 38.5%, transparent 39%),
+      radial-gradient(circle at center, transparent 48%, rgba(192,57,43,0.03) 48.5%, transparent 49%),
+      radial-gradient(circle at center, transparent 58%, rgba(192,57,43,0.025) 58.5%, transparent 59%),
+      radial-gradient(circle at center, transparent 68%, rgba(192,57,43,0.02) 68.5%, transparent 69%);
+  }
+  .hero-content { position:relative; z-index:1; }
+  .autopsy-label { font-family:var(--font-display); letter-spacing:0.4em; font-size:0.72rem; color:var(--accent); text-transform:uppercase; margin-bottom:1.8rem; opacity:0; animation:fadeUp 0.8s ease 0.2s forwards; }
+  .hero-artist { font-family:var(--font-display); font-size:clamp(4rem,16vw,14rem); line-height:0.88; letter-spacing:-0.02em; color:var(--text); opacity:0; animation:fadeUp 0.8s ease 0.4s forwards; }
+  .hero-album { font-family:var(--font-serif); font-style:italic; font-size:clamp(1.2rem,4vw,3.2rem); color:var(--gold); margin-top:0.6rem; opacity:0; animation:fadeUp 0.8s ease 0.6s forwards; line-height:1.25; }
+  .hero-meta { font-family:var(--font-display); letter-spacing:0.3em; font-size:0.85rem; color:var(--muted); margin-top:1.5rem; opacity:0; animation:fadeUp 0.8s ease 0.8s forwards; }
+  .hero-rule { width:1px; height:70px; background:linear-gradient(to bottom, var(--accent), transparent); margin:3rem auto 0; opacity:0; animation:fadeUp 0.8s ease 1s forwards; }
+  .scroll-hint { font-size:0.68rem; letter-spacing:0.35em; color:var(--muted); text-transform:uppercase; margin-top:0.8rem; opacity:0; animation:fadeUp 0.8s ease 1.2s forwards; }
+  .verdict-bar { background:linear-gradient(90deg, var(--accent), #922b21); padding:1.1rem 2rem; text-align:center; font-size:0.92rem; color:rgba(255,255,255,0.9); font-weight:400; line-height:1.5; }
+
+  /* SCORE */
+  .score-section { background:var(--bg2); border-top:1px solid var(--border); border-bottom:1px solid var(--border); }
+  .score-inner { max-width:920px; margin:0 auto; padding:6rem 2rem; display:grid; grid-template-columns:1fr 1.5fr; gap:5rem; align-items:center; }
+  @media(max-width:640px){.score-inner{grid-template-columns:1fr;gap:2.5rem;}}
+  .score-display { text-align:center; }
+  .score-number { font-family:var(--font-display); font-size:clamp(5.5rem,16vw,11rem); line-height:1; color:var(--text); }
+  .score-number span { color:var(--accent); }
+  .score-label { font-family:var(--font-display); letter-spacing:0.35em; font-size:0.75rem; color:var(--muted); margin-top:0.4rem; }
+  .score-verdict { font-family:var(--font-serif); font-style:italic; font-size:1.3rem; line-height:1.55; margin-bottom:1.5rem; color:var(--text); }
+  .score-defense { font-size:0.88rem; color:var(--muted); line-height:1.85; }
+
+  /* SECTIONS */
+  .section { max-width:920px; margin:0 auto; padding:6rem 2rem; }
+  .section-label { font-family:var(--font-display); letter-spacing:0.4em; font-size:0.68rem; color:var(--accent); text-transform:uppercase; margin-bottom:1.4rem; }
+  .section-title { font-family:var(--font-serif); font-size:clamp(1.8rem,4.5vw,3.2rem); font-weight:900; line-height:1.1; margin-bottom:2.5rem; }
+  .section-title em { font-style:italic; color:var(--gold); }
+
+  /* THEMES */
+  .pill { padding:0.35rem 0.9rem; border:1px solid var(--border); border-radius:2px; font-size:0.7rem; letter-spacing:0.15em; text-transform:uppercase; font-family:var(--font-display); color:var(--text); background:transparent; transition:all 0.2s; cursor:default; }
+  .pill:hover, .pill.active { border-color:var(--accent); color:var(--accent); background:rgba(192,57,43,0.08); }
+  .theme-pills { display:flex; flex-wrap:wrap; gap:0.45rem; margin:0 0 3rem; }
+  .themes-section { background:var(--bg2); border-top:1px solid var(--border); }
+  .themes-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:1.5px; background:var(--border); border:1px solid var(--border); }
+  .theme-card { background:var(--bg2); padding:2.2rem 1.8rem; transition:background 0.2s; cursor:default; position:relative; overflow:hidden; }
+  .theme-card::before { content:''; position:absolute; top:0; left:0; width:3px; height:0; background:var(--accent); transition:height 0.3s; }
+  .theme-card:hover::before { height:100%; }
+  .theme-card:hover { background:var(--bg3); }
+  .theme-card-icon { font-size:1.8rem; margin-bottom:0.9rem; display:block; }
+  .theme-card-title { font-family:var(--font-serif); font-size:1rem; font-weight:700; margin-bottom:0.6rem; }
+  .theme-card-text { font-size:0.82rem; color:var(--muted); line-height:1.75; }
+
+  /* EASTER EGG BOX */
+  .egg-section { background:var(--bg3); border-top:1px solid var(--border); border-bottom:1px solid var(--border); }
+  .egg-inner { max-width:920px; margin:0 auto; padding:5rem 2rem; }
+  .egg-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:1px; background:var(--border); border:1px solid var(--border); margin-top:2.5rem; }
+  .egg-card { background:var(--bg3); padding:2rem 1.6rem; position:relative; }
+  .egg-card::after { content:'🥚'; position:absolute; top:1.2rem; right:1.4rem; font-size:1rem; opacity:0.4; }
+  .egg-num { font-family:var(--font-display); font-size:2.5rem; line-height:1; color:rgba(192,57,43,0.2); margin-bottom:0.6rem; }
+  .egg-title { font-family:var(--font-serif); font-size:0.95rem; font-weight:700; margin-bottom:0.5rem; }
+  .egg-text { font-size:0.8rem; color:var(--muted); line-height:1.75; }
+
+  /* QUOTE */
+  .quote-section { padding:7rem 2rem; text-align:center; position:relative; overflow:hidden; }
+  .quote-bg { position:absolute; inset:0; background:radial-gradient(ellipse 55% 55% at 50% 50%, rgba(192,57,43,0.07) 0%, transparent 70%); }
+  .quote-mark { font-family:var(--font-serif); font-size:7rem; line-height:0; vertical-align:-1.8rem; color:rgba(192,57,43,0.18); margin-right:0.05em; }
+  .quote-text { font-family:var(--font-serif); font-style:italic; font-size:clamp(1.4rem,3.5vw,2.5rem); line-height:1.35; max-width:680px; margin:0 auto; position:relative; z-index:1; }
+  .quote-attr { margin-top:2rem; font-size:0.72rem; letter-spacing:0.3em; text-transform:uppercase; color:var(--muted); font-family:var(--font-display); position:relative; z-index:1; }
+
+  /* TRACKS */
+  .tracks-section { background:var(--bg); border-top:1px solid var(--border); }
+  .tracks-inner { max-width:920px; margin:0 auto; padding:6rem 2rem; }
+  .track-item { border-bottom:1px solid var(--border); overflow:hidden; cursor:pointer; transition:background 0.15s; }
+  .track-item:first-of-type { border-top:1px solid var(--border); }
+  .track-item:hover { background:rgba(192,57,43,0.025); }
+  .track-header { display:grid; grid-template-columns:3rem 1fr auto; align-items:center; gap:1.2rem; padding:1.1rem 0; }
+  .track-num { font-family:var(--font-display); font-size:0.75rem; color:var(--muted); letter-spacing:0.1em; }
+  .track-name { font-family:var(--font-serif); font-size:1rem; font-weight:700; }
+  .track-right { display:flex; align-items:center; gap:1.2rem; }
+  .track-score-bar { width:70px; height:3px; background:rgba(255,255,255,0.06); border-radius:2px; overflow:hidden; }
+  .track-score-fill { height:100%; background:linear-gradient(90deg, var(--accent), var(--gold)); transform-origin:left; transform:scaleX(0); transition:transform 0.8s ease; border-radius:2px; }
+  .track-score-num { font-family:var(--font-display); font-size:0.95rem; color:var(--muted); min-width:2.2rem; text-align:right; }
+  .track-expand-icon { font-size:0.55rem; color:var(--muted); transition:transform 0.3s; }
+  .track-item.open .track-expand-icon { transform:rotate(180deg); }
+  .track-body { max-height:0; overflow:hidden; transition:max-height 0.38s ease; }
+  .track-body-inner { padding:0 0 1.4rem 0; margin-left:4.2rem; color:var(--muted); font-size:0.87rem; line-height:1.8; border-left:2px solid var(--accent); padding-left:1.4rem; }
+
+  /* CHART */
+  .chart-section { background:var(--bg3); border-top:1px solid var(--border); border-bottom:1px solid var(--border); }
+  .chart-inner { max-width:920px; margin:0 auto; padding:6rem 2rem; }
+  .chart-bars { display:flex; flex-direction:column; gap:0.85rem; margin-top:3rem; }
+  .bar-row { display:grid; grid-template-columns:170px 1fr 2.8rem; align-items:center; gap:1rem; }
+  @media(max-width:500px){.bar-row{grid-template-columns:90px 1fr 2.5rem;}}
+  .bar-label { font-size:0.78rem; color:var(--muted); text-align:right; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .bar-track { height:5px; background:rgba(255,255,255,0.05); border-radius:3px; overflow:hidden; }
+  .bar-fill { height:100%; background:linear-gradient(90deg, var(--accent), var(--gold)); transform-origin:left; transform:scaleX(0); transition:transform 0.85s ease; border-radius:3px; }
+  .bar-val { font-family:var(--font-display); font-size:0.88rem; color:var(--text); }
+
+  .footnote-section { padding:5rem 2rem; text-align:center; border-top:1px solid var(--border); background:var(--bg2); }
+  .footnote-text { font-family:var(--font-serif); font-style:italic; font-size:1rem; color:var(--muted); line-height:1.85; max-width:640px; margin:0 auto; }
+  footer { padding:3.5rem 2rem; text-align:center; border-top:1px solid var(--border); }
+  .footer-sig { font-family:var(--font-serif); font-style:italic; font-size:0.88rem; color:var(--muted); }
+  .footer-brand { font-family:var(--font-display); letter-spacing:0.4em; font-size:0.68rem; color:rgba(255,255,255,0.1); margin-top:1.8rem; }
+  .divider { width:36px; height:1px; background:var(--accent); margin:1.8rem auto; }
+  .back-link { display:inline-block; margin-top:2rem; font-family:var(--font-display); letter-spacing:0.25em; font-size:0.72rem; color:var(--accent); text-decoration:none; border:1px solid var(--accent); padding:0.6rem 1.4rem; transition:all 0.2s; }
+  .back-link:hover { background:var(--accent); color:#fff; }
+
+  @keyframes fadeUp { from{opacity:0;transform:translateY(28px)} to{opacity:1;transform:translateY(0)} }
+  .reveal { opacity:0; transform:translateY(38px); transition:opacity 0.7s ease, transform 0.7s ease; }
+  .reveal.visible { opacity:1; transform:translateY(0); }
+</style>
+</head>
+<body>
+<div class="progress-bar" id="progress"></div>
+<nav>
+  <a href="index.html" class="nav-back">← All Autopsies</a>
+  <div class="nav-score" id="navScore">9.6 / 10</div>
+</nav>
+
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-rings"></div>
+  <div class="hero-content">
+    <div class="autopsy-label">Album Autopsy · 009</div>
+    <div class="hero-artist">Radiohead</div>
+    <div class="hero-album">In Rainbows</div>
+    <div class="hero-meta">Self-Released · 2007</div>
+    <div class="hero-rule"></div>
+    <div class="scroll-hint">Scroll to dissect</div>
+  </div>
+</section>
+
+<div class="verdict-bar">Their most human album. The paranoia is still there but it's turned inward - this is Thom Yorke in a body, wanting things, afraid of wanting them. The most approachable Radiohead record is also the most quietly devastating.</div>
+
+<section class="score-section">
+  <div class="score-inner">
+    <div class="score-display reveal">
+      <div class="score-number" id="scoreCounter">0<span>.0</span></div>
+      <div class="score-label">Overall Score</div>
+    </div>
+    <div class="reveal">
+      <div class="score-verdict">"The paranoia turned inward. Radiohead discovered desire and were terrified by it. The result is their warmest, most corporeal album - and their most quietly heartbroken."</div>
+      <div class="score-defense">9.6 because it is the rare late-career record that represents genuine arrival rather than consolidation. After Kid A and Amnesiac explored what a band could be without hooks, In Rainbows brought back melody - but drenched in something accumulated. Every song sounds like it costs something. Videotape is the single best album closer in the catalog. The point-four deduction is for the back half losing slight momentum between Reckoner and House of Cards, which is a minor complaint about a near-perfect record.</div>
+    </div>
+  </div>
+</section>
+
+<div class="themes-section">
+  <div class="section">
+    <div class="section-label reveal">Central Thesis</div>
+    <div class="section-title reveal">What <em>This Album Is Really About</em></div>
+    <div class="theme-pills reveal">
+      <span class="pill active">The Body as Threat</span>
+      <span class="pill">Desire Without Safety</span>
+      <span class="pill">Mortality as Texture</span>
+      <span class="pill">Intimacy Under Glass</span>
+    </div>
+    <div class="themes-grid reveal">
+      <div class="theme-card">
+        <span class="theme-card-icon">🩸</span>
+        <div class="theme-card-title">The Body as Threat</div>
+        <div class="theme-card-text">Radiohead had spent years dissolving the self into machines. In Rainbows puts the body back - sweating, wanting, failing. "All I need is the air I breathe and a place to rest my head." That's not transcendence. That's a person at the end of something.</div>
+      </div>
+      <div class="theme-card">
+        <span class="theme-card-icon">🔥</span>
+        <div class="theme-card-title">Desire Without Safety</div>
+        <div class="theme-card-text">Nude, Weird Fishes, House of Cards - the album is saturated with longing that knows it's dangerous. Thom doesn't want things carelessly. He wants them with full knowledge of what wanting costs. That tension is the album's engine.</div>
+      </div>
+      <div class="theme-card">
+        <span class="theme-card-icon">⏳</span>
+        <div class="theme-card-title">Mortality as Texture</div>
+        <div class="theme-card-text">Videotape ends with a piano loop and a voice addressing death directly. Reckoner refers to a creature that takes people at the end of their lives. The whole record has the texture of something finite. Like they knew exactly how much time was left.</div>
+      </div>
+      <div class="theme-card">
+        <span class="theme-card-icon">🔬</span>
+        <div class="theme-card-title">Intimacy Under Glass</div>
+        <div class="theme-card-text">Even at its warmest - 15 Step, All I Need - there's a clinical distance. The production is close but observed. Like watching yourself feel something from across a room. It's intimacy filtered through a mind that can't quite trust it.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<section class="quote-section">
+  <div class="quote-bg"></div>
+  <div class="quote-text reveal"><span class="quote-mark">"</span>I will see you in the next life.</div>
+  <div class="quote-attr reveal">Thom Yorke · Videotape · 2007</div>
+</section>
+
+<!-- EASTER EGGS -->
+<section class="egg-section">
+  <div class="egg-inner">
+    <div class="section-label reveal">Rare Frequencies</div>
+    <div class="section-title reveal">Things You <em>Didn't Know</em></div>
+    <div class="egg-grid reveal">
+      <div class="egg-card">
+        <div class="egg-num">01</div>
+        <div class="egg-title">Pay What You Want</div>
+        <div class="egg-text">In Rainbows was the first major album released on a "pay what you want" model in October 2007. Fans could download it for literally nothing. The physical discbox - with a vinyl, CD, and booklet - sold for £40. It outsold everything they'd released on Parlophone. The experiment proved the record industry wrong and they never really recovered from the data.</div>
+      </div>
+      <div class="egg-card">
+        <div class="egg-num">02</div>
+        <div class="egg-title">Videotape's Haunted Piano</div>
+        <div class="egg-text">Videotape was performed live for over two years before the band could figure out how to record it. Every studio version sounded wrong. The final version uses a piano loop that doesn't sit on the beat in the way you expect - it floats slightly. Jonny Greenwood described it as "a piece of music trying to resist its own ending." They never explained exactly how they finally got the take.</div>
+      </div>
+      <div class="egg-card">
+        <div class="egg-num">03</div>
+        <div class="egg-title">Weird Fishes - the Bass Line</div>
+        <div class="egg-text">Colin Greenwood's bass in Weird Fishes/Arpeggi plays a counter-melody to the guitar arpeggios that was entirely improvised in the studio. The band liked it so much they built the entire arrangement around it. The song has no traditional chorus - it just escalates and dissolves. Thom has called it one of the few times a song arrived fully formed.</div>
+      </div>
+      <div class="egg-card">
+        <div class="egg-num">04</div>
+        <div class="egg-title">Kid A / In Rainbows Theory</div>
+        <div class="egg-text">A widely-circulated fan theory holds that In Rainbows and Kid A were designed as companion albums - play them simultaneously, starting Kid A at track 1 and In Rainbows at track 1, and the musical phrases, rhythms, and lyrics align with unsettling precision. The band has never confirmed or denied it. Thom's response when asked: "That's… interesting." Then nothing.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="tracks-section">
+  <div class="tracks-inner">
+    <div class="section-label reveal">Track by Track</div>
+    <div class="section-title reveal">The <em>Dissection</em></div>
+    <div id="trackList" class="reveal">
+
+      <div class="track-item">
+        <div class="track-header"><span class="track-num">01</span><span class="track-name">15 Step</span><div class="track-right"><div class="track-score-bar"><div class="track-score-fill" data-score="9.2"></div></div><span class="track-score-num">9.2</span><span class="track-expand-icon">▼</span></div></div>
+        <div class="track-body"><div class="track-body-inner">Opens in 5/4 - an odd time signature that shouldn't feel as natural as it does. The children's choir at the end (recorded at a school in Oxford) was added almost as an afterthought and became the most quoted moment of the song. The title refers to the 15-step shuffle rhythm programmed by the band's touring programmer, Clive Deamer.</div></div>
+      </div>
+
+      <div class="track-item">
+        <div class="track-header"><span class="track-num">02</span><span class="track-name">Bodysnatchers</span><div class="track-right"><div class="track-score-bar"><div class="track-score-fill" data-score="9.0"></div></div><span class="track-score-num">9.0</span><span class="track-expand-icon">▼</span></div></div>
+        <div class="track-body"><div class="track-body-inner">The most aggressive thing on the record, and deliberately so - it's the album announcing it still has teeth before retreating into warmth. Jonny Greenwood's guitar riff was reportedly written in a few minutes during a soundcheck. It sounds like a body trying to escape something wearing its face.</div></div>
+      </div>
+
+      <div class="track-item">
+        <div class="track-header"><span class="track-num">03</span><span class="track-name">Nude</span><div class="track-right"><div class="track-score-bar"><div class="track-score-fill" data-score="9.5"></div></div><span class="track-score-num">9.5</span><span class="track-expand-icon">▼</span></div></div>
+        <div class="track-body"><div class="track-body-inner">First performed live in 1998 as "Big Ideas (Don't Get Any)" - Radiohead held it for nine years before finding the right arrangement. Worth the wait. The chord progression is deliberately unresolved; it circles but never quite lands. 'You'll go to hell for what your dirty mind is thinking.' Warm, terrifying, gorgeous.</div></div>
+      </div>
+
+      <div class="track-item">
+        <div class="track-header"><span class="track-num">04</span><span class="track-name">Weird Fishes/Arpeggi</span><div class="track-right"><div class="track-score-bar"><div class="track-score-fill" data-score="9.8"></div></div><span class="track-score-num">9.8</span><span class="track-expand-icon">▼</span></div></div>
+        <div class="track-body"><div class="track-body-inner">The album's structural and emotional centre. Four guitars playing interlocking arpeggios, Colin's bass improvised and then made permanent, Phil Selway's drums that come in like a tide. It has no chorus. It just builds until Thom sings 'I get eaten by the worms and weird fishes' and then falls apart beautifully. One of the ten best songs they've made.</div></div>
+      </div>
+
+      <div class="track-item">
+        <div class="track-header"><span class="track-num">05</span><span class="track-name">All I Need</span><div class="track-right"><div class="track-score-bar"><div class="track-score-fill" data-score="9.6"></div></div><span class="track-score-num">9.6</span><span class="track-expand-icon">▼</span></div></div>
+        <div class="track-body"><div class="track-body-inner">The most romantically terrifying song on the record. 'I am an animal trapped in your hot car.' That's love through a Radiohead filter - obsessive, slightly dangerous, entirely honest. The bass drone underneath never resolves. The UNICEF video pairing it with footage of child labour in sweatshops recontextualised it permanently.</div></div>
+      </div>
+
+      <div class="track-item">
+        <div class="track-header"><span class="track-num">06</span><span class="track-name">Faust Arp</span><div class="track-right"><div class="track-score-bar"><div class="track-score-fill" data-score="8.8"></div></div><span class="track-score-num">8.8</span><span class="track-expand-icon">▼</span></div></div>
+        <div class="track-body"><div class="track-body-inner">Two minutes of acoustic guitar and string quartet. Named as a portmanteau of Faust (the deal with the devil) and an arpeggio. The strings were arranged by Jonny, who had studied composition at the Royal Academy of Music. It's a palate cleanser that works because it feels genuinely fragile rather than decorative.</div></div>
+      </div>
+
+      <div class="track-item">
+        <div class="track-header"><span class="track-num">07</span><span class="track-name">Reckoner</span><div class="track-right"><div class="track-score-bar"><div class="track-score-fill" data-score="9.7"></div></div><span class="track-score-num">9.7</span><span class="track-expand-icon">▼</span></div></div>
+        <div class="track-body"><div class="track-body-inner">'Dedicated to all human beings.' A Reckoner in archaic English is a figure who arrives to collect the dead. The percussion loop has a heartbeat pattern that sits just off-tempo from the rest of the song. Thom's voice is processed into something barely human by the end. Beautiful and genuinely about death in the most matter-of-fact possible way.</div></div>
+      </div>
+
+      <div class="track-item">
+        <div class="track-header"><span class="track-num">10</span><span class="track-name">Videotape</span><div class="track-right"><div class="track-score-bar"><div class="track-score-fill" data-score="9.9"></div></div><span class="track-score-num">9.9</span><span class="track-expand-icon">▼</span></div></div>
+        <div class="track-body"><div class="track-body-inner">The best album closer in the Radiohead catalog. A man at the gates of heaven, recording his life on a videotape to prove he was there, that it mattered. The piano loop that ends the album plays over itself and doesn't line up - a rhythmic irregularity that Jonny confirmed was intentional. The loop is supposed to feel like time running out. It does.</div></div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<section class="chart-section">
+  <div class="chart-inner">
+    <div class="section-label reveal">Score Breakdown</div>
+    <div class="section-title reveal">Every Track, <em>Ranked</em></div>
+    <div class="chart-bars reveal" id="chartBars">
+      <div class="bar-row"><div class="bar-label">Videotape</div><div class="bar-track"><div class="bar-fill" data-score="9.9"></div></div><div class="bar-val">9.9</div></div>
+      <div class="bar-row"><div class="bar-label">Weird Fishes</div><div class="bar-track"><div class="bar-fill" data-score="9.8"></div></div><div class="bar-val">9.8</div></div>
+      <div class="bar-row"><div class="bar-label">Reckoner</div><div class="bar-track"><div class="bar-fill" data-score="9.7"></div></div><div class="bar-val">9.7</div></div>
+      <div class="bar-row"><div class="bar-label">All I Need</div><div class="bar-track"><div class="bar-fill" data-score="9.6"></div></div><div class="bar-val">9.6</div></div>
+      <div class="bar-row"><div class="bar-label">Nude</div><div class="bar-track"><div class="bar-fill" data-score="9.5"></div></div><div class="bar-val">9.5</div></div>
+      <div class="bar-row"><div class="bar-label">15 Step</div><div class="bar-track"><div class="bar-fill" data-score="9.2"></div></div><div class="bar-val">9.2</div></div>
+      <div class="bar-row"><div class="bar-label">Bodysnatchers</div><div class="bar-track"><div class="bar-fill" data-score="9.0"></div></div><div class="bar-val">9.0</div></div>
+      <div class="bar-row"><div class="bar-label">Faust Arp</div><div class="bar-track"><div class="bar-fill" data-score="8.8"></div></div><div class="bar-val">8.8</div></div>
+    </div>
+  </div>
+</section>
+
+<div class="footnote-section">
+  <div class="section-label reveal" style="text-align:center;">Footnote</div>
+  <div class="footnote-text reveal">In Rainbows was the first major album to be released entirely without a label, without a street date announcement, and without a promotional campaign. Radiohead emailed their mailing list on a Tuesday and said "it's ready, pay what you want." Within 24 hours it had more downloads than all their previous albums combined. The music industry had a meeting about it and still hasn't fully processed what happened.</div>
+</div>
+
+<footer>
+  <div class="footer-sig reveal">Album Autopsy - A structured dissection of records that matter.</div>
+  <div class="divider"></div>
+  <a href="index.html" class="back-link reveal">← Back to All Autopsies</a>
+  <div class="footer-brand">@MyParentsDidntLeaveForThis</div>
+</footer>
+
+<script>
+  window.addEventListener('scroll', () => {
+    const p = (window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100;
+    document.getElementById('progress').style.width = p + '%';
+  });
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (!e.isIntersecting) return;
+      e.target.classList.add('visible');
+      if (e.target.id === 'scoreCounter') { animateScore(0, 9.6, 1600); document.getElementById('navScore').classList.add('visible'); }
+    });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+  if(document.getElementById('scoreCounter')) observer.observe(document.getElementById('scoreCounter'));
+  const tlObs = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (!e.isIntersecting) return; e.target.querySelectorAll('.track-score-fill').forEach((f,i) => { setTimeout(() => { f.style.transform = `scaleX(${parseFloat(f.dataset.score)/10})`; }, i * 55); }); tlObs.unobserve(e.target); });
+  }, { threshold: 0.08 });
+  const tl = document.getElementById('trackList'); if(tl) tlObs.observe(tl);
+  const chObs = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (!e.isIntersecting) return; e.target.querySelectorAll('.bar-fill').forEach((f,i) => { setTimeout(() => { const s = parseFloat(f.dataset.score); f.style.transform = `scaleX(${Math.max(0,(s-6)/4)})`; }, i * 70); }); chObs.unobserve(e.target); });
+  }, { threshold: 0.08 });
+  const cb = document.getElementById('chartBars'); if(cb) chObs.observe(cb);
+  function animateScore(from, to, duration) {
+    const el = document.getElementById('scoreCounter'); if(!el) return;
+    const start = performance.now();
+    (function tick(now) { const p = Math.min((now - start) / duration, 1); const ease = 1 - Math.pow(1 - p, 3); const val = from + (to - from) * ease; const int = Math.floor(val); const dec = Math.round((val - int) * 10); el.innerHTML = int + '<span>.' + dec + '</span>'; if(p < 1) requestAnimationFrame(tick); })(start);
+  }
+  document.querySelectorAll('.track-item').forEach(item => {
+    item.querySelector('.track-header').addEventListener('click', () => { const body = item.querySelector('.track-body'); const open = item.classList.toggle('open'); body.style.maxHeight = open ? body.scrollHeight + 'px' : '0'; });
+  });
+  document.querySelectorAll('.pill').forEach(pill => {
+    pill.addEventListener('click', () => { document.querySelectorAll('.pill').forEach(p => p.classList.remove('active')); pill.classList.add('active'); });
+  });
+</script>
+</body>
+</html>

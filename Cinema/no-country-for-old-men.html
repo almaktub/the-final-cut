@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>No Country for Old Men - Final Cut</title>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Space+Grotesk:wght@300;400;500&family=IBM+Plex+Mono:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+  :root {
+    --bg:#0a0908; --bg2:#100f0c;
+    --accent:#a89968;
+    --accent-glow:rgba(168,153,104,0.15);
+    --text:#e9e4d8; --muted:#76705f;
+    --border:rgba(255,255,255,0.06);
+    --font-display:'Anton',sans-serif;
+    --font-body:'Space Grotesk',sans-serif;
+    --font-mono:'IBM Plex Mono',monospace;
+  }
+  html { scroll-behavior:smooth; }
+  body { background:var(--bg); color:var(--text); font-family:var(--font-body); font-weight:300; line-height:1.75; overflow-x:hidden; }
+  .progress-bar { position:fixed; top:0; left:0; height:2px; background:var(--accent); z-index:200; width:0%; transition:width 0.1s linear; }
+  nav { position:fixed; top:0; left:0; right:0; padding:1.1rem 2.2rem; display:flex; justify-content:space-between; align-items:center; z-index:100; background:linear-gradient(to bottom, rgba(10,9,8,0.9) 0%, transparent 100%); }
+  .nav-back { font-family:var(--font-mono); letter-spacing:0.25em; font-size:0.64rem; text-transform:uppercase; color:rgba(255,255,255,0.45); text-decoration:none; transition:color 0.2s; }
+  .nav-back:hover { color:var(--accent); }
+  .nav-score { font-family:var(--font-display); font-size:1.05rem; color:var(--accent); opacity:0; transition:opacity 0.4s; }
+  .nav-score.visible { opacity:1; }
+  .hero { position:relative; height:100vh; min-height:560px; overflow:hidden; display:flex; align-items:flex-end; }
+  .hero-img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:center; }
+  .hero-fallback { position:absolute; inset:0; background:radial-gradient(ellipse 80% 60% at 50% 40%, var(--accent-glow), var(--bg) 70%); }
+  .hero-overlay { position:absolute; inset:0; background:linear-gradient(to top, rgba(10,9,8,0.96) 0%, rgba(10,9,8,0.45) 45%, rgba(10,9,8,0.1) 100%); }
+  .hero-content { position:relative; z-index:1; width:100%; padding:0 2.4rem 3.5rem; }
+  .cut-label { font-family:var(--font-mono); letter-spacing:0.4em; font-size:0.62rem; color:var(--accent); text-transform:uppercase; margin-bottom:1rem; opacity:0; animation:fadeUp 0.7s ease 0.2s forwards; }
+  .hero-title { font-family:var(--font-display); font-size:clamp(2.4rem,8vw,7rem); line-height:0.9; text-transform:uppercase; color:var(--text); opacity:0; animation:fadeUp 0.7s ease 0.4s forwards; max-width:900px; }
+  .hero-credits { font-family:var(--font-mono); font-size:0.78rem; color:rgba(255,255,255,0.38); letter-spacing:0.2em; text-transform:uppercase; margin-top:1.1rem; opacity:0; animation:fadeUp 0.7s ease 0.6s forwards; }
+  .review-section { max-width:1020px; margin:0 auto; padding:6rem 2.4rem; display:grid; grid-template-columns:180px 1fr; gap:5rem; align-items:start; }
+  @media(max-width:700px){ .review-section { grid-template-columns:1fr; gap:2.5rem; padding:4rem 1.6rem; } }
+  .score-col { position:sticky; top:5rem; }
+  .score-number { font-family:var(--font-display); font-size:clamp(4rem,10vw,7.5rem); line-height:1; color:var(--text); }
+  .score-number span { color:var(--accent); }
+  .score-denom { font-family:var(--font-mono); font-size:0.62rem; letter-spacing:0.3em; text-transform:uppercase; color:var(--muted); margin-top:0.3rem; }
+  .score-verdict { font-family:var(--font-mono); font-style:italic; font-size:0.82rem; color:var(--accent); line-height:1.6; margin-top:1.2rem; padding-top:1.2rem; border-top:1px solid var(--border); }
+  @media(max-width:700px){ .score-col { position:static; display:flex; align-items:baseline; gap:1.2rem; flex-wrap:wrap; } .score-verdict { border-top:none; margin-top:0; padding-top:0; } }
+  .review-text p { font-size:0.97rem; color:var(--text); line-height:1.85; margin-bottom:1.5rem; }
+  .review-text p:last-child { margin-bottom:0; }
+  .divider { max-width:1020px; margin:0 auto; padding:0 2.4rem; }
+  .divider hr { border:none; border-top:1px solid var(--border); }
+  .quote-section { padding:6rem 2.4rem; text-align:center; }
+  .quote-text { font-family:var(--font-mono); font-style:italic; font-size:clamp(1.1rem,2.8vw,1.75rem); line-height:1.5; max-width:680px; margin:0 auto; color:var(--text); }
+  .quote-attr { font-family:var(--font-mono); letter-spacing:0.3em; font-size:0.6rem; text-transform:uppercase; color:var(--muted); margin-top:1.4rem; }
+  .rewatch-section { background:var(--bg2); border-top:1px solid var(--border); border-bottom:1px solid var(--border); padding:5rem 2.4rem; text-align:center; }
+  .rewatch-label { font-family:var(--font-mono); letter-spacing:0.4em; font-size:0.62rem; text-transform:uppercase; color:var(--muted); margin-bottom:1.8rem; }
+  .rewatch-stamp { display:inline-block; font-family:var(--font-display); font-size:clamp(1.5rem,3.5vw,2.6rem); text-transform:uppercase; color:var(--accent); border:2px solid var(--accent); padding:0.5rem 2rem; transform:rotate(-1.5deg); letter-spacing:0.04em; }
+  .rewatch-note { font-size:0.88rem; color:var(--muted); max-width:520px; margin:1.8rem auto 0; line-height:1.85; font-family:var(--font-mono); font-style:italic; }
+  footer { padding:3.5rem 2.4rem; text-align:center; }
+  .footer-back { font-family:var(--font-mono); letter-spacing:0.3em; font-size:0.62rem; text-transform:uppercase; color:var(--muted); text-decoration:none; transition:color 0.2s; }
+  .footer-back:hover { color:var(--accent); }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(22px)} to{opacity:1;transform:translateY(0)} }
+  .reveal { opacity:0; transform:translateY(30px); transition:opacity 0.65s ease, transform 0.65s ease; }
+  .reveal.visible { opacity:1; transform:translateY(0); }
+</style>
+</head>
+<body>
+<div class="progress-bar" id="progress"></div>
+<nav>
+  <a href="../index.html" class="nav-back">← All Cuts</a>
+  <div class="nav-score" id="navScore">10</div>
+</nav>
+
+<section class="hero">
+  <img src="../img/no-country.jpg" alt="No Country for Old Men" class="hero-img" onerror="this.style.opacity=0">
+  <div class="hero-fallback"></div>
+  <div class="hero-overlay"></div>
+  <div class="hero-content">
+    <div class="cut-label">Final Cut No. 6</div>
+    <h1 class="hero-title">No Country<br>for Old Men</h1>
+    <div class="hero-credits">dir. Joel &amp; Ethan Coen &nbsp;·&nbsp; 2007 &nbsp;·&nbsp; Thriller &nbsp;·&nbsp; 122 min</div>
+  </div>
+</section>
+
+<section class="review-section">
+  <div class="score-col reveal">
+    <div class="score-number">10<span>.0</span></div>
+    <div class="score-denom">Out of ten</div>
+    <div class="score-verdict">The Coens remove every safety net a thriller is supposed to have, and the tension doubles.</div>
+  </div>
+  <div class="review-text reveal">
+    <p>Chigurh isn't a serial killer. He's a theology. He offers his victims the coin toss because he genuinely believes he's not the one deciding — the universe is, and he's just the delivery mechanism. The film never disproves him. Carla Jean's refusal to call the toss is the closest anyone comes to beating him: she makes him own the choice, forces him to be a man rather than a mechanism, and he kills her anyway. He checks his boots on the porch after. That detail is the whole character.</p>
+    <p>The famous objections — Llewelyn dying offscreen, the quiet ending — are the two best decisions in the film. It was never about who wins the chase. It's about Bell, an old sheriff watching a world he can't read anymore, finally understanding that the violence was always here. His crippled uncle Ellis tells him about a lawman gunned down on his own porch in 1909. The title isn't a complaint about modernity. It's a diagnosis of memory. The climax happens to Bell in a chair, telling his wife about a dream of his dead father carrying fire through a cold mountain dark. Cut to black. The film hands you everything in ninety seconds and trusts you to hold it.</p>
+    <p>Bardem built the most frightening screen villain of the century out of stillness and customer-service politeness. Deakins shoots West Texas as a place that predates mercy. Carter Burwell's score is sixteen minutes of near-subliminal tones; what the film actually has is the best sound design ever put in a thriller — boot scrapes on motel carpet, the cattle gun's hiss, wind as the only witness. I've heard every case against the ending and they're all reviews of a worse movie the Coens refused to make.</p>
+  </div>
+</section>
+
+<div class="divider reveal"><hr></div>
+
+<section class="quote-section reveal">
+  <div class="quote-text">"What's the most you ever lost on a coin toss?"</div>
+  <div class="quote-attr">Anton Chigurh — No Country for Old Men</div>
+</section>
+
+<section class="rewatch-section">
+  <div class="rewatch-label reveal">Rewatch verdict</div>
+  <div class="reveal"><span class="rewatch-stamp">Rewatch It</span></div>
+  <div class="rewatch-note reveal">First watch is for the chase. Every one after is for Bell — the film quietly reorganizes itself around him once you know where it's going.</div>
+</section>
+
+<footer>
+  <a href="../index.html" class="footer-back">← Back to all cuts</a>
+</footer>
+
+<script>
+  window.addEventListener('scroll', () => {
+    const el = document.documentElement;
+    const total = el.scrollHeight - el.clientHeight;
+    document.getElementById('progress').style.width = (total > 0 ? el.scrollTop / total * 100 : 0) + '%';
+    document.getElementById('navScore').classList.toggle('visible', el.scrollTop > window.innerHeight * 0.6);
+  }, { passive:true });
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold:0.1 });
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+</script>
+</body>
+</html>

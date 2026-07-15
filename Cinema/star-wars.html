@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Star Wars (I–IX) - Final Cut</title>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Space+Grotesk:wght@300;400;500&family=IBM+Plex+Mono:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+  :root {
+    --bg:#0a0908; --bg2:#100f0c;
+    --accent:#d4a843;
+    --accent-glow:rgba(212,168,67,0.15);
+    --text:#e9e4d8; --muted:#76705f;
+    --border:rgba(255,255,255,0.06);
+    --font-display:'Anton',sans-serif;
+    --font-body:'Space Grotesk',sans-serif;
+    --font-mono:'IBM Plex Mono',monospace;
+  }
+  html { scroll-behavior:smooth; }
+  body { background:var(--bg); color:var(--text); font-family:var(--font-body); font-weight:300; line-height:1.75; overflow-x:hidden; }
+
+  /* PROGRESS */
+  .progress-bar { position:fixed; top:0; left:0; height:2px; background:var(--accent); z-index:200; width:0%; transition:width 0.1s linear; }
+
+  /* NAV */
+  nav { position:fixed; top:0; left:0; right:0; padding:1.1rem 2.2rem; display:flex; justify-content:space-between; align-items:center; z-index:100; background:linear-gradient(to bottom, rgba(10,9,8,0.9) 0%, transparent 100%); }
+  .nav-back { font-family:var(--font-mono); letter-spacing:0.25em; font-size:0.64rem; text-transform:uppercase; color:rgba(255,255,255,0.45); text-decoration:none; transition:color 0.2s; }
+  .nav-back:hover { color:var(--accent); }
+  .nav-score { font-family:var(--font-display); font-size:1.05rem; color:var(--accent); opacity:0; transition:opacity 0.4s; }
+  .nav-score.visible { opacity:1; }
+
+  /* HERO */
+  .hero { position:relative; height:100vh; min-height:560px; overflow:hidden; display:flex; align-items:flex-end; }
+  .hero-img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:center; }
+  .hero-fallback { position:absolute; inset:0; background:radial-gradient(ellipse 80% 60% at 50% 40%, var(--accent-glow), var(--bg) 70%); }
+  .hero-overlay { position:absolute; inset:0; background:linear-gradient(to top, rgba(10,9,8,0.96) 0%, rgba(10,9,8,0.45) 45%, rgba(10,9,8,0.1) 100%); }
+  .hero-content { position:relative; z-index:1; width:100%; padding:0 2.4rem 3.5rem; }
+  .cut-label { font-family:var(--font-mono); letter-spacing:0.4em; font-size:0.62rem; color:var(--accent); text-transform:uppercase; margin-bottom:1rem; opacity:0; animation:fadeUp 0.7s ease 0.2s forwards; }
+  .hero-title { font-family:var(--font-display); font-size:clamp(3rem,11vw,9rem); line-height:0.9; text-transform:uppercase; color:var(--text); opacity:0; animation:fadeUp 0.7s ease 0.4s forwards; max-width:900px; }
+  .hero-credits { font-family:var(--font-mono); font-size:0.78rem; color:rgba(255,255,255,0.38); letter-spacing:0.2em; text-transform:uppercase; margin-top:1.1rem; opacity:0; animation:fadeUp 0.7s ease 0.6s forwards; }
+
+  /* DIVIDER */
+  .divider { max-width:1020px; margin:0 auto; padding:0 2.4rem; }
+  .divider hr { border:none; border-top:1px solid var(--border); }
+
+  /* QUOTE */
+  .quote-section { padding:6rem 2.4rem; text-align:center; }
+  .quote-text { font-family:var(--font-mono); font-style:italic; font-size:clamp(1.1rem,2.8vw,1.75rem); line-height:1.5; max-width:680px; margin:0 auto; color:var(--text); }
+  .quote-attr { font-family:var(--font-mono); letter-spacing:0.3em; font-size:0.6rem; text-transform:uppercase; color:var(--muted); margin-top:1.4rem; }
+
+  /* REWATCH */
+  .rewatch-section { background:var(--bg2); border-top:1px solid var(--border); border-bottom:1px solid var(--border); padding:5rem 2.4rem; text-align:center; }
+  .rewatch-label { font-family:var(--font-mono); letter-spacing:0.4em; font-size:0.62rem; text-transform:uppercase; color:var(--muted); margin-bottom:1.8rem; }
+  .rewatch-stamp { display:inline-block; font-family:var(--font-display); font-size:clamp(1.5rem,3.5vw,2.6rem); text-transform:uppercase; color:var(--accent); border:2px solid var(--accent); padding:0.5rem 2rem; transform:rotate(-1.5deg); letter-spacing:0.04em; }
+  .rewatch-note { font-size:0.88rem; color:var(--muted); max-width:520px; margin:1.8rem auto 0; line-height:1.85; font-family:var(--font-mono); font-style:italic; }
+
+  /* FOOTER */
+  footer { padding:3.5rem 2.4rem; text-align:center; }
+  .footer-back { font-family:var(--font-mono); letter-spacing:0.3em; font-size:0.62rem; text-transform:uppercase; color:var(--muted); text-decoration:none; transition:color 0.2s; }
+  .footer-back:hover { color:var(--accent); }
+
+  @keyframes fadeUp { from{opacity:0;transform:translateY(22px)} to{opacity:1;transform:translateY(0)} }
+  .reveal { opacity:0; transform:translateY(30px); transition:opacity 0.65s ease, transform 0.65s ease; }
+  .reveal.visible { opacity:1; transform:translateY(0); }
+
+  /* SERIES INTRO */
+  .series-intro { max-width:780px; margin:0 auto; padding:5rem 2.4rem 3rem; }
+  .series-intro p { font-size:0.97rem; color:var(--text); line-height:1.85; margin-bottom:1.2rem; }
+
+  /* EPISODES GRID */
+  .episodes-grid { max-width:1020px; margin:0 auto; padding:2rem 2.4rem 6rem; }
+  .episode { display:grid; grid-template-columns:140px 1fr; gap:3rem; align-items:start; padding:3.5rem 0; border-bottom:1px solid var(--border); }
+  .episode:last-child { border-bottom:none; }
+  @media(max-width:700px){ .episode { grid-template-columns:1fr; gap:1.5rem; } }
+
+  .ep-score-col { }
+  .ep-num { font-family:var(--font-mono); letter-spacing:0.35em; font-size:0.58rem; text-transform:uppercase; color:var(--muted); margin-bottom:0.5rem; }
+  .ep-title { font-family:var(--font-display); font-size:1.1rem; text-transform:uppercase; line-height:1.1; color:var(--text); margin-bottom:0.8rem; }
+  .ep-score-number { font-family:var(--font-display); font-size:3rem; line-height:1; color:var(--text); }
+  .ep-score-number span { color:var(--accent); }
+  .ep-score-denom { font-family:var(--font-mono); font-size:0.58rem; letter-spacing:0.3em; text-transform:uppercase; color:var(--muted); }
+  .ep-verdict { font-family:var(--font-mono); font-style:italic; font-size:0.78rem; color:var(--accent); line-height:1.6; margin-top:1rem; padding-top:1rem; border-top:1px solid var(--border); }
+
+  .ep-review p { font-size:0.95rem; color:var(--text); line-height:1.85; margin-bottom:1.2rem; }
+  .ep-review p:last-child { margin-bottom:0; }
+  .ep-meta { font-family:var(--font-mono); font-size:0.62rem; letter-spacing:0.2em; text-transform:uppercase; color:var(--muted); margin-bottom:1.5rem; }
+</style>
+</head>
+<body>
+<div class="progress-bar" id="progress"></div>
+
+<nav>
+  <a href="../index.html" class="nav-back">← All Cuts</a>
+  <div class="nav-score" id="navScore">I–IX</div>
+</nav>
+
+<section class="hero">
+  <img src="../img/star-wars.jpg" alt="Star Wars" class="hero-img" onerror="this.style.opacity=0">
+  <div class="hero-fallback"></div>
+  <div class="hero-overlay"></div>
+  <div class="hero-content">
+    <div class="cut-label">Final Cut No. 12 — Series Review</div>
+    <h1 class="hero-title">STAR WARS</h1>
+    <div class="hero-credits">Episodes I–IX &nbsp;·&nbsp; George Lucas / Various &nbsp;·&nbsp; 1977–2019 &nbsp;·&nbsp; Sci-Fi / Space Opera</div>
+  </div>
+</section>
+
+<section class="series-intro">
+  <p class="reveal">Star Wars is the most culturally dominant film franchise ever made, which is a strange thing to sit with when you actually watch the nine films in sequence. The original trilogy is mythology: three films with complete moral logic, characters who earn their arcs, and a visual language that landed so fully formed in 1977 that cinema has been rearranging itself around it ever since. George Lucas built something that behaved like a religion, and then spent decades undermining it.</p>
+  <p class="reveal">The prequels are a different project entirely — ambitious in concept, uneven in execution, most interesting where they fail. The sequels are something different again: corporate mythology, cautious at first, then overcorrecting, then retreating. The nine-film arc contains some of the best and some of the most disappointing filmmaking of the last fifty years, often within the same storyline. That unevenness is the interesting part.</p>
+</section>
+
+<div class="episodes-grid">
+
+  <!-- EPISODE I -->
+  <div class="episode reveal">
+    <div class="ep-score-col">
+      <div class="ep-num">Episode I</div>
+      <div class="ep-title">The Phantom Menace</div>
+      <div class="ep-score-number">6<span>.0</span></div>
+      <div class="ep-score-denom">Out of ten</div>
+      <div class="ep-verdict">The film that invented a generation's first cinematic disappointment.</div>
+    </div>
+    <div class="ep-review">
+      <div class="ep-meta">1999 &nbsp;·&nbsp; dir. George Lucas &nbsp;·&nbsp; 136 min</div>
+      <p>The pod race works. It's the one sequence in the film where Lucas's instincts fire cleanly — kinetic, physical, funny in the right places. Liam Neeson carries every scene he's in with a gravity the material doesn't deserve, and Ewan McGregor is doing something interesting with very little room to do it. The film has genuine pieces. The problem is that it doesn't have a spine.</p>
+      <p>Midichlorians are a real problem, not because they're childish but because they're incoherent — they turn the Force from a moral relationship into a blood test. Jar Jar Binks is the franchise's most discussed mistake, but the Trade Federation plot is the quieter one: a film that opens on trade dispute arbitration has already lost the argument about what this story is. The prequels' deepest error is Anakin as a cute blond child. The math never adds up. Nothing in this film suggests the road to Darth Vader, and no amount of connective tissue in Episodes II and III quite closes that gap.</p>
+    </div>
+  </div>
+
+  <!-- EPISODE II -->
+  <div class="episode reveal">
+    <div class="ep-score-col">
+      <div class="ep-num">Episode II</div>
+      <div class="ep-title">Attack of the Clones</div>
+      <div class="ep-score-number">5<span>.5</span></div>
+      <div class="ep-score-denom">Out of ten</div>
+      <div class="ep-verdict">The worst film in the saga — including the sequels.</div>
+    </div>
+    <div class="ep-review">
+      <div class="ep-meta">2002 &nbsp;·&nbsp; dir. George Lucas &nbsp;·&nbsp; 142 min</div>
+      <p>The romance between Anakin and Padme is the franchise's most damaging creative failure, because it's not a subplot — it's the emotional spine of the entire prequel trilogy. If you don't believe these two people are in love, then Anakin's turn makes no psychological sense, and Episode III cannot land. The dialogue is famously wooden, but the problem runs deeper than lines. Lucas directs these scenes as if he isn't sure what emotions he wants the actors to convey, so they convey nothing, and the film asks you to invest in it anyway.</p>
+      <p>Hayden Christensen is not wrong to play Anakin as stiff and uncomfortable. The direction never gave him anything else to work with, and the few moments where genuine menace surfaces — the Tusken raider confession, the anger at Obi-Wan — suggest that a different approach to the whole performance might have worked. The arena sequence is visually alive. Christopher Lee is in it. The film exists. That is roughly the ceiling of what can be said in its defense.</p>
+    </div>
+  </div>
+
+  <!-- EPISODE III -->
+  <div class="episode reveal">
+    <div class="ep-score-col">
+      <div class="ep-num">Episode III</div>
+      <div class="ep-title">Revenge of the Sith</div>
+      <div class="ep-score-number">7<span>.8</span></div>
+      <div class="ep-score-denom">Out of ten</div>
+      <div class="ep-verdict">The prequel trilogy's only film that earns what it was trying to build toward.</div>
+    </div>
+    <div class="ep-review">
+      <div class="ep-meta">2005 &nbsp;·&nbsp; dir. George Lucas &nbsp;·&nbsp; 140 min</div>
+      <p>Ewan McGregor and Ian McDiarmid carry this film. The opera scene — Palpatine telling the tragedy of Darth Plagueis the Wise while Anakin sits and listens and the galaxy's fate tips — is the best written scene in the prequel trilogy and possibly the most purely cinematic thing Lucas did across all three episodes. It works because it's quiet, because McDiarmid knows exactly what he's doing, and because the film finally lets the audience feel the weight of what's coming.</p>
+      <p>The Order 66 sequence is genuinely devastating in a way Episodes I and II never managed to be. The Mustafar duel is operatic and earns that register. The film's flaws are real — Padme's death still doesn't convince, and some of the dialogue around Anakin's turn is underwritten — but it proves that the prequel concept was fundamentally sound. The idea of showing how a democracy becomes an empire from the inside is a good one. Episodes I and II were the problem. This film is what the trilogy was supposed to be.</p>
+    </div>
+  </div>
+
+  <!-- EPISODE IV -->
+  <div class="episode reveal">
+    <div class="ep-score-col">
+      <div class="ep-num">Episode IV</div>
+      <div class="ep-title">A New Hope</div>
+      <div class="ep-score-number">9<span>.5</span></div>
+      <div class="ep-score-denom">Out of ten</div>
+      <div class="ep-verdict">The film that invented the modern blockbuster and accidentally built a mythology that would outlast it.</div>
+    </div>
+    <div class="ep-review">
+      <div class="ep-meta">1977 &nbsp;·&nbsp; dir. George Lucas &nbsp;·&nbsp; 121 min</div>
+      <p>What Lucas made in 1977 with a limited budget and borrowed ideas — samurai films, Westerns, World War II fighter footage — is a film with complete tonal and moral clarity. The Force is a feeling before it's an explanation. The hero is someone the audience can identify with because he's bored and wants more and doesn't know why yet. The villain is a physical presence in black with a voice that fills a room. Ben Kenobi's death is still the franchise's best sacrifice: not a fight lost but a choice made, and the film is honest enough to let Luke be destroyed by it.</p>
+      <p>The Death Star trench run is edited with a precision that most modern action sequences don't approach — you always know where everyone is, what's at stake, and how much time is left. It's a simple film made with such confidence that it feels inevitable. Nothing in it feels placed or calculated. The whole thing moves the way only films that get lucky with themselves do: like it couldn't have been any other way.</p>
+    </div>
+  </div>
+
+  <!-- EPISODE V -->
+  <div class="episode reveal">
+    <div class="ep-score-col">
+      <div class="ep-num">Episode V</div>
+      <div class="ep-title">The Empire Strikes Back</div>
+      <div class="ep-score-number">10<span>.0</span></div>
+      <div class="ep-score-denom">Out of ten</div>
+      <div class="ep-verdict">The best sequel ever made, and possibly the best argument for what science fiction can do.</div>
+    </div>
+    <div class="ep-review">
+      <div class="ep-meta">1980 &nbsp;·&nbsp; dir. Irvin Kershner &nbsp;·&nbsp; 124 min</div>
+      <p>Kershner took the mythology Lucas built and gave it weight. The Empire Strikes Back is darker not because things go badly but because the film understands that the Force, evil, and love are all more complicated than the first film suggested. Yoda — introduced as a peculiar old thing in a swamp, revealed as something much harder to dismiss — is the franchise's best character. Frank Oz performs him with a specificity that makes the creature fully real, and the film earns the transition from comedy to wisdom without announcing it.</p>
+      <p>"I am your father" lands because the film earned it through a third act that systematically dismantles everything Episode IV gave you. The rebels lose. Luke loses the fight and loses his hand and loses his certainty about who he is. Han Solo's final scene before the carbonite, three words between him and Leia, is the most confident moment in the franchise's history: no score swell, no explanation, just two people and exactly the right amount of words. The film ends without resolution and doesn't apologize for it.</p>
+    </div>
+  </div>
+
+  <!-- EPISODE VI -->
+  <div class="episode reveal">
+    <div class="ep-score-col">
+      <div class="ep-num">Episode VI</div>
+      <div class="ep-title">Return of the Jedi</div>
+      <div class="ep-score-number">8<span>.5</span></div>
+      <div class="ep-score-denom">Out of ten</div>
+      <div class="ep-verdict">An imperfect ending to a perfect trilogy — and the imperfections are real but forgivable.</div>
+    </div>
+    <div class="ep-review">
+      <div class="ep-meta">1983 &nbsp;·&nbsp; dir. Richard Marquand &nbsp;·&nbsp; 134 min</div>
+      <p>The Jabba's palace sequence is the franchise at its pulpiest and most enjoyable: Max Rebo Band, Salacious Crumb, a Sarlacc pit and a good old-fashioned escape. The Ewoks are the film's known compromise. As a story beat they work — a low-tech indigenous population defeating an occupying technological force has actual thematic weight — but they don't hold up to any real scrutiny, and the film knows it and moves on quickly.</p>
+      <p>The Emperor's throne room sequence is the trilogy's emotional peak. Everything Lucas started in 1977 converges here: the three-way dynamic of Luke, Vader, and Palpatine plays out with genuine tension, and Vader's choice to save his son at the cost of his own life is earned by everything the trilogy built. The bonfire is earned. The galaxy celebrates and so do you. It's a film that earns its sentimentality by not cutting corners on the darkness that precedes it. The Ewoks notwithstanding.</p>
+    </div>
+  </div>
+
+  <!-- EPISODE VII -->
+  <div class="episode reveal">
+    <div class="ep-score-col">
+      <div class="ep-num">Episode VII</div>
+      <div class="ep-title">The Force Awakens</div>
+      <div class="ep-score-number">7<span>.5</span></div>
+      <div class="ep-score-denom">Out of ten</div>
+      <div class="ep-verdict">A confident restart that mostly works by knowing exactly when to stop asking new questions.</div>
+    </div>
+    <div class="ep-review">
+      <div class="ep-meta">2015 &nbsp;·&nbsp; dir. J.J. Abrams &nbsp;·&nbsp; 138 min</div>
+      <p>Abrams makes the correct call to rebuild audience trust by grounding the film in familiar structure, and Daisy Ridley and John Boyega are genuinely compelling presences from their first shared scene. Rey's scavenger introduction — alone, efficient, eating portion bread in the shadow of an AT-AT — is the best new-character establishment in the sequel trilogy. The film moves quickly and with real confidence in its own tone, which after the prequel era is not nothing.</p>
+      <p>The problem is that it relies too heavily on A New Hope's structure as a security blanket. Another desert planet, another superweapon, another trench run. What could have been great settles for being good by not trusting itself to go further. Kylo Ren — unmasked, conflicted, prone to tantrums — is the most interesting villain the franchise had made since Vader, and the film is smart enough to leave him genuinely unresolved at the end. Han Solo's death lands. The franchise had a foundation to build on. What came next was the question.</p>
+    </div>
+  </div>
+
+  <!-- EPISODE VIII -->
+  <div class="episode reveal">
+    <div class="ep-score-col">
+      <div class="ep-num">Episode VIII</div>
+      <div class="ep-title">The Last Jedi</div>
+      <div class="ep-score-number">7<span>.5</span></div>
+      <div class="ep-score-denom">Out of ten</div>
+      <div class="ep-verdict">The bravest film in the sequel trilogy and the most divisive — both for real reasons.</div>
+    </div>
+    <div class="ep-review">
+      <div class="ep-meta">2017 &nbsp;·&nbsp; dir. Rian Johnson &nbsp;·&nbsp; 152 min</div>
+      <p>Johnson makes a film about failure, the cost of hero mythology, and what it means to pass something on when the thing you're passing on is partly a lie — and he's right to. Luke Skywalker's disillusionment is the most interesting thing the sequels attempted. The decision to have him be broken, cynical, and hiding from a legacy he no longer believes in is genuinely brave, and Mark Hamill plays it with more complexity than the franchise has any right to expect. The throne room fight is the best action sequence in the sequel trilogy.</p>
+      <p>The film has genuine problems. The Canto Bight sequence drags and doesn't pay off proportionally. The middle section pacing is soft. But the backlash against it was at least partly resistance to a film that was trying to say something rather than deliver something, and those are different failures. The salt planet finale is beautiful: an old man projecting himself across the galaxy to give his friends time to escape, disappearing with the setting sun. It's the franchise at its most mythological since 1980, and Episode IX had no idea what to do with it.</p>
+    </div>
+  </div>
+
+  <!-- EPISODE IX -->
+  <div class="episode reveal">
+    <div class="ep-score-col">
+      <div class="ep-num">Episode IX</div>
+      <div class="ep-title">The Rise of Skywalker</div>
+      <div class="ep-score-number">5<span>.5</span></div>
+      <div class="ep-score-denom">Out of ten</div>
+      <div class="ep-verdict">A film so frightened of The Last Jedi that it retreats from everything interesting the saga had built.</div>
+    </div>
+    <div class="ep-review">
+      <div class="ep-meta">2019 &nbsp;·&nbsp; dir. J.J. Abrams &nbsp;·&nbsp; 142 min</div>
+      <p>The decision to reverse The Last Jedi's thematic choices — Rey's parentage, the nature of the Force, the irrelevance of bloodlines — in service of audience appeasement is the sequel trilogy's defining failure. It isn't just that the reversal is clumsy. It's that the film doesn't believe in its own reversals either. Palpatine returns with an explanation the movie delivers without conviction, as if speed alone can substitute for sense. The whole film moves at a pace that mistakes momentum for meaning.</p>
+      <p>There are scenes that work. The Force-bond between Rey and Ben is the sequel trilogy's most original idea and this film uses it well in places. Some of the final battle has genuine scale. But they exist inside a film in a state of managed panic, running from one plot point to the next without pausing to ask whether any of it adds up. The saga spent forty years building to a conclusion. The conclusion is this. The original trilogy deserved better than to have its legacy handed off to a film too scared to finish what it started.</p>
+    </div>
+  </div>
+
+</div>
+
+<div class="divider reveal"><hr></div>
+
+<section class="quote-section reveal">
+  <div class="quote-text">"May the Force be with you."</div>
+  <div class="quote-attr">Various — Star Wars</div>
+</section>
+
+<section class="rewatch-section">
+  <div class="rewatch-label reveal">Rewatch verdict</div>
+  <div class="reveal"><span class="rewatch-stamp">THE ORIGINAL TRILOGY</span></div>
+  <div class="rewatch-note reveal">Episodes IV, V, and VI are the ones that live forever. Everything else is context.</div>
+</section>
+
+<footer>
+  <a href="../index.html" class="footer-back">← Back to all cuts</a>
+</footer>
+
+<script>
+  window.addEventListener('scroll', () => {
+    const el = document.documentElement;
+    const total = el.scrollHeight - el.clientHeight;
+    document.getElementById('progress').style.width = (total > 0 ? el.scrollTop / total * 100 : 0) + '%';
+    document.getElementById('navScore').classList.toggle('visible', el.scrollTop > window.innerHeight * 0.6);
+  }, { passive:true });
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold:0.1 });
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+</script>
+</body>
+</html>

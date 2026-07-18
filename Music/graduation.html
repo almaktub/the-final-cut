@@ -28,6 +28,7 @@
     .nav-score { font-family: 'Bebas Neue', sans-serif; font-size: 1.4rem; color: var(--accent); letter-spacing: 0.08em; }
     .hero { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; padding: 8rem 2rem 4rem; max-width: 900px; margin: 0 auto; }
     .autopsy-label { font-size: 0.75rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); margin-bottom: 1.5rem; }
+    .hero-cover { width:150px; height:150px; object-fit:cover; border-radius:4px; box-shadow:0 20px 55px rgba(0,0,0,0.5); margin-bottom:1.8rem; }
     .hero-artist { font-family: 'Bebas Neue', sans-serif; font-size: clamp(3rem,10vw,7rem); line-height: 0.9; color: var(--accent-light); letter-spacing: 0.03em; }
     .hero-album { font-family: 'Playfair Display', serif; font-size: clamp(2rem,6vw,4.5rem); font-style: italic; color: var(--text); margin-top: 0.3rem; }
     .hero-meta { margin-top: 1.5rem; color: var(--muted); font-size: 0.85rem; letter-spacing: 0.12em; text-transform: uppercase; }
@@ -85,7 +86,8 @@
   <div class="nav-score" id="navScore">9.2 / 10</div>
 </nav>
 <section class="hero">
-  <div class="autopsy-label">Album Autopsy · 070</div>
+  <img class="hero-cover" src="img/graduation.jpg" alt="Kanye West - Graduation album cover">
+  <div class="autopsy-label">Album Autopsy · 071</div>
   <div class="hero-artist">Kanye West</div>
   <div class="hero-album">Graduation</div>
   <div class="hero-meta">Roc-A-Fella · Def Jam · 2007 · Hip-Hop / Pop-Rap</div>

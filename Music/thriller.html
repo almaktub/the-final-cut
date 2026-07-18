@@ -37,6 +37,8 @@
     radial-gradient(ellipse 30% 30% at 75% 60%, rgba(251,191,36,0.04) 0%, transparent 55%),
     var(--bg); z-index:0; }
   .hero-content { position:relative; z-index:1; }
+  .hero-cover { width:180px; height:180px; object-fit:cover; border-radius:4px; box-shadow:0 25px 70px rgba(0,0,0,0.55), 0 0 0 1px var(--border); margin-bottom:2.2rem; opacity:0; animation:fadeUp 0.8s ease 0s forwards; }
+
   .autopsy-label { font-family:var(--font-display); letter-spacing:0.4em; font-size:0.72rem; color:var(--accent); text-transform:uppercase; margin-bottom:1.8rem; opacity:0; animation:fadeUp 0.8s ease 0.2s forwards; }
   .hero-artist { font-family:var(--font-display); font-size:clamp(4rem,18vw,15rem); line-height:0.88; letter-spacing:-0.02em; color:var(--text); opacity:0; animation:fadeUp 0.8s ease 0.4s forwards; }
   .hero-album { font-family:var(--font-serif); font-style:italic; font-size:clamp(1.2rem,4vw,3.2rem); color:var(--gold); margin-top:0.6rem; opacity:0; animation:fadeUp 0.8s ease 0.6s forwards; line-height:1.25; }
@@ -139,7 +141,8 @@
 <section class="hero">
   <div class="hero-bg"></div>
   <div class="hero-content">
-    <div class="autopsy-label">Album Autopsy · 020</div>
+    <img class="hero-cover" src="img/thriller.jpg" alt="Michael Jackson - Thriller album cover">
+    <div class="autopsy-label">Album Autopsy · 070</div>
     <div class="hero-artist">Michael Jackson</div>
     <div class="hero-album">Thriller</div>
     <div class="hero-meta">Epic Records · 1982</div>

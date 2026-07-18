@@ -45,6 +45,8 @@
   .album-card { background:var(--bg); position:relative; overflow:hidden; cursor:pointer; text-decoration:none; display:block; transition:background 0.2s; }
   .album-card:hover { background:var(--bg2); }
   .card-accent-bar { height:3px; width:0%; transition:width 0.4s ease; }
+  .card-cover { position:absolute; top:1.5rem; left:2.5rem; width:56px; height:56px; object-fit:cover; border-radius:3px; box-shadow:0 6px 18px rgba(0,0,0,0.45); }
+
   .album-card:hover .card-accent-bar { width:100%; }
   .card-inner { padding:2.8rem 2.5rem 2.5rem; }
   .card-num { font-family:var(--font-display); font-size:4rem; line-height:1; letter-spacing:-0.02em; color:var(--border); position:absolute; top:1.5rem; right:2rem; }
@@ -90,7 +92,7 @@
     <div class="hero-eyebrow">@MyParentsDidntLeaveForThis</div>
     <div class="hero-title">Album<br>Autopsy</div>
     <div class="hero-sub">A structured dissection of records that matter.</div>
-    <div class="hero-count">69 Autopsies Published</div>
+    <div class="hero-count">71 Autopsies Published</div>
     <div class="hero-rule"></div>
   </div>
 </section>
@@ -119,6 +121,7 @@
   
   <a class="album-card" href="tpab.html" data-genre="Hip-Hop">
     <div class="card-accent-bar" style="background:#27ae60"></div>
+    <img class="card-cover" src="img/tpab.jpg" alt="Kendrick Lamar - To Pimp a Butterfly album cover">
     <div class="card-inner">
       <div class="card-num">001</div>
       <div class="card-label" style="color:#27ae60">Album Autopsy · 001</div>
@@ -134,6 +137,7 @@
   </a>
   <a class="album-card" href="mbdtf.html" data-genre="Hip-Hop">
     <div class="card-accent-bar" style="background:#e67e22"></div>
+    <img class="card-cover" src="img/mbdtf.jpg" alt="Kanye West - My Beautiful Dark Twisted Fantasy album cover">
     <div class="card-inner">
       <div class="card-num">002</div>
       <div class="card-label" style="color:#e67e22">Album Autopsy · 002</div>
@@ -149,6 +153,7 @@
   </a>
   <a class="album-card" href="abbey-road.html" data-genre="Rock">
     <div class="card-accent-bar" style="background:#3498db"></div>
+    <img class="card-cover" src="img/abbey-road.jpg" alt="The Beatles - Abbey Road album cover">
     <div class="card-inner">
       <div class="card-num">003</div>
       <div class="card-label" style="color:#3498db">Album Autopsy · 003</div>
@@ -164,6 +169,7 @@
   </a>
   <a class="album-card" href="white-album.html" data-genre="Rock">
     <div class="card-accent-bar" style="background:#bdc3c7"></div>
+    <img class="card-cover" src="img/white-album.jpg" alt="The Beatles - The Beatles (White Album) album cover">
     <div class="card-inner">
       <div class="card-num">004</div>
       <div class="card-label" style="color:#bdc3c7">Album Autopsy · 004</div>
@@ -180,6 +186,7 @@
 
   <a class="album-card" href="blonde.html" data-genre="R&B">
     <div class="card-accent-bar" style="background:#d4a853"></div>
+    <img class="card-cover" src="img/blonde.jpg" alt="Frank Ocean - Blonde album cover">
     <div class="card-inner">
       <div class="card-num">005</div>
       <div class="card-label" style="color:#d4a853">Album Autopsy · 005</div>
@@ -196,6 +203,7 @@
 
   <a class="album-card" href="dark-side.html" data-genre="Rock">
     <div class="card-accent-bar" style="background:#9b59b6"></div>
+    <img class="card-cover" src="img/dark-side.jpg" alt="Pink Floyd - The Dark Side of the Moon album cover">
     <div class="card-inner">
       <div class="card-num">006</div>
       <div class="card-label" style="color:#9b59b6">Album Autopsy · 006</div>
@@ -212,6 +220,7 @@
 
   <a class="album-card" href="the-wall.html" data-genre="Rock">
     <div class="card-accent-bar" style="background:#d8d0c4"></div>
+    <img class="card-cover" src="img/the-wall.jpg" alt="Pink Floyd - The Wall album cover">
     <div class="card-inner">
       <div class="card-num">007</div>
       <div class="card-label" style="color:#d8d0c4">Album Autopsy · 007</div>
@@ -228,6 +237,7 @@
 
   <a class="album-card" href="ok-computer.html" data-genre="Rock">
     <div class="card-accent-bar" style="background:#2e86ab"></div>
+    <img class="card-cover" src="img/ok-computer.jpg" alt="Radiohead - OK Computer album cover">
     <div class="card-inner">
       <div class="card-num">008</div>
       <div class="card-label" style="color:#2e86ab">Album Autopsy · 008</div>
@@ -244,6 +254,7 @@
 
   <a class="album-card" href="in-rainbows.html" data-genre="Rock">
     <div class="card-accent-bar" style="background:#c0392b"></div>
+    <img class="card-cover" src="img/in-rainbows.jpg" alt="Radiohead - In Rainbows album cover">
     <div class="card-inner">
       <div class="card-num">009</div>
       <div class="card-label" style="color:#c0392b">Album Autopsy · 009</div>
@@ -261,6 +272,7 @@
 
   <a class="album-card" href="whats-going-on.html" data-genre="R&B">
     <div class="card-accent-bar" style="background:#c97a2a"></div>
+    <img class="card-cover" src="img/whats-going-on.jpg" alt="Marvin Gaye - What's Going On album cover">
     <div class="card-inner">
       <div class="card-num">010</div>
       <div class="card-label" style="color:#c97a2a">Album Autopsy · 010</div>
@@ -277,6 +289,7 @@
 
   <a class="album-card" href="kind-of-blue.html" data-genre="Jazz">
     <div class="card-accent-bar" style="background:#1a6b9a"></div>
+    <img class="card-cover" src="img/kind-of-blue.jpg" alt="Miles Davis - Kind of Blue album cover">
     <div class="card-inner">
       <div class="card-num">011</div>
       <div class="card-label" style="color:#1a6b9a">Album Autopsy · 011</div>
@@ -293,6 +306,7 @@
 
   <a class="album-card" href="illmatic.html" data-genre="Hip-Hop">
     <div class="card-accent-bar" style="background:#b8972a"></div>
+    <img class="card-cover" src="img/illmatic.jpg" alt="Nas - Illmatic album cover">
     <div class="card-inner">
       <div class="card-num">012</div>
       <div class="card-label" style="color:#b8972a">Album Autopsy · 012</div>
@@ -309,6 +323,7 @@
 
   <a class="album-card" href="purple-rain.html" data-genre="R&B">
     <div class="card-accent-bar" style="background:#7d3c98"></div>
+    <img class="card-cover" src="img/purple-rain.jpg" alt="Prince - Purple Rain album cover">
     <div class="card-inner">
       <div class="card-num">013</div>
       <div class="card-label" style="color:#7d3c98">Album Autopsy · 013</div>
@@ -325,6 +340,7 @@
 
   <a class="album-card" href="blue-joni.html" data-genre="Folk">
     <div class="card-accent-bar" style="background:#4a90c4"></div>
+    <img class="card-cover" src="img/blue-joni.jpg" alt="Joni Mitchell - Blue album cover">
     <div class="card-inner">
       <div class="card-num">014</div>
       <div class="card-label" style="color:#4a90c4">Album Autopsy · 014</div>
@@ -342,6 +358,7 @@
 
   <a class="album-card" href="currents.html" data-genre="Rock">
     <div class="card-accent-bar" style="background:#e91e63"></div>
+    <img class="card-cover" src="img/currents.jpg" alt="Tame Impala - Currents album cover">
     <div class="card-inner">
       <div class="card-num">015</div>
       <div class="card-label" style="color:#e91e63">Album Autopsy · 015</div>
@@ -358,6 +375,7 @@
 
   <a class="album-card" href="damn.html" data-genre="Hip-Hop">
     <div class="card-accent-bar" style="background:#b71c1c"></div>
+    <img class="card-cover" src="img/damn.jpg" alt="Kendrick Lamar - DAMN. album cover">
     <div class="card-inner">
       <div class="card-num">016</div>
       <div class="card-label" style="color:#b71c1c">Album Autopsy · 016</div>
@@ -374,6 +392,7 @@
 
   <a class="album-card" href="the-fall-off.html" data-genre="Hip-Hop">
     <div class="card-accent-bar" style="background:#f39c12"></div>
+    <img class="card-cover" src="img/the-fall-off.jpg" alt="J. Cole - The Fall-Off album cover">
     <div class="card-inner">
       <div class="card-num">017</div>
       <div class="card-label" style="color:#f39c12">Album Autopsy · 017</div>
@@ -390,6 +409,7 @@
 
   <a class="album-card" href="the-forever-story.html" data-genre="Hip-Hop">
     <div class="card-accent-bar" style="background:#16a085"></div>
+    <img class="card-cover" src="img/the-forever-story.jpg" alt="JID - The Forever Story album cover">
     <div class="card-inner">
       <div class="card-num">018</div>
       <div class="card-label" style="color:#16a085">Album Autopsy · 018</div>
@@ -407,6 +427,7 @@
 
   <a class="album-card" href="madvillainy.html" data-genre="Hip-Hop">
     <div class="card-accent-bar" style="background:#c4a882"></div>
+    <img class="card-cover" src="img/madvillainy.jpg" alt="Madvillain - Madvillainy album cover">
     <div class="card-inner">
       <div class="card-num">019</div>
       <div class="card-label" style="color:#c4a882">Album Autopsy · 019</div>
@@ -423,6 +444,7 @@
 
   <a class="album-card" href="miseducation.html" data-genre="R&B">
     <div class="card-accent-bar" style="background:#c4872a"></div>
+    <img class="card-cover" src="img/miseducation.jpg" alt="Lauryn Hill - The Miseducation of Lauryn Hill album cover">
     <div class="card-inner">
       <div class="card-num">020</div>
       <div class="card-label" style="color:#c4872a">Album Autopsy · 020</div>
@@ -439,6 +461,7 @@
 
   <a class="album-card" href="born-to-run.html" data-genre="Rock">
     <div class="card-accent-bar" style="background:#4e7d9e"></div>
+    <img class="card-cover" src="img/born-to-run.jpg" alt="Springsteen - Born to Run album cover">
     <div class="card-inner">
       <div class="card-num">021</div>
       <div class="card-label" style="color:#4e7d9e">Album Autopsy · 021</div>
@@ -455,6 +478,7 @@
 
   <a class="album-card" href="songs-key-of-life.html" data-genre="R&B">
     <div class="card-accent-bar" style="background:#d49c2a"></div>
+    <img class="card-cover" src="img/songs-key-of-life.jpg" alt="Stevie Wonder - Songs in the Key of Life album cover">
     <div class="card-inner">
       <div class="card-num">022</div>
       <div class="card-label" style="color:#d49c2a">Album Autopsy · 022</div>
@@ -471,6 +495,7 @@
 
   <a class="album-card" href="ctrl-sza.html" data-genre="R&B">
     <div class="card-accent-bar" style="background:#9b6b8a"></div>
+    <img class="card-cover" src="img/ctrl-sza.jpg" alt="SZA - Ctrl album cover">
     <div class="card-inner">
       <div class="card-num">023</div>
       <div class="card-label" style="color:#9b6b8a">Album Autopsy · 023</div>
@@ -487,6 +512,7 @@
 
   <a class="album-card" href="led-zeppelin-iv.html" data-genre="Rock">
     <div class="card-accent-bar" style="background:#c4882a"></div>
+    <img class="card-cover" src="img/led-zeppelin-iv.jpg" alt="Led Zeppelin - Led Zeppelin IV album cover">
     <div class="card-inner">
       <div class="card-num">024</div>
       <div class="card-label" style="color:#c4882a">Album Autopsy · 024</div>
@@ -503,6 +529,7 @@
 
   <a class="album-card" href="revolver.html" data-genre="Rock">
     <div class="card-accent-bar" style="background:#5a8a64"></div>
+    <img class="card-cover" src="img/revolver.jpg" alt="The Beatles - Revolver album cover">
     <div class="card-inner">
       <div class="card-num">025</div>
       <div class="card-label" style="color:#5a8a64">Album Autopsy · 025</div>
@@ -519,6 +546,7 @@
 
   <a class="album-card" href="gkmc.html" data-genre="Hip-Hop">
     <div class="card-accent-bar" style="background:#546e7a"></div>
+    <img class="card-cover" src="img/gkmc.jpg" alt="Kendrick Lamar - good kid, m.A.A.d city album cover">
     <div class="card-inner">
       <div class="card-num">026</div>
       <div class="card-label" style="color:#546e7a">Album Autopsy · 026</div>
@@ -535,6 +563,7 @@
 
   <a class="album-card" href="mr-morale.html" data-genre="Hip-Hop">
     <div class="card-accent-bar" style="background:#a05c3a"></div>
+    <img class="card-cover" src="img/mr-morale.jpg" alt="Kendrick Lamar - Mr. Morale &amp; the Big Steppers album cover">
     <div class="card-inner">
       <div class="card-num">027</div>
       <div class="card-label" style="color:#a05c3a">Album Autopsy · 027</div>
@@ -551,6 +580,7 @@
 
   <a class="album-card" href="aquemini.html" data-genre="Hip-Hop">
     <div class="card-accent-bar" style="background:#bf6340"></div>
+    <img class="card-cover" src="img/aquemini.jpg" alt="Outkast - Aquemini album cover">
     <div class="card-inner">
       <div class="card-num">028</div>
       <div class="card-label" style="color:#bf6340">Album Autopsy · 028</div>
@@ -567,6 +597,7 @@
 
   <a class="album-card" href="low-end-theory.html" data-genre="Hip-Hop">
     <div class="card-accent-bar" style="background:#4a6fa5"></div>
+    <img class="card-cover" src="img/low-end-theory.jpg" alt="A Tribe Called Quest - The Low End Theory album cover">
     <div class="card-inner">
       <div class="card-num">029</div>
       <div class="card-label" style="color:#4a6fa5">Album Autopsy · 029</div>
@@ -583,6 +614,7 @@
 
   <a class="album-card" href="hell-hath-no-fury.html" data-genre="Hip-Hop">
     <div class="card-accent-bar" style="background:#8a9bb0"></div>
+    <img class="card-cover" src="img/hell-hath-no-fury.jpg" alt="Clipse - Hell Hath No Fury album cover">
     <div class="card-inner">
       <div class="card-num">030</div>
       <div class="card-label" style="color:#8a9bb0">Album Autopsy · 030</div>
@@ -599,9 +631,10 @@
 
   <a class="album-card" href="thriller.html" data-genre="R&B">
     <div class="card-accent-bar" style="background:#c4162a"></div>
+    <img class="card-cover" src="img/thriller.jpg" alt="Michael Jackson - Thriller album cover">
     <div class="card-inner">
-      <div class="card-num">020</div>
-      <div class="card-label" style="color:#c4162a">Album Autopsy · 020</div>
+      <div class="card-num">070</div>
+      <div class="card-label" style="color:#c4162a">Album Autopsy · 070</div>
       <div class="card-artist" style="color:#c4162a">Michael Jackson</div>
       <div class="card-album">Thriller</div>
       <div class="card-meta">
@@ -615,6 +648,7 @@
 
   <a class="album-card" href="the-infamous.html" data-genre="Hip-Hop">
     <div class="card-accent-bar" style="background:#6b7280"></div>
+    <img class="card-cover" src="img/the-infamous.jpg" alt="Mobb Deep - The Infamous album cover">
     <div class="card-inner">
       <div class="card-num">031</div>
       <div class="card-label" style="color:#6b7280">Album Autopsy · 031</div>
@@ -631,6 +665,7 @@
 
   <a class="album-card" href="astroworld.html" data-genre="Hip-Hop">
     <div class="card-accent-bar" style="background:#e07b3a"></div>
+    <img class="card-cover" src="img/astroworld.jpg" alt="Travis Scott - Astroworld album cover">
     <div class="card-inner">
       <div class="card-num">032</div>
       <div class="card-label" style="color:#e07b3a">Album Autopsy · 032</div>
@@ -647,6 +682,7 @@
 
   <a class="album-card" href="utopia.html" data-genre="Hip-Hop">
     <div class="card-accent-bar" style="background:#7c3aed"></div>
+    <img class="card-cover" src="img/utopia.jpg" alt="Travis Scott - Utopia album cover">
     <div class="card-inner">
       <div class="card-num">033</div>
       <div class="card-label" style="color:#7c3aed">Album Autopsy · 033</div>
@@ -663,6 +699,7 @@
 
   <a class="album-card" href="beauty-behind-the-madness.html" data-genre="R&B">
     <div class="card-accent-bar" style="background:#8b2fc9"></div>
+    <img class="card-cover" src="img/beauty-behind-the-madness.jpg" alt="The Weeknd - Beauty Behind the Madness album cover">
     <div class="card-inner">
       <div class="card-num">034</div>
       <div class="card-label" style="color:#8b2fc9">Album Autopsy · 034</div>
@@ -679,6 +716,7 @@
 
   <a class="album-card" href="after-hours.html" data-genre="R&B">
     <div class="card-accent-bar" style="background:#c0392b"></div>
+    <img class="card-cover" src="img/after-hours.jpg" alt="The Weeknd - After Hours album cover">
     <div class="card-inner">
       <div class="card-num">035</div>
       <div class="card-label" style="color:#c0392b">Album Autopsy · 035</div>
@@ -695,6 +733,7 @@
 
   <a class="album-card" href="sometimes-i-might-be-introvert.html" data-genre="Hip-Hop">
     <div class="card-accent-bar" style="background:#b07d2e"></div>
+    <img class="card-cover" src="img/sometimes-i-might-be-introvert.jpg" alt="Little Simz - Sometimes I Might Be Introvert album cover">
     <div class="card-inner">
       <div class="card-num">036</div>
       <div class="card-label" style="color:#b07d2e">Album Autopsy · 036</div>
@@ -711,6 +750,7 @@
 
   <a class="album-card" href="no-thank-you.html" data-genre="Hip-Hop">
     <div class="card-accent-bar" style="background:#3d7a5c"></div>
+    <img class="card-cover" src="img/no-thank-you.jpg" alt="Little Simz - No Thank You album cover">
     <div class="card-inner">
       <div class="card-num">037</div>
       <div class="card-label" style="color:#3d7a5c">Album Autopsy · 037</div>
@@ -727,6 +767,7 @@
 
   <a class="album-card" href="great-divide-noah-kahan.html" data-genre="Folk">
     <div class="card-accent-bar" style="background:#4a7fa5"></div>
+    <img class="card-cover" src="img/great-divide-noah-kahan.jpg" alt="Noah Kahan - The Great Divide album cover">
     <div class="card-inner">
       <div class="card-num">038</div>
       <div class="card-label" style="color:#4a7fa5">Album Autopsy · 038</div>
@@ -744,6 +785,7 @@
 
   <a class="album-card" href="velvet-underground-and-nico.html" data-genre="Rock">
     <div class="card-accent-bar" style="background:#c9a227"></div>
+    <img class="card-cover" src="img/velvet-underground-and-nico.jpg" alt="The Velvet Underground - The Velvet Underground & Nico album cover">
     <div class="card-inner">
       <div class="card-num">039</div>
       <div class="card-label" style="color:#c9a227">Album Autopsy · 039</div>
@@ -760,6 +802,7 @@
 
   <a class="album-card" href="ants-from-up-there.html" data-genre="Rock">
     <div class="card-accent-bar" style="background:#5b8ea6"></div>
+    <img class="card-cover" src="img/ants-from-up-there.jpg" alt="Black Country, New Road - Ants From Up There album cover">
     <div class="card-inner">
       <div class="card-num">040</div>
       <div class="card-label" style="color:#5b8ea6">Album Autopsy · 040</div>
@@ -776,6 +819,7 @@
 
   <a class="album-card" href="love-and-hate-kiwanuka.html" data-genre="R&B">
     <div class="card-accent-bar" style="background:#c87830"></div>
+    <img class="card-cover" src="img/love-and-hate-kiwanuka.jpg" alt="Kiwanuka - Love & Hate album cover">
     <div class="card-inner">
       <div class="card-num">041</div>
       <div class="card-label" style="color:#c87830">Album Autopsy · 041</div>
@@ -792,6 +836,7 @@
 
   <a class="album-card" href="kiwanuka.html" data-genre="R&B">
     <div class="card-accent-bar" style="background:#c49030"></div>
+    <img class="card-cover" src="img/kiwanuka.jpg" alt="Kiwanuka - Kiwanuka album cover">
     <div class="card-inner">
       <div class="card-num">042</div>
       <div class="card-label" style="color:#c49030">Album Autopsy · 042</div>
@@ -808,6 +853,7 @@
 
   <a class="album-card" href="unreal-unearth.html" data-genre="Rock">
     <div class="card-accent-bar" style="background:#8b2d3a"></div>
+    <img class="card-cover" src="img/unreal-unearth.jpg" alt="Hozier - Unreal Unearth album cover">
     <div class="card-inner">
       <div class="card-num">043</div>
       <div class="card-label" style="color:#8b2d3a">Album Autopsy · 043</div>
@@ -824,6 +870,7 @@
 
   <a class="album-card" href="nevermind.html" data-genre="Rock">
     <div class="card-accent-bar" style="background:#1a7a8e"></div>
+    <img class="card-cover" src="img/nevermind.jpg" alt="Nirvana - Nevermind album cover">
     <div class="card-inner">
       <div class="card-num">044</div>
       <div class="card-label" style="color:#1a7a8e">Album Autopsy · 044</div>
@@ -840,6 +887,7 @@
 
   <a class="album-card" href="hit-me-hard-and-soft.html" data-genre="Pop">
     <div class="card-accent-bar" style="background:#3a7a9a"></div>
+    <img class="card-cover" src="img/hit-me-hard-and-soft.jpg" alt="Billie Eilish - Hit Me Hard and Soft album cover">
     <div class="card-inner">
       <div class="card-num">045</div>
       <div class="card-label" style="color:#3a7a9a">Album Autopsy · 045</div>
@@ -856,6 +904,7 @@
 
   <a class="album-card" href="alligator-bites-never-heal.html" data-genre="Hip-Hop">
     <div class="card-accent-bar" style="background:#7a2d9a"></div>
+    <img class="card-cover" src="img/alligator-bites-never-heal.jpg" alt="Doechii - Alligator Bites Never Heal album cover">
     <div class="card-inner">
       <div class="card-num">046</div>
       <div class="card-label" style="color:#7a2d9a">Album Autopsy · 046</div>
@@ -872,6 +921,7 @@
 
   <a class="album-card" href="gorillaz.html" data-genre="Rock">
     <div class="card-accent-bar" style="background:#4a7a1e"></div>
+    <img class="card-cover" src="img/gorillaz.jpg" alt="Gorillaz - Gorillaz album cover">
     <div class="card-inner">
       <div class="card-num">047</div>
       <div class="card-label" style="color:#4a7a1e">Album Autopsy · 047</div>
@@ -888,6 +938,7 @@
 
   <a class="album-card" href="honeymoon.html" data-genre="Pop">
     <div class="card-accent-bar" style="background:#b07858"></div>
+    <img class="card-cover" src="img/honeymoon.jpg" alt="Lana Del Rey - Honeymoon album cover">
     <div class="card-inner">
       <div class="card-num">048</div>
       <div class="card-label" style="color:#b07858">Album Autopsy · 048</div>
@@ -904,6 +955,7 @@
 
   <a class="album-card" href="black-on-both-sides.html" data-genre="Hip-Hop">
     <div class="card-accent-bar" style="background:#2a6a42"></div>
+    <img class="card-cover" src="img/black-on-both-sides.jpg" alt="Mos Def - Black on Both Sides album cover">
     <div class="card-inner">
       <div class="card-num">049</div>
       <div class="card-label" style="color:#2a6a42">Album Autopsy · 049</div>
@@ -920,6 +972,7 @@
 
   <a class="album-card" href="the-bends.html" data-genre="Rock">
     <div class="card-accent-bar" style="background:#5a8a5a"></div>
+    <img class="card-cover" src="img/the-bends.jpg" alt="Radiohead - The Bends album cover">
     <div class="card-inner">
       <div class="card-num">050</div>
       <div class="card-label" style="color:#5a8a5a">Album Autopsy · 050</div>
@@ -936,6 +989,7 @@
 
   <a class="album-card" href="maps-billy-woods.html" data-genre="Hip-Hop">
     <div class="card-accent-bar" style="background:#c4854a"></div>
+    <img class="card-cover" src="img/maps-billy-woods.jpg" alt="billy woods & Kenny Segel - Maps album cover">
     <div class="card-inner">
       <div class="card-num">051</div>
       <div class="card-label" style="color:#c4854a">Album Autopsy · 051</div>
@@ -952,6 +1006,7 @@
 
   <a class="album-card" href="pure-heroine.html" data-genre="Pop">
     <div class="card-accent-bar" style="background:#8b7ec8"></div>
+    <img class="card-cover" src="img/pure-heroine.jpg" alt="Lorde - Pure Heroine album cover">
     <div class="card-inner">
       <div class="card-num">052</div>
       <div class="card-label" style="color:#8b7ec8">Album Autopsy · 052</div>
@@ -968,6 +1023,7 @@
 
   <a class="album-card" href="melodrama.html" data-genre="Pop">
     <div class="card-accent-bar" style="background:#c45a7a"></div>
+    <img class="card-cover" src="img/melodrama.jpg" alt="Lorde - Melodrama album cover">
     <div class="card-inner">
       <div class="card-num">053</div>
       <div class="card-label" style="color:#c45a7a">Album Autopsy · 053</div>
@@ -984,6 +1040,7 @@
 
   <a class="album-card" href="torches.html" data-genre="Pop">
     <div class="card-accent-bar" style="background:#4a9ec4"></div>
+    <img class="card-cover" src="img/torches.jpg" alt="Foster the People - Torches album cover">
     <div class="card-inner">
       <div class="card-num">054</div>
       <div class="card-label" style="color:#4a9ec4">Album Autopsy · 054</div>
@@ -1000,6 +1057,7 @@
 
   <a class="album-card" href="clipse.html" data-genre="Hip-Hop">
     <div class="card-accent-bar" style="background:#a07840"></div>
+    <img class="card-cover" src="img/clipse.jpg" alt="Clipse - Let God Sort Em Out album cover">
     <div class="card-inner">
       <div class="card-num">055</div>
       <div class="card-label" style="color:#a07840">Album Autopsy · 055</div>
@@ -1016,6 +1074,7 @@
 
   <a class="album-card" href="channel-orange.html" data-genre="R&B">
     <div class="card-accent-bar" style="background:#d4873a"></div>
+    <img class="card-cover" src="img/channel-orange.jpg" alt="Frank Ocean - Channel Orange album cover">
     <div class="card-inner">
       <div class="card-num">056</div>
       <div class="card-label" style="color:#d4873a">Album Autopsy · 056</div>
@@ -1032,6 +1091,7 @@
 
   <a class="album-card" href="college-dropout.html" data-genre="Hip-Hop">
     <div class="card-accent-bar" style="background:#c8a020"></div>
+    <img class="card-cover" src="img/college-dropout.jpg" alt="Kanye West - The College Dropout album cover">
     <div class="card-inner">
       <div class="card-num">057</div>
       <div class="card-label" style="color:#c8a020">Album Autopsy · 057</div>
@@ -1048,6 +1108,7 @@
 
   <a class="album-card" href="igor.html" data-genre="R&B">
     <div class="card-accent-bar" style="background:#7a5a9a"></div>
+    <img class="card-cover" src="img/igor.jpg" alt="Tyler, the Creator - Igor album cover">
     <div class="card-inner">
       <div class="card-num">058</div>
       <div class="card-label" style="color:#7a5a9a">Album Autopsy · 058</div>
@@ -1064,6 +1125,7 @@
 
   <a class="album-card" href="reasonable-doubt.html" data-genre="Hip-Hop">
     <div class="card-accent-bar" style="background:#8a6a4a"></div>
+    <img class="card-cover" src="img/reasonable-doubt.jpg" alt="Jay-Z - Reasonable Doubt album cover">
     <div class="card-inner">
       <div class="card-num">059</div>
       <div class="card-label" style="color:#8a6a4a">Album Autopsy · 059</div>
@@ -1080,6 +1142,7 @@
 
   <a class="album-card" href="fetch-the-bolt-cutters.html" data-genre="Rock">
     <div class="card-accent-bar" style="background:#7a9a5a"></div>
+    <img class="card-cover" src="img/fetch-the-bolt-cutters.jpg" alt="Fiona Apple - Fetch the Bolt Cutters album cover">
     <div class="card-inner">
       <div class="card-num">060</div>
       <div class="card-label" style="color:#7a9a5a">Album Autopsy · 060</div>
@@ -1096,6 +1159,7 @@
 
   <a class="album-card" href="is-this-it.html" data-genre="Rock">
     <div class="card-accent-bar" style="background:#c87040"></div>
+    <img class="card-cover" src="img/is-this-it.jpg" alt="The Strokes - Is This It album cover">
     <div class="card-inner">
       <div class="card-num">061</div>
       <div class="card-label" style="color:#c87040">Album Autopsy · 061</div>
@@ -1112,6 +1176,7 @@
 
   <a class="album-card" href="brat.html" data-genre="Pop">
     <div class="card-accent-bar" style="background:#b4e400"></div>
+    <img class="card-cover" src="img/brat.jpg" alt="Charli XCX - Brat album cover">
     <div class="card-inner">
       <div class="card-num">063</div>
       <div class="card-label" style="color:#b4e400">Album Autopsy · 063</div>
@@ -1127,6 +1192,7 @@
   </a>
   <a class="album-card" href="dragon-new-warm-mountain.html" data-genre="Folk">
     <div class="card-accent-bar" style="background:#c4903a"></div>
+    <img class="card-cover" src="img/dragon-new-warm-mountain.jpg" alt="Big Thief - Dragon New Warm Mountain I Believe in You album cover">
     <div class="card-inner">
       <div class="card-num">064</div>
       <div class="card-label" style="color:#c4903a">Album Autopsy · 064</div>
@@ -1142,6 +1208,7 @@
   </a>
   <a class="album-card" href="saint-cloud.html" data-genre="Folk">
     <div class="card-accent-bar" style="background:#7ab0cc"></div>
+    <img class="card-cover" src="img/saint-cloud.jpg" alt="Waxahatchee - Saint Cloud album cover">
     <div class="card-inner">
       <div class="card-num">065</div>
       <div class="card-label" style="color:#7ab0cc">Album Autopsy · 065</div>
@@ -1157,6 +1224,7 @@
   </a>
   <a class="album-card" href="motomami.html" data-genre="Pop">
     <div class="card-accent-bar" style="background:#d4203a"></div>
+    <img class="card-cover" src="img/motomami.jpg" alt="Rosalía - MOTOMAMI album cover">
     <div class="card-inner">
       <div class="card-num">066</div>
       <div class="card-label" style="color:#d4203a">Album Autopsy · 066</div>
@@ -1172,6 +1240,7 @@
   </a>
   <a class="album-card" href="sos-sza.html" data-genre="R&B">
     <div class="card-accent-bar" style="background:#2a5a9a"></div>
+    <img class="card-cover" src="img/sos-sza.jpg" alt="SZA - SOS album cover">
     <div class="card-inner">
       <div class="card-num">067</div>
       <div class="card-label" style="color:#2a5a9a">Album Autopsy · 067</div>
@@ -1187,6 +1256,7 @@
   </a>
   <a class="album-card" href="forest-hills-drive.html" data-genre="Hip-Hop">
     <div class="card-accent-bar" style="background:#c4792a"></div>
+    <img class="card-cover" src="img/forest-hills-drive.jpg" alt="J. Cole - 2014 Forest Hills Drive album cover">
     <div class="card-inner">
       <div class="card-num">069</div>
       <div class="card-label" style="color:#c4792a">Album Autopsy · 069</div>
@@ -1202,6 +1272,7 @@
   </a>
   <a class="album-card" href="god-does-like-ugly.html" data-genre="Hip-Hop">
     <div class="card-accent-bar" style="background:#c4622a"></div>
+    <img class="card-cover" src="img/god-does-like-ugly.jpg" alt="JID - God Does Like Ugly album cover">
     <div class="card-inner">
       <div class="card-num">068</div>
       <div class="card-label" style="color:#c4622a">Album Autopsy · 068</div>
@@ -1217,6 +1288,7 @@
   </a>
   <a class="album-card" href="funeral.html" data-genre="Rock">
     <div class="card-accent-bar" style="background:#9a5a5a"></div>
+    <img class="card-cover" src="img/funeral.jpg" alt="Arcade Fire - Funeral album cover">
     <div class="card-inner">
       <div class="card-num">062</div>
       <div class="card-label" style="color:#9a5a5a">Album Autopsy · 062</div>
@@ -1228,6 +1300,22 @@
       </div>
       <div class="card-verdict">Recorded around real deaths. Named accordingly. "Wake Up" is not a triumph - it's a decision to continue. There is a difference. Funeral understands it completely.</div>
       <div class="card-cta" style="color:#9a5a5a">Read Autopsy <span class="card-cta-arrow">→</span></div>
+    </div>
+  </a>
+  <a class="album-card" href="graduation.html" data-genre="Hip-Hop">
+    <div class="card-accent-bar" style="background:#2f9bd6"></div>
+    <img class="card-cover" src="img/graduation.jpg" alt="Kanye West - Graduation album cover">
+    <div class="card-inner">
+      <div class="card-num">071</div>
+      <div class="card-label" style="color:#2f9bd6">Album Autopsy · 071</div>
+      <div class="card-artist" style="color:#2f9bd6">Kanye West</div>
+      <div class="card-album">Graduation</div>
+      <div class="card-meta">
+        <span class="card-score" style="color:#2f9bd6">9.2</span>
+        <span>2007 · Hip-Hop / Pop-Rap · Roc-A-Fella · Def Jam</span>
+      </div>
+      <div class="card-verdict">The producer who built his name on soul samples decided he wanted to fill stadiums instead - and rebuilt his whole sound to do it.</div>
+      <div class="card-cta" style="color:#2f9bd6">Read Autopsy <span class="card-cta-arrow">→</span></div>
     </div>
   </a>
 

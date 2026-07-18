@@ -60,6 +60,8 @@
     clip-path: polygon(88% 0%, 92% 0%, 100% 100%, 96% 100%);
   }
   .hero-content { position:relative; z-index:1; }
+  .hero-cover { width:180px; height:180px; object-fit:cover; border-radius:4px; box-shadow:0 25px 70px rgba(0,0,0,0.55), 0 0 0 1px var(--border); margin-bottom:2.2rem; opacity:0; animation:fadeUp 0.8s ease 0s forwards; }
+
   .autopsy-label { font-family:var(--font-display); letter-spacing:0.4em; font-size:0.72rem; color:var(--accent); text-transform:uppercase; margin-bottom:1.8rem; opacity:0; animation:fadeUp 0.8s ease 0.2s forwards; }
   .hero-artist { font-family:var(--font-display); font-size:clamp(4rem,16vw,14rem); line-height:0.88; letter-spacing:-0.02em; color:var(--text); opacity:0; animation:fadeUp 0.8s ease 0.4s forwards; }
   .hero-album { font-family:var(--font-serif); font-style:italic; font-size:clamp(1.2rem,4vw,3.2rem); color:var(--gold); margin-top:0.6rem; opacity:0; animation:fadeUp 0.8s ease 0.6s forwards; line-height:1.25; }
@@ -170,6 +172,7 @@
   <div class="hero-bg"></div>
   <div class="hero-overpass"></div>
   <div class="hero-content">
+    <img class="hero-cover" src="img/ok-computer.jpg" alt="Radiohead - OK Computer album cover">
     <div class="autopsy-label">Album Autopsy · 008</div>
     <div class="hero-artist">Radiohead</div>
     <div class="hero-album">OK Computer</div>

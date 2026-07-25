@@ -1348,6 +1348,18 @@
 </footer>
 
 <script>
+  // Most recently published autopsy (highest Album Autopsy number) shows first.
+  (function sortByMostRecent() {
+    const grid = document.getElementById('albumGrid');
+    if (!grid) return;
+    const cards = Array.from(grid.querySelectorAll('.album-card'));
+    cards.sort((a, b) => {
+      const numOf = el => parseInt((el.querySelector('.card-num') || {}).textContent || '0', 10);
+      return numOf(b) - numOf(a);
+    });
+    cards.forEach(card => grid.appendChild(card));
+  })();
+
   window.addEventListener('scroll', () => {
     const p = (window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100;
     document.getElementById('progress').style.width = p + '%';

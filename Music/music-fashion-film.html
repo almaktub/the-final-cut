@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Music, Fashion, Film - Album Autopsy</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #080809;
+    --bg2: #0e0e10;
+    --bg3: #131315;
+    --accent: #c9c4b8;
+    --accent-dark: #8f8a7d;
+    --gold: #c9a84c;
+    --text: #eae6de;
+    --muted: #6e6a64;
+    --border: rgba(255,255,255,0.055);
+    --font-display: 'Bebas Neue', sans-serif;
+    --font-serif: 'Playfair Display', serif;
+    --font-body: 'DM Sans', sans-serif;
+  }
+  html { scroll-behavior: smooth; }
+  body { background: var(--bg); color: var(--text); font-family: var(--font-body); font-weight: 300; line-height: 1.7; overflow-x: hidden; }
+  body::before { content:''; position:fixed; inset:0; background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E"); pointer-events:none; z-index:9999; opacity:0.45; }
+  .progress-bar { position:fixed; top:0; left:0; height:2px; background:var(--accent); z-index:200; width:0%; transition: width 0.1s linear; }
+  nav { position:fixed; top:0; left:0; right:0; padding:1.1rem 2.5rem; display:flex; justify-content:space-between; align-items:center; z-index:100; background:linear-gradient(to bottom, rgba(8,8,9,0.92), transparent); }
+  .nav-back { font-family:var(--font-display); letter-spacing:0.25em; font-size:0.7rem; color:var(--muted); text-decoration:none; transition:color 0.2s; }
+  .nav-back:hover { color:var(--accent); }
+  .nav-score { font-family:var(--font-display); font-size:1.1rem; color:var(--accent); opacity:0; transition:opacity 0.4s; }
+  .nav-score.visible { opacity:1; }
+  .hero { min-height:100vh; display:flex; flex-direction:column; justify-content:center; align-items:center; position:relative; overflow:hidden; padding:4rem 2rem; text-align:center; }
+  .hero-bg { position:absolute; inset:0; background: radial-gradient(ellipse 80% 55% at 50% 45%, #c9c4b818 0%, transparent 68%), radial-gradient(ellipse 35% 35% at 15% 75%, #c9c4b809 0%, transparent 60%), var(--bg); z-index:0; }
+  .hero-lines { position:absolute; inset:0; background-image:repeating-linear-gradient(0deg, transparent, transparent 78px, rgba(255,255,255,0.011) 78px, rgba(255,255,255,0.011) 79px); z-index:0; }
+  .hero-content { position:relative; z-index:1; }
+  .hero-cover { width:180px; height:180px; object-fit:cover; border-radius:4px; box-shadow:0 25px 70px rgba(0,0,0,0.55), 0 0 0 1px var(--border); margin-bottom:2.2rem; opacity:0; animation:fadeUp 0.8s ease 0s forwards; }
+  .autopsy-label { font-family:var(--font-display); letter-spacing:0.4em; font-size:0.72rem; color:var(--accent); text-transform:uppercase; margin-bottom:1.8rem; opacity:0; animation:fadeUp 0.8s ease 0.2s forwards; }
+  .hero-artist { font-family:var(--font-display); font-size:clamp(4rem,16vw,14rem); line-height:0.88; letter-spacing:-0.02em; color:var(--text); opacity:0; animation:fadeUp 0.8s ease 0.4s forwards; }
+  .hero-album { font-family:var(--font-serif); font-style:italic; font-size:clamp(1.2rem,4vw,3rem); color:var(--gold); margin-top:0.6rem; opacity:0; animation:fadeUp 0.8s ease 0.6s forwards; line-height:1.25; max-width:800px; }
+  .hero-meta { font-family:var(--font-display); letter-spacing:0.3em; font-size:0.85rem; color:var(--muted); margin-top:1.5rem; opacity:0; animation:fadeUp 0.8s ease 0.8s forwards; }
+  .hero-rule { width:1px; height:70px; background:linear-gradient(to bottom, var(--accent), transparent); margin:3rem auto 0; opacity:0; animation:fadeUp 0.8s ease 1s forwards; }
+  .scroll-hint { font-size:0.68rem; letter-spacing:0.35em; color:var(--muted); text-transform:uppercase; margin-top:0.8rem; opacity:0; animation:fadeUp 0.8s ease 1.2s forwards; }
+  .verdict-bar { background:var(--accent); padding:1.1rem 2rem; text-align:center; font-family:var(--font-body); font-size:0.92rem; color:rgba(0,0,0,0.85); font-weight:500; line-height:1.5; }
+  .score-section { background:var(--bg2); border-top:1px solid var(--border); border-bottom:1px solid var(--border); }
+  .score-inner { max-width:920px; margin:0 auto; padding:6rem 2rem; display:grid; grid-template-columns:1fr 1.5fr; gap:5rem; align-items:center; }
+  @media(max-width:640px){.score-inner{grid-template-columns:1fr;gap:2.5rem;}}
+  .score-display { text-align:center; }
+  .score-number { font-family:var(--font-display); font-size:clamp(5.5rem,16vw,11rem); line-height:1; color:var(--text); }
+  .score-number span { color:var(--accent); }
+  .score-label { font-family:var(--font-display); letter-spacing:0.35em; font-size:0.75rem; color:var(--muted); margin-top:0.4rem; }
+  .score-verdict { font-family:var(--font-serif); font-style:italic; font-size:1.3rem; line-height:1.55; margin-bottom:1.5rem; color:var(--text); }
+  .score-defense { font-size:0.88rem; color:var(--muted); line-height:1.85; }
+  .section { max-width:920px; margin:0 auto; padding:6rem 2rem; }
+  .section-label { font-family:var(--font-display); letter-spacing:0.4em; font-size:0.68rem; color:var(--accent); text-transform:uppercase; margin-bottom:1.4rem; }
+  .section-title { font-family:var(--font-serif); font-size:clamp(1.8rem,4.5vw,3.2rem); font-weight:900; line-height:1.1; margin-bottom:2.5rem; }
+  .section-title em { font-style:italic; color:var(--gold); }
+  .pill { padding:0.35rem 0.9rem; border:1px solid var(--border); border-radius:2px; font-size:0.7rem; letter-spacing:0.15em; text-transform:uppercase; font-family:var(--font-display); color:var(--text); background:transparent; transition:all 0.2s; cursor:default; }
+  .pill:hover, .pill.active { border-color:var(--accent); color:var(--accent); background:#c9c4b814; }
+  .theme-pills { display:flex; flex-wrap:wrap; gap:0.45rem; margin:0 0 3rem; }
+  .themes-section { background:var(--bg2); border-top:1px solid var(--border); }
+  .themes-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:1.5px; background:var(--border); border:1px solid var(--border); margin-top:0; }
+  .theme-card { background:var(--bg2); padding:2.2rem 1.8rem; transition:background 0.2s; cursor:default; position:relative; overflow:hidden; }
+  .theme-card::before { content:''; position:absolute; top:0; left:0; width:3px; height:0; background:var(--accent); transition:height 0.3s; }
+  .theme-card:hover::before { height:100%; }
+  .theme-card:hover { background:var(--bg3); }
+  .theme-card-icon { font-size:1.8rem; margin-bottom:0.9rem; display:block; }
+  .theme-card-title { font-family:var(--font-serif); font-size:1rem; font-weight:700; margin-bottom:0.6rem; }
+  .theme-card-text { font-size:0.82rem; color:var(--muted); line-height:1.75; }
+  .quote-section { padding:7rem 2rem; text-align:center; position:relative; overflow:hidden; }
+  .quote-bg { position:absolute; inset:0; background:radial-gradient(ellipse 55% 55% at 50% 50%, #c9c4b80a 0%, transparent 70%); }
+  .quote-mark { font-family:var(--font-serif); font-size:7rem; line-height:0; vertical-align:-1.8rem; color:#c9c4b825; margin-right:0.05em; }
+  .quote-text { font-family:var(--font-serif); font-style:italic; font-size:clamp(1.4rem,3.5vw,2.5rem); line-height:1.35; max-width:680px; margin:0 auto; position:relative; z-index:1; }
+  .quote-attr { margin-top:2rem; font-size:0.72rem; letter-spacing:0.3em; text-transform:uppercase; color:var(--muted); font-family:var(--font-display); position:relative; z-index:1; }
+  .tracks-section { background:var(--bg); border-top:1px solid var(--border); }
+  .tracks-inner { max-width:920px; margin:0 auto; padding:6rem 2rem; }
+  .track-item { border-bottom:1px solid var(--border); overflow:hidden; cursor:pointer; transition:background 0.15s; }
+  .track-item:first-of-type { border-top:1px solid var(--border); }
+  .track-item:hover { background:rgba(255,255,255,0.018); }
+  .track-header { display:grid; grid-template-columns:3rem 1fr auto; align-items:center; gap:1.2rem; padding:1.1rem 0; }
+  .track-num { font-family:var(--font-display); font-size:0.75rem; color:var(--muted); letter-spacing:0.1em; }
+  .track-name { font-family:var(--font-serif); font-size:1rem; font-weight:700; }
+  .track-right { display:flex; align-items:center; gap:1.2rem; }
+  .track-score-bar { width:70px; height:3px; background:rgba(255,255,255,0.08); border-radius:2px; overflow:hidden; }
+  .track-score-fill { height:100%; background:var(--accent); transform-origin:left; transform:scaleX(0); transition:transform 0.8s ease; border-radius:2px; }
+  .track-score-num { font-family:var(--font-display); font-size:0.95rem; color:var(--muted); min-width:2.2rem; text-align:right; }
+  .track-expand-icon { font-size:0.55rem; color:var(--muted); transition:transform 0.3s; }
+  .track-item.open .track-expand-icon { transform:rotate(180deg); }
+  .track-body { max-height:0; overflow:hidden; transition:max-height 0.38s ease; }
+  .track-body-inner { padding:0 0 1.4rem 0; margin-left:4.2rem; color:var(--muted); font-size:0.87rem; line-height:1.8; border-left:2px solid var(--accent); padding-left:1.4rem; }
+  .chart-section { background:var(--bg3); border-top:1px solid var(--border); border-bottom:1px solid var(--border); }
+  .chart-inner { max-width:920px; margin:0 auto; padding:6rem 2rem; }
+  .chart-bars { display:flex; flex-direction:column; gap:0.85rem; margin-top:3rem; }
+  .bar-row { display:grid; grid-template-columns:170px 1fr 2.8rem; align-items:center; gap:1rem; }
+  @media(max-width:500px){.bar-row{grid-template-columns:90px 1fr 2.5rem;}}
+  .bar-label { font-size:0.78rem; color:var(--muted); text-align:right; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .bar-track { height:5px; background:rgba(255,255,255,0.055); border-radius:3px; overflow:hidden; }
+  .bar-fill { height:100%; background:linear-gradient(90deg, var(--accent), var(--gold)); transform-origin:left; transform:scaleX(0); transition:transform 0.85s ease; border-radius:3px; }
+  .bar-val { font-family:var(--font-display); font-size:0.88rem; color:var(--text); }
+  .footnote-section { padding:5rem 2rem; text-align:center; border-top:1px solid var(--border); background:var(--bg2); }
+  .footnote-text { font-family:var(--font-serif); font-style:italic; font-size:1rem; color:var(--muted); line-height:1.85; max-width:640px; margin:0 auto; }
+  footer { padding:3.5rem 2rem; text-align:center; border-top:1px solid var(--border); }
+  .footer-sig { font-family:var(--font-serif); font-style:italic; font-size:0.88rem; color:var(--muted); }
+  .footer-brand { font-family:var(--font-display); letter-spacing:0.4em; font-size:0.68rem; color:rgba(255,255,255,0.12); margin-top:1.8rem; }
+  .divider { width:36px; height:1px; background:var(--accent); margin:1.8rem auto; }
+  .back-link { display:inline-block; margin-top:2rem; font-family:var(--font-display); letter-spacing:0.25em; font-size:0.72rem; color:var(--accent); text-decoration:none; border:1px solid var(--accent); padding:0.6rem 1.4rem; transition:all 0.2s; }
+  .back-link:hover { background:var(--accent); color:#000; }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(28px)} to{opacity:1;transform:translateY(0)} }
+  .reveal { opacity:0; transform:translateY(38px); transition:opacity 0.7s ease, transform 0.7s ease; }
+  .reveal.visible { opacity:1; transform:translateY(0); }
+</style>
+</head>
+<body>
+<div class="progress-bar" id="progress"></div>
+<nav>
+  <a href="index.html" class="nav-back">← All Autopsies</a>
+  <div class="nav-score" id="navScore">7.9 / 10</div>
+</nav>
+
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-lines"></div>
+  <div class="hero-content">
+    <img class="hero-cover" src="img/charli-xcx-music-fashion-film.png" alt="Charli XCX - Music, Fashion, Film album cover">
+    <div class="autopsy-label">Album Autopsy · 072</div>
+    <div class="hero-artist">Charli XCX</div>
+    <div class="hero-album">Music, Fashion, Film</div>
+    <div class="hero-meta">Atlantic Records · 2026 · Art-Pop / Alt-Rock · 30 min</div>
+    <div class="hero-rule"></div>
+    <div class="scroll-hint">Scroll to dissect</div>
+  </div>
+</section>
+
+<div class="verdict-bar">A concept album about whether the persona and the person underneath it were ever actually different things, that trades Brat's immediacy for something colder and funnier, and loses real heat in the trade.</div>
+
+<section class="score-section">
+  <div class="score-inner">
+    <div class="score-display reveal">
+      <div class="score-number" id="scoreCounter">0<span>.0</span></div>
+      <div class="score-label">Overall Score</div>
+    </div>
+    <div class="reveal">
+      <div class="score-verdict">"A concept album about whether the persona and the person underneath it were ever actually different things, that trades Brat's immediacy for something colder and funnier, and loses real heat in the trade."</div>
+      <div class="score-defense">7.9 because the cover tells you everything before track one starts: Scorsese, John Cale, Marc Jacobs, and no Charli. She isn't claiming greatness, she's interrogating whether she's earned it, and that's a genuinely interesting hook for a victory-lap album to refuse. Persona, 2007, and the Cronenberg-featuring closer are where the idea and the songwriting fully line up, and they're as good as anything she's made. The 2.1: a 30-minute, 11-track runtime doesn't leave room for the weaker premises (Card Declined, SS26) to become more than their premise, and the constant push between irony and earnestness occasionally curdles into just not trusting the record. That split is real. Some of the same tracks that got Pitchfork and the Guardian handing out top marks left the Times and the Telegraph cold.</div>
+    </div>
+  </div>
+</section>
+
+<div class="themes-section">
+  <div class="section">
+    <div class="section-label reveal">Central Thesis</div>
+    <div class="section-title reveal">What <em>This Album Is Really About</em></div>
+    <div class="theme-pills reveal"><span class="pill active">Persona vs. Self</span><span class="pill">Genre as Costume</span><span class="pill">Nostalgia as Trap</span><span class="pill">Mortality and Legacy</span></div>
+    <div class="themes-grid reveal">
+    <div class="theme-card">
+      <span class="theme-card-icon">🎭</span>
+      <div class="theme-card-title">Persona vs. Self</div>
+      <div class="theme-card-text">The war between the image she built and the person underneath it, played out most directly on "Persona," where she stops fighting the persona and fuses with it on the outro instead.</div>
+    </div>
+    <div class="theme-card">
+      <span class="theme-card-icon">🎸</span>
+      <div class="theme-card-title">Genre as Costume</div>
+      <div class="theme-card-text">"Rock Music" turns her own "I think the dance floor is dead" quote into thesis and troll at once. She isn't committing to rock, she's performing the idea of it, and the glitch on the title line is the tell.</div>
+    </div>
+    <div class="theme-card">
+      <span class="theme-card-icon">📼</span>
+      <div class="theme-card-title">Nostalgia as Trap</div>
+      <div class="theme-card-text">"2007" sets 2000s indie-landfill alt-rock against modern TikTok fame, and fractures its own chorus into DJ-scratch static right when the contradiction lands.</div>
+    </div>
+    <div class="theme-card">
+      <span class="theme-card-icon">⏳</span>
+      <div class="theme-card-title">Mortality and Legacy</div>
+      <div class="theme-card-text">"No One Lasts Forever" hands the mic to David Cronenberg for a meditation on art outliving the artist, his voice looped and doubled against itself so nothing quite syncs up.</div>
+    </div></div>
+  </div>
+</div>
+
+<section class="quote-section">
+  <div class="quote-bg"></div>
+  <div class="quote-text reveal"><span class="quote-mark">"</span>Don't fucking choke on your ego when you see me coming, I know you're performing, I know that you're hurting.</div>
+  <div class="quote-attr reveal">Charli XCX · Persona · 2026</div>
+</section>
+
+<section class="tracks-section">
+  <div class="tracks-inner">
+    <div class="section-label reveal">Track by Track</div>
+    <div class="section-title reveal">The <em>Dissection</em></div>
+    <div id="trackList" class="reveal">
+    <div class="track-item">
+      <div class="track-header"><span class="track-num">01</span><span class="track-name">Rock Music</span><div class="track-right"><div class="track-score-bar"><div class="track-score-fill" data-score="7.9"></div></div><span class="track-score-num">7.9</span><span class="track-expand-icon">▼</span></div></div>
+      <div class="track-body"><div class="track-body-inner">The thesis statement dressed as a joke. Her own "the dance floor is dead" quote from the rollout becomes the song's premise and its own punchline in the same breath. She isn't committing to rock, she's performing the idea of it, and the glitch on "ro-o-o-ock music" is a playful enough tell that even the trick feels human.</div></div>
+    </div>
+    <div class="track-item">
+      <div class="track-header"><span class="track-num">02</span><span class="track-name">SS26</span><div class="track-right"><div class="track-score-bar"><div class="track-score-fill" data-score="7.4"></div></div><span class="track-score-num">7.4</span><span class="track-expand-icon">▼</span></div></div>
+      <div class="track-body"><div class="track-body-inner">Named for a fashion season, sung like the season already ended. Fame reads here as a runway you can't get off. Catchy in the verses, hollow in the chorus on purpose, which is the point and also the album's biggest risk.</div></div>
+    </div>
+    <div class="track-item">
+      <div class="track-header"><span class="track-num">03</span><span class="track-name">Card Declined</span><div class="track-right"><div class="track-score-bar"><div class="track-score-fill" data-score="6.6"></div></div><span class="track-score-num">6.6</span><span class="track-expand-icon">▼</span></div></div>
+      <div class="track-body"><div class="track-body-inner">The most style-over-substance moment on the record. The refrain piles up commands and details until it becomes a collage, meant to dramatize hiding behind consumption. The idea lands before the song does, and three and a half minutes is long for a joke this thin.</div></div>
+    </div>
+    <div class="track-item">
+      <div class="track-header"><span class="track-num">04</span><span class="track-name">Camera</span><div class="track-right"><div class="track-score-bar"><div class="track-score-fill" data-score="7.7"></div></div><span class="track-score-num">7.7</span><span class="track-expand-icon">▼</span></div></div>
+      <div class="track-body"><div class="track-body-inner">She claims film, more than music, is where she can finally be honest, in a song, which is either a wink or a contradiction depending on your patience for her. Worth it for the tension alone, and a sign the record knows exactly what it's doing.</div></div>
+    </div>
+    <div class="track-item">
+      <div class="track-header"><span class="track-num">05</span><span class="track-name">2007</span><div class="track-right"><div class="track-score-bar"><div class="track-score-fill" data-score="8.3"></div></div><span class="track-score-num">8.3</span><span class="track-expand-icon">▼</span></div></div>
+      <div class="track-body"><div class="track-body-inner">The best trick on the album. Alt-rock guitars built to sound like the year the title names, chorus fractured into DJ-scratch static right when the TikTok-fame lyric lands, so nostalgia and the thing that killed it happen in the same four bars.</div></div>
+    </div>
+    <div class="track-item">
+      <div class="track-header"><span class="track-num">06</span><span class="track-name">I'm Afraid</span><div class="track-right"><div class="track-score-bar"><div class="track-score-fill" data-score="7.0"></div></div><span class="track-score-num">7.0</span><span class="track-expand-icon">▼</span></div></div>
+      <div class="track-body"><div class="track-body-inner">The plainest song on the record and one of the more effective ones for it. Less armor than almost anything else here, which after ten tracks of irony actually lands as relief rather than weakness.</div></div>
+    </div>
+    <div class="track-item">
+      <div class="track-header"><span class="track-num">07</span><span class="track-name">Yeah</span><div class="track-right"><div class="track-score-bar"><div class="track-score-fill" data-score="7.3"></div></div><span class="track-score-num">7.3</span><span class="track-expand-icon">▼</span></div></div>
+      <div class="track-body"><div class="track-body-inner">Barely a song. Two lines total, "I don't wanna" answered by "wait, I think I wanna feel it," repeated until the chorus stops and starts like it's losing signal. Feels like a first draft on purpose, and mostly earns the choice as a moshpit starter.</div></div>
+    </div>
+    <div class="track-item">
+      <div class="track-header"><span class="track-num">08</span><span class="track-name">Wink Wink</span><div class="track-right"><div class="track-score-bar"><div class="track-score-fill" data-score="8.5"></div></div><span class="track-score-num">8.5</span><span class="track-expand-icon">▼</span></div></div>
+      <div class="track-body"><div class="track-body-inner">The funniest song on the album and maybe the sharpest. The one track where the joke about fame and the actual feeling about fame are allowed to sit in the same line without either one undercutting the other.</div></div>
+    </div>
+    <div class="track-item">
+      <div class="track-header"><span class="track-num">09</span><span class="track-name">Persona</span><div class="track-right"><div class="track-score-bar"><div class="track-score-fill" data-score="8.9"></div></div><span class="track-score-num">8.9</span><span class="track-expand-icon">▼</span></div></div>
+      <div class="track-body"><div class="track-body-inner">The record's actual center. "Don't fucking choke on your ego when you see me coming, I know you're performing, I know that you're hurting" is the plainest she gets about the cost of the act, and the outro, where she fuses with the persona instead of fighting it, is the smartest writing on the album.</div></div>
+    </div>
+    <div class="track-item">
+      <div class="track-header"><span class="track-num">10</span><span class="track-name">Magic Metal Montana</span><div class="track-right"><div class="track-score-bar"><div class="track-score-fill" data-score="8.7"></div></div><span class="track-score-num">8.7</span><span class="track-expand-icon">▼</span></div></div>
+      <div class="track-body"><div class="track-body-inner">The one moment with no argument attached. A love letter to A.G. Cook and to collaboration itself, harmonized chorus floating over sugar-sweet guitar. After nine tracks of self-interrogation, letting one song just be happy is its own kind of relief.</div></div>
+    </div>
+    <div class="track-item">
+      <div class="track-header"><span class="track-num">11</span><span class="track-name">No One Lasts Forever</span><div class="track-right"><div class="track-score-bar"><div class="track-score-fill" data-score="9.0"></div></div><span class="track-score-num">9.0</span><span class="track-expand-icon">▼</span></div></div>
+      <div class="track-body"><div class="track-body-inner">David Cronenberg reciting a meditation on mortality while his own voice loops back against itself, one line landing just behind the other, so nothing quite lines up. "Oblivion is freedom," he says, and she doesn't argue. The best closing track she's made.</div></div>
+    </div>
+    </div>
+  </div>
+</section>
+
+<section class="chart-section">
+  <div class="chart-inner">
+    <div class="section-label reveal">Score Breakdown</div>
+    <div class="section-title reveal">Every Track, <em>Ranked</em></div>
+    <div class="chart-bars reveal" id="chartBars">
+    <div class="bar-row"><div class="bar-label">No One Lasts Forever</div><div class="bar-track"><div class="bar-fill" data-score="9.0"></div></div><div class="bar-val">9.0</div></div>
+    <div class="bar-row"><div class="bar-label">Persona</div><div class="bar-track"><div class="bar-fill" data-score="8.9"></div></div><div class="bar-val">8.9</div></div>
+    <div class="bar-row"><div class="bar-label">Magic Metal Montana</div><div class="bar-track"><div class="bar-fill" data-score="8.7"></div></div><div class="bar-val">8.7</div></div>
+    <div class="bar-row"><div class="bar-label">Wink Wink</div><div class="bar-track"><div class="bar-fill" data-score="8.5"></div></div><div class="bar-val">8.5</div></div>
+    <div class="bar-row"><div class="bar-label">2007</div><div class="bar-track"><div class="bar-fill" data-score="8.3"></div></div><div class="bar-val">8.3</div></div>
+    <div class="bar-row"><div class="bar-label">Rock Music</div><div class="bar-track"><div class="bar-fill" data-score="7.9"></div></div><div class="bar-val">7.9</div></div>
+    <div class="bar-row"><div class="bar-label">Camera</div><div class="bar-track"><div class="bar-fill" data-score="7.7"></div></div><div class="bar-val">7.7</div></div>
+    <div class="bar-row"><div class="bar-label">SS26</div><div class="bar-track"><div class="bar-fill" data-score="7.4"></div></div><div class="bar-val">7.4</div></div>
+    <div class="bar-row"><div class="bar-label">Yeah</div><div class="bar-track"><div class="bar-fill" data-score="7.3"></div></div><div class="bar-val">7.3</div></div>
+    <div class="bar-row"><div class="bar-label">I'm Afraid</div><div class="bar-track"><div class="bar-fill" data-score="7.0"></div></div><div class="bar-val">7.0</div></div>
+    <div class="bar-row"><div class="bar-label">Card Declined</div><div class="bar-track"><div class="bar-fill" data-score="6.6"></div></div><div class="bar-val">6.6</div></div>
+    </div>
+  </div>
+</section>
+
+<div class="footnote-section">
+  <div class="section-label reveal" style="text-align:center;">Footnote</div>
+  <div class="footnote-text reveal">The cover has no Charli on it. Scorsese, Cale, and Jacobs earn that photo because their legacies are already settled, hers isn't, and the whole album is what that uncertainty sounds like. She doesn't get to assume the work survives. She only gets the sound of trying to figure out if it will while the tape still rolls.</div>
+</div>
+
+<footer>
+  <div class="footer-sig reveal">Album Autopsy - A structured dissection of records that matter.</div>
+  <div class="divider"></div>
+  <a href="index.html" class="back-link reveal">← Back to All Autopsies</a>
+  <div class="footer-brand">@MyParentsDidntLeaveForThis</div>
+</footer>
+
+<script>
+  window.addEventListener('scroll', () => {
+    const p = (window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100;
+    document.getElementById('progress').style.width = p + '%';
+  });
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (!e.isIntersecting) return;
+      e.target.classList.add('visible');
+      if (e.target.id === 'scoreCounter') {
+        animateScore(0, 7.9, 1600);
+        document.getElementById('navScore').classList.add('visible');
+      }
+    });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+  if(document.getElementById('scoreCounter')) observer.observe(document.getElementById('scoreCounter'));
+  const tlObs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (!e.isIntersecting) return;
+      e.target.querySelectorAll('.track-score-fill').forEach((f,i) => {
+        setTimeout(() => { f.style.transform = `scaleX(${parseFloat(f.dataset.score)/10})`; }, i * 55);
+      });
+      tlObs.unobserve(e.target);
+    });
+  }, { threshold: 0.08 });
+  const tl = document.getElementById('trackList');
+  if(tl) tlObs.observe(tl);
+  const chObs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (!e.isIntersecting) return;
+      e.target.querySelectorAll('.bar-fill').forEach((f,i) => {
+        setTimeout(() => { const s = parseFloat(f.dataset.score); f.style.transform = `scaleX(${Math.max(0,(s-6)/4)})`; }, i * 70);
+      });
+      chObs.unobserve(e.target);
+    });
+  }, { threshold: 0.08 });
+  const cb = document.getElementById('chartBars');
+  if(cb) chObs.observe(cb);
+  function animateScore(from, to, duration) {
+    const el = document.getElementById('scoreCounter');
+    if(!el) return;
+    const start = performance.now();
+    (function tick(now) {
+      const p = Math.min((now - start) / duration, 1);
+      const ease = 1 - Math.pow(1 - p, 3);
+      const val = from + (to - from) * ease;
+      const int = Math.floor(val);
+      const dec = Math.round((val - int) * 10);
+      el.innerHTML = int + '<span>.' + dec + '</span>';
+      if(p < 1) requestAnimationFrame(tick);
+    })(start);
+  }
+  document.querySelectorAll('.track-item').forEach(item => {
+    item.querySelector('.track-header').addEventListener('click', () => {
+      const body = item.querySelector('.track-body');
+      const open = item.classList.toggle('open');
+      body.style.maxHeight = open ? body.scrollHeight + 'px' : '0';
+    });
+  });
+  document.querySelectorAll('.pill').forEach(pill => {
+    pill.addEventListener('click', () => {
+      document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+      pill.classList.add('active');
+    });
+  });
+</script>
+</body>
+</html>
